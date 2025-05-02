@@ -34,10 +34,6 @@
   <label for="fim">Data e Hora de Término Prevista</label>
   <input type="datetime-local" id="fim">
 
-  <label for="token">Token de Acesso do Google</label>
-  <input type="text" id="token" placeholder="Cole seu token de acesso aqui">
-  <button onclick="salvarToken()">Salvar Token</button>
-
   <button onclick="gerarQRCode()">Gerar QR Code</button>
   <button onclick="limparHistorico()">Limpar Histórico</button>
 
@@ -50,51 +46,6 @@
   </div>
 
   <script>
-    const SPREADSHEET_ID = "97e81428-408c-4142-8429-62e6b008bd20"; // Substitua se necessário
-    const SHEET_NAME = "Página 1";
-
-    function salvarToken() {
-      const token = document.getElementById("token").value.trim();
-      if (token) {
-        localStorage.setItem("googleAccessToken", token);
-        alert("Token salvo com sucesso!");
-      } else {
-        alert("Por favor, cole um token válido.");
-      }
-    }
-
-    async function enviarParaGoogleSheets(descricao, inicio, fim) {
-      const token = localStorage.getItem("googleAccessToken");
-      if (!token) {
-        alert("Token de acesso não encontrado. Salve seu token antes de enviar.");
-        return;
-      }
-
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(SHEET_NAME)}!A1:append?valueInputOption=USER_ENTERED`;
-      const valores = {
-        values: [[new Date().toLocaleString(), descricao, inicio, fim]]
-      };
-
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(valores)
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(errorText);
-        }
-      } catch (error) {
-        console.error("Erro ao enviar para Google Sheets:", error);
-        alert("Erro ao enviar para o Google Sheets: " + error.message);
-      }
-    }
-
     function gerarQRCode() {
       const descricao = document.getElementById("descricao").value.trim();
       const inicio = document.getElementById("inicio").value;
@@ -135,7 +86,6 @@
       atividades.push(atividade);
       localStorage.setItem("atividades", JSON.stringify(atividades));
 
-      enviarParaGoogleSheets(descricao, inicio, fim);
       mostrarHistorico();
 
       mensagem.textContent = "QR Code gerado e salvo com sucesso!";
