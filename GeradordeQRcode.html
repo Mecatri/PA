@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de QR Code - Atividades da Parada</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 15px; padding: 10px 15px; }
+    #qrcode { margin-top: 20px; text-align: center; }
+    #historico { margin-top: 30px; }
+    .atividade { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+    .atividade a { word-break: break-all; }
+    .error { color: red; margin-top: 10px; }
+    .success { color: green; margin-top: 10px; }
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <h2>Gerador de QR Code - Atividade</h2>
+
+  <label for="descricao">Descrição da Atividade</label>
+  <textarea id="descricao" rows="3" placeholder="Ex: Troca da válvula CV-210"></textarea>
+
+  <label for="inicio">Data e Hora de Início Prevista</label>
+  <input type="datetime-local" id="inicio">
+
+  <label for="fim">Data e Hora de Término Prevista</label>
+  <input type="datetime-local" id="fim">
+
+  <button onclick="gerarQRCode()">Gerar QR Code</button>
+  <button onclick="limparHistorico()">Limpar Histórico</button>
+
+  <div id="qrcode"></div>
+  <p id="mensagem" class="error"></p>
+
+  <div id="historico">
+    <h3>🗂 Histórico de Atividades Geradas</h3>
+    <div id="listaAtividades"></div>
+  </div>
+
+  <script>
+    function gerarQRCode() {
+      const descricao = document.getElementById("descricao").value.trim();
+      const inicio = document.getElementById("inicio").value;
+      const fim = document.getElementById("fim").value;
+      const mensagem = document.getElementById("mensagem");
+
+      // Validação
+      if (!descricao || !inicio || !fim) {
+        mensagem.textContent = "Por favor, preencha todos os campos.";
+        return;
+      }
+
+      if (new Date(inicio) >= new Date(fim)) {
+        mensagem.textContent = "A data de início deve ser anterior à data de término.";
+        return;
+      }
+
+      mensagem.textContent = ""; // Limpa mensagens de erro
+
+      // Gera a URL
+      const url = `https://seu-dominio.com/formulario.html?descricao=${encodeURIComponent(descricao)}&inicio=${inicio}&fim=${fim}`;
+
+      // Mostra o QR Code
+      const container = document.getElementById("qrcode");
+      container.innerHTML = ""; 
+      const canvas = document.createElement("canvas");
+      container.appendChild(canvas);
+
+      QRCode.toCanvas(canvas, url, function (error) {
+        if (error) {
+          console.error(error);
+          container.innerHTML = "<p>Erro ao gerar QR Code</p>";
+        } else {
+          const link = document.createElement("p");
+          link.innerHTML = `Link gerado: <a href="${url}" target="_blank">${url}</a>`;
+          container.appendChild(link);
+        }
+      });
+
+      // Salva no histórico local
+      const atividade = { descricao, inicio, fim, url };
+      let atividades = JSON.parse(localStorage.getItem("atividades")) || [];
+      atividades.push(atividade);
+      localStorage.setItem("atividades", JSON.stringify(atividades));
+
+      mostrarHistorico();
+
+      mensagem.textContent = "QR Code gerado com sucesso!";
+      mensagem.className = "success";
+    }
+
+    function mostrarHistorico() {
+      const lista = document.getElementById("listaAtividades");
+      lista.innerHTML = "";
+      const atividades = JSON.parse(localStorage.getItem("atividades")) || [];
+
+      atividades.forEach((atv, index) => {
+        const div = document.createElement("div");
+        div.className = "atividade";
+        div.innerHTML = `
+          <strong>Descrição:</strong> ${atv.descricao}<br>
+          <strong>Início:</strong> ${new Date(atv.inicio).toLocaleString()}<br>
+          <strong>Fim:</strong> ${new Date(atv.fim).toLocaleString()}<br>
+          <a href="${atv.url}" target="_blank">Abrir Formulário</a>
+        `;
+        lista.appendChild(div);
+      });
+    }
+
+    function limparHistorico() {
+      if (confirm("Tem certeza de que deseja limpar o histórico? Esta ação não pode ser desfeita.")) {
+        localStorage.removeItem("atividades");
+        mostrarHistorico();
+      }
+    }
+
+    // Carrega histórico ao abrir a página
+    mostrarHistorico();
+  </script>
+</body>
+</html>
