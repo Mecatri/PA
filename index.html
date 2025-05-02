@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerador de QR Code - Atividades da Parada</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
@@ -13,8 +13,13 @@
     #qrcode { margin-top: 20px; text-align: center; }
     #historico { margin-top: 30px; }
     .atividade { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-    .error { color: red; }
-    .success { color: green; }
+    .atividade a { word-break: break-word; }
+    .error { color: red; margin-top: 10px; }
+    .success { color: green; margin-top: 10px; }
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      button { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -29,6 +34,10 @@
   <label for="fim">Data e Hora de Término Prevista</label>
   <input type="datetime-local" id="fim">
 
+  <label for="token">Token de Acesso do Google</label>
+  <input type="text" id="token" placeholder="Cole seu token de acesso aqui">
+  <button onclick="salvarToken()">Salvar Token</button>
+
   <button onclick="gerarQRCode()">Gerar QR Code</button>
   <button onclick="limparHistorico()">Limpar Histórico</button>
 
@@ -36,11 +45,56 @@
   <p id="mensagem" class="error"></p>
 
   <div id="historico">
-    <h3>🗂 Histórico de Atividades Geradas</h3>
+    <h3>📂 Histórico de Atividades Geradas</h3>
     <div id="listaAtividades"></div>
   </div>
 
   <script>
+    const SPREADSHEET_ID = "97e81428-408c-4142-8429-62e6b008bd20"; // Substitua se necessário
+    const SHEET_NAME = "Página 1";
+
+    function salvarToken() {
+      const token = document.getElementById("token").value.trim();
+      if (token) {
+        localStorage.setItem("googleAccessToken", token);
+        alert("Token salvo com sucesso!");
+      } else {
+        alert("Por favor, cole um token válido.");
+      }
+    }
+
+    async function enviarParaGoogleSheets(descricao, inicio, fim) {
+      const token = localStorage.getItem("googleAccessToken");
+      if (!token) {
+        alert("Token de acesso não encontrado. Salve seu token antes de enviar.");
+        return;
+      }
+
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(SHEET_NAME)}!A1:append?valueInputOption=USER_ENTERED`;
+      const valores = {
+        values: [[new Date().toLocaleString(), descricao, inicio, fim]]
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(valores)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText);
+        }
+      } catch (error) {
+        console.error("Erro ao enviar para Google Sheets:", error);
+        alert("Erro ao enviar para o Google Sheets: " + error.message);
+      }
+    }
+
     function gerarQRCode() {
       const descricao = document.getElementById("descricao").value.trim();
       const inicio = document.getElementById("inicio").value;
@@ -53,15 +107,13 @@
       }
 
       if (new Date(inicio) >= new Date(fim)) {
-        mensagem.textContent = "A data de início deve ser anterior à de término.";
+        mensagem.textContent = "A data de início deve ser anterior à data de término.";
         return;
       }
 
       mensagem.textContent = "";
-      mensagem.className = "";
 
       const url = `https://seu-dominio.com/formulario.html?descricao=${encodeURIComponent(descricao)}&inicio=${inicio}&fim=${fim}`;
-
       const container = document.getElementById("qrcode");
       container.innerHTML = "";
       const canvas = document.createElement("canvas");
@@ -72,11 +124,9 @@
           console.error(error);
           container.innerHTML = "<p>Erro ao gerar QR Code</p>";
         } else {
-          const legenda = document.createElement("p");
-          legenda.textContent = descricao;
-          legenda.style.marginTop = "10px";
-          legenda.style.fontWeight = "bold";
-          container.appendChild(legenda);
+          const link = document.createElement("p");
+          link.innerHTML = `Link gerado: <a href="${url}" target="_blank">${url}</a><br><strong>${descricao}</strong>`;
+          container.appendChild(link);
         }
       });
 
@@ -85,9 +135,10 @@
       atividades.push(atividade);
       localStorage.setItem("atividades", JSON.stringify(atividades));
 
+      enviarParaGoogleSheets(descricao, inicio, fim);
       mostrarHistorico();
 
-      mensagem.textContent = "QR Code gerado com sucesso!";
+      mensagem.textContent = "QR Code gerado e salvo com sucesso!";
       mensagem.className = "success";
     }
 
@@ -110,7 +161,7 @@
     }
 
     function limparHistorico() {
-      if (confirm("Tem certeza que deseja apagar o histórico?")) {
+      if (confirm("Tem certeza de que deseja limpar o histórico? Esta ação não pode ser desfeita.")) {
         localStorage.removeItem("atividades");
         mostrarHistorico();
       }
