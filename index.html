@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador de QR Code - Atividades da Parada</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <!-- Scripts do Firebase -->
+  <title>Gerador de QR Code - Atividades</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
@@ -28,46 +27,99 @@
 <body>
   <h2>Gerador de QR Code - Atividade</h2>
 
-  <label for="descricao">Descrição da Atividade</label>
-  <textarea id="descricao" rows="3" placeholder="Ex: Troca da válvula CV-210"></textarea>
+  <!-- Área de Login -->
+  <div id="login">
+    <h3>Login</h3>
+    <button onclick="login()">Entrar com Gmail</button>
+    <p id="loginMessage"></p>
+  </div>
 
-  <label for="inicio">Data e Hora de Início Prevista</label>
-  <input type="datetime-local" id="inicio">
+  <!-- Área do Aplicativo (oculta até login) -->
+  <div id="app" style="display: none;">
+    <label for="descricao">Descrição da Atividade</label>
+    <textarea id="descricao" rows="3" placeholder="Ex: Troca da válvula CV-210"></textarea>
 
-  <label for="fim">Data e Hora de Término Prevista</label>
-  <input type="datetime-local" id="fim">
+    <label for="inicio">Data e Hora de Início Prevista</label>
+    <input type="datetime-local" id="inicio">
 
-  <button onclick="gerarQRCode()">Gerar QR Code</button>
-  <button onclick="limparHistorico()">Limpar Histórico</button>
+    <label for="fim">Data e Hora de Término Prevista</label>
+    <input type="datetime-local" id="fim">
 
-  <div id="qrcode"></div>
-  <p id="mensagem" class="error"></p>
+    <button onclick="gerarQRCode()">Gerar QR Code</button>
+    <button onclick="limparHistorico()">Limpar Histórico</button>
 
-  <div id="historico">
-    <h3>📂 Histórico de Atividades Geradas</h3>
-    <div id="listaAtividades"></div>
+    <div id="qrcode"></div>
+    <p id="mensagem" class="error"></p>
+
+    <div id="historico">
+      <h3>📂 Histórico de Atividades Geradas</h3>
+      <div id="listaAtividades"></div>
+    </div>
+
+    <button onclick="logout()">Sair</button>
   </div>
 
   <script>
     // Configuração do Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
-      authDomain: "pa-pg-a7abc.firebaseapp.com",
-      projectId: "pa-pg-a7abc",
-      storageBucket: "pa-pg-a7abc.firebasestorage.app",
-      messagingSenderId: "102164980919",
-      appId: "1:102164980919:web:72220a8b2ed478a2cdd932",
-      measurementId: "G-CZVR8YGQL7"
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_AUTH_DOMAIN",
+      projectId: "SEU_PROJECT_ID",
+      storageBucket: "SEU_STORAGE_BUCKET",
+      messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+      appId: "SEU_APP_ID"
     };
 
     // Inicialize o Firebase
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
 
-    // Inicialize o Firestore
+    // Inicialize os serviços do Firebase
+    const auth = firebase.auth();
     const db = firebase.firestore();
 
-    console.log("Firebase App:", app);
-    console.log("Firestore Database:", db);
+    // Função de login com Gmail
+    function login() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          console.log("Usuário logado:", result.user);
+          document.getElementById("login").style.display = "none";
+          document.getElementById("app").style.display = "block";
+          document.getElementById("loginMessage").textContent = "";
+          mostrarHistorico();
+        })
+        .catch((error) => {
+          console.error("Erro no login:", error);
+          document.getElementById("loginMessage").textContent = "Erro no login: " + error.message;
+        });
+    }
+
+    // Função de logout
+    function logout() {
+      auth.signOut()
+        .then(() => {
+          console.log("Usuário deslogado");
+          document.getElementById("login").style.display = "block";
+          document.getElementById("app").style.display = "none";
+        })
+        .catch((error) => {
+          console.error("Erro ao sair:", error);
+        });
+    }
+
+    // Verificar estado de autenticação
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log("Usuário autenticado:", user);
+        document.getElementById("login").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        mostrarHistorico();
+      } else {
+        console.log("Nenhum usuário autenticado");
+        document.getElementById("login").style.display = "block";
+        document.getElementById("app").style.display = "none";
+      }
+    });
 
     // Função para gerar QR Code
     async function gerarQRCode() {
@@ -94,6 +146,7 @@
       const canvas = document.createElement("canvas");
       container.appendChild(canvas);
 
+      // Gerar QR Code
       QRCode.toCanvas(canvas, url, function (error) {
         if (error) {
           console.error(error);
@@ -105,13 +158,13 @@
         }
       });
 
-      const atividade = { descricao, inicio, fim, url };
-
+      // Salvar no Firestore
+      const atividade = { descricao, inicio, fim, url, userId: auth.currentUser.uid };
       try {
         const docRef = await db.collection("historico").add(atividade);
         console.log("Atividade salva no Firebase com ID:", docRef.id);
       } catch (error) {
-        console.error("Erro ao salvar a atividade no Firestore:", error);
+        console.error("Erro ao salvar atividade:", error);
       }
 
       mostrarHistorico();
@@ -120,12 +173,11 @@
     // Função para mostrar histórico
     async function mostrarHistorico() {
       const lista = document.getElementById("listaAtividades");
-      lista.innerHTML = ""; // Limpa a lista antes de carregar
+      lista.innerHTML = "";
 
       try {
-        const querySnapshot = await db.collection("historico").get();
+        const querySnapshot = await db.collection("historico").where("userId", "==", auth.currentUser.uid).get();
         if (querySnapshot.empty) {
-          console.log("Nenhuma atividade encontrada no Firestore.");
           lista.innerHTML = "<p>Nenhuma atividade encontrada.</p>";
           return;
         }
@@ -148,15 +200,12 @@
       }
     }
 
-    // Função para limpar histórico local (não remove do Firebase)
+    // Função para limpar histórico (apenas local)
     function limparHistorico() {
       if (confirm("Tem certeza de que deseja limpar o histórico local?")) {
         document.getElementById("listaAtividades").innerHTML = "";
       }
     }
-
-    // Mostrar histórico ao carregar a página
-    mostrarHistorico();
   </script>
 </body>
 </html>
