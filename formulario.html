@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulário da Atividade com Modificação</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Formulário da Atividade</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
     label { display: block; margin-top: 10px; }
@@ -22,7 +22,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script>
-    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
       authDomain: "pa-pg-a7abc.firebaseapp.com",
@@ -33,53 +32,34 @@
       clientId: "460190166657-18jbdvae4cemj3n38ivsnol1r975nkee.apps.googleusercontent.com"
     };
 
-    // Inicialize o Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Verificar estado de autenticação
     auth.onAuthStateChanged((user) => {
       if (user) {
         document.getElementById('login').style.display = 'none';
         document.getElementById('form-container').style.display = 'block';
-
-        // Exibir email do operador logado
         document.getElementById('email').value = user.email;
-
-        carregarHistorico(); // Carrega o histórico ao logar
-        console.log('Usuário autenticado:', user.email);
+        carregarHistorico();
       } else {
         document.getElementById('login').style.display = 'block';
         document.getElementById('form-container').style.display = 'none';
       }
     });
 
-    // Função para login com Gmail
     function login() {
       const provider = new firebase.auth.GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
 
       auth.signInWithPopup(provider)
-        .then((result) => {
-          console.log('Usuário logado:', result.user.email);
-        })
-        .catch((error) => {
-          console.error('Erro no login:', error.message);
-          alert('Erro no login: ' + error.message);
-        });
+        .catch((error) => alert('Erro no login: ' + error.message));
     }
 
-    // Função para logout
     function logout() {
-      auth.signOut().then(() => {
-        console.log('Usuário deslogado');
-      }).catch((error) => {
-        console.error('Erro ao sair:', error.message);
-      });
+      auth.signOut();
     }
 
-    // Função para obter parâmetros da URL
     function getQueryParams() {
       const params = new URLSearchParams(window.location.search);
       return {
@@ -89,98 +69,94 @@
       };
     }
 
-    // Função para preencher o formulário com os parâmetros da URL
     function preencherFormulario() {
       const { descricao, inicio, fim } = getQueryParams();
-
       if (descricao) document.getElementById('descricao').value = descricao;
-      if (inicio) document.getElementById('inicio').value = inicio;
-      if (fim) document.getElementById('fim').value = fim;
+      if (inicio) document.getElementById('inicioPrevisto').value = inicio;
+      if (fim) document.getElementById('fimPrevisto').value = fim;
     }
 
-    // Função para validar os campos
     function validarFormulario(event) {
-      event.preventDefault(); // Previne o envio do formulário se houver erros
+      event.preventDefault();
 
       let isValid = true;
 
-      // Validação do campo "Nome do Operador Liberador"
       const operador = document.getElementById('operador');
       const operadorErro = document.getElementById('operadorErro');
       if (operador.value.trim() === '') {
-        operadorErro.textContent = 'Por favor, preencha o Nome do Operador Liberador.';
+        operadorErro.textContent = 'Preencha o nome do operador.';
         isValid = false;
       } else {
         operadorErro.textContent = '';
       }
 
-      // Validação do campo "Número da Ordem de Serviço"
       const ordem = document.getElementById('ordem');
       const ordemErro = document.getElementById('ordemErro');
       if (ordem.value.trim() === '') {
-        ordemErro.textContent = 'Por favor, preencha o Número da Ordem de Serviço.';
+        ordemErro.textContent = 'Preencha o número da ordem.';
         isValid = false;
       } else {
         ordemErro.textContent = '';
       }
 
-      // Validação do campo "Número da PT"
       const pt = document.getElementById('pt');
       const ptErro = document.getElementById('ptErro');
       if (pt.value.trim() === '') {
-        ptErro.textContent = 'Por favor, preencha o Número da PT.';
+        ptErro.textContent = 'Preencha o número da PT.';
         isValid = false;
       } else {
         ptErro.textContent = '';
       }
 
-      // Se todos os campos forem válidos
-      if (isValid) {
-        salvarFormulario();
+      const inicioReal = document.getElementById('inicioReal');
+      const inicioRealErro = document.getElementById('inicioRealErro');
+      if (inicioReal.value.trim() === '') {
+        inicioRealErro.textContent = 'Preencha a data/hora de início real.';
+        isValid = false;
+      } else {
+        inicioRealErro.textContent = '';
       }
+
+      if (isValid) salvarFormulario();
     }
 
-    // Função para salvar o formulário no Firestore
     async function salvarFormulario() {
       const user = auth.currentUser;
       if (!user) {
-        alert('Você precisa estar logado para enviar o formulário.');
+        alert('Você precisa estar logado.');
         return;
       }
 
       const formulario = {
         descricao: document.getElementById('descricao').value,
-        inicio: document.getElementById('inicio').value,
-        fim: document.getElementById('fim').value,
+        inicioPrevisto: document.getElementById('inicioPrevisto').value,
+        fimPrevisto: document.getElementById('fimPrevisto').value,
+        inicioReal: document.getElementById('inicioReal').value,
+        fimReal: document.getElementById('fimReal').value,
         operador: document.getElementById('operador').value,
         ordem: document.getElementById('ordem').value,
         pt: document.getElementById('pt').value,
-        email: user.email, // Adiciona o email do usuário logado
+        email: user.email,
         userId: user.uid,
         timestamp: new Date()
       };
 
       try {
         await db.collection('formularios').add(formulario);
-        alert('Formulário enviado com sucesso!');
+        alert('Formulário enviado!');
         document.getElementById('formulario').reset();
-        carregarHistorico(); // Atualiza o histórico após salvar
+        carregarHistorico();
       } catch (error) {
-        console.error('Erro ao salvar o formulário:', error.message);
-        alert('Erro ao salvar o formulário: ' + error.message);
+        alert('Erro ao salvar: ' + error.message);
       }
     }
 
-    // Função para carregar o histórico do usuário autenticado
     async function carregarHistorico() {
       const user = auth.currentUser;
-      if (!user) {
-        alert('Você precisa estar logado para acessar o histórico.');
-        return;
-      }
+      if (!user) return;
 
       const historicoContainer = document.getElementById('historico');
-      historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
+      historicoContainer.innerHTML = '<h3>Histórico de Formulários</h3>';
 
       try {
         const querySnapshot = await db.collection('formularios')
@@ -194,71 +170,27 @@
         }
 
         querySnapshot.forEach((doc) => {
-          const formulario = doc.data();
+          const f = doc.data();
           const registro = document.createElement('div');
           registro.className = 'registro';
           registro.innerHTML = `
-            <p><strong>Descrição:</strong> ${formulario.descricao}</p>
-            <p><strong>Início:</strong> ${new Date(formulario.inicio).toLocaleString()}</p>
-            <p><strong>Término:</strong> ${new Date(formulario.fim).toLocaleString()}</p>
-            <p><strong>Email:</strong> ${formulario.email}</p>
-            <p><strong>Operador:</strong> ${formulario.operador}</p>
-            <p><strong>OS:</strong> ${formulario.ordem}</p>
-            <p><strong>PT:</strong> ${formulario.pt}</p>
-            <div class="registro-actions">
-              <button onclick="editarFormulario('${doc.id}')">Editar</button>
-              <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
-            </div>
+            <p><strong>Descrição:</strong> ${f.descricao}</p>
+            <p><strong>Início Previsto:</strong> ${new Date(f.inicioPrevisto).toLocaleString()}</p>
+            <p><strong>Término Previsto:</strong> ${new Date(f.fimPrevisto).toLocaleString()}</p>
+            <p><strong>Início Real:</strong> ${f.inicioReal ? new Date(f.inicioReal).toLocaleString() : ''}</p>
+            <p><strong>Término Real:</strong> ${f.fimReal ? new Date(f.fimReal).toLocaleString() : ''}</p>
+            <p><strong>Operador:</strong> ${f.operador}</p>
+            <p><strong>OS:</strong> ${f.ordem}</p>
+            <p><strong>PT:</strong> ${f.pt}</p>
+            <p><strong>Email:</strong> ${f.email}</p>
           `;
           historicoContainer.appendChild(registro);
         });
       } catch (error) {
-        console.error('Erro ao carregar o histórico:', error.message);
-        historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
+        historicoContainer.innerHTML += '<p>Erro ao carregar histórico.</p>';
       }
     }
 
-    // Função para editar um formulário
-    async function editarFormulario(formularioId) {
-      const novoOperador = prompt('Informe o novo nome do operador:');
-      const novaOrdem = prompt('Informe o novo número da ordem de serviço:');
-      const novaPT = prompt('Informe o novo número da PT:');
-
-      if (!novoOperador || !novaOrdem || !novaPT) {
-        alert('Todos os campos devem ser preenchidos.');
-        return;
-      }
-
-      try {
-        await db.collection('formularios').doc(formularioId).update({
-          operador: novoOperador,
-          ordem: novaOrdem,
-          pt: novaPT,
-        });
-        alert('Formulário atualizado com sucesso!');
-        carregarHistorico(); // Atualiza o histórico
-      } catch (error) {
-        console.error('Erro ao editar o formulário:', error.message);
-        alert('Erro ao editar o formulário: ' + error.message);
-      }
-    }
-
-    // Função para excluir um formulário
-    async function excluirFormulario(formularioId) {
-      const confirmar = confirm('Tem certeza de que deseja excluir este formulário?');
-      if (!confirmar) return;
-
-      try {
-        await db.collection('formularios').doc(formularioId).delete();
-        alert('Formulário excluído com sucesso!');
-        carregarHistorico(); // Atualiza o histórico
-      } catch (error) {
-        console.error('Erro ao excluir o formulário:', error.message);
-        alert('Erro ao excluir o formulário: ' + error.message);
-      }
-    }
-
-    // Executa ao carregar a página
     window.onload = preencherFormulario;
   </script>
 </head>
@@ -272,31 +204,37 @@
   <div id="form-container">
     <h1>Formulário da Atividade</h1>
     <form id="formulario" onsubmit="validarFormulario(event)">
-      <!-- Campos pré-preenchidos -->
+      <!-- Campos pré-preenchidos (previstos) -->
       <label for="descricao">Descrição da Atividade:</label>
-      <textarea id="descricao" name="descricao" class="readonly" readonly></textarea>
+      <textarea id="descricao" class="readonly" readonly></textarea>
 
-      <label for="inicio">Data e Hora de Início:</label>
-      <input type="datetime-local" id="inicio" name="inicio" class="readonly" readonly>
+      <label for="inicioPrevisto">Data e Hora de Início Previsto:</label>
+      <input type="datetime-local" id="inicioPrevisto" class="readonly" readonly>
 
-      <label for="fim">Data e Hora de Término:</label>
-      <input type="datetime-local" id="fim" name="fim" class="readonly" readonly>
+      <label for="fimPrevisto">Data e Hora de Término Previsto:</label>
+      <input type="datetime-local" id="fimPrevisto" class="readonly" readonly>
 
-      <!-- Campo de email -->
+      <!-- Campos preenchíveis -->
+      <label for="inicioReal">Data e Hora de Início Real:</label>
+      <input type="datetime-local" id="inicioReal" required>
+      <p id="inicioRealErro" class="error"></p>
+
+      <label for="fimReal">Data e Hora de Término Real (opcional):</label>
+      <input type="datetime-local" id="fimReal">
+
       <label for="email">Email do Operador:</label>
-      <input type="email" id="email" name="email" class="readonly" readonly>
+      <input type="email" id="email" class="readonly" readonly>
 
-      <!-- Campos a serem preenchidos pelo operador -->
       <label for="operador">Nome do Operador Liberador:</label>
-      <input type="text" id="operador" name="operador" required>
+      <input type="text" id="operador" required>
       <p id="operadorErro" class="error"></p>
 
       <label for="ordem">Número da Ordem de Serviço:</label>
-      <input type="text" id="ordem" name="ordem" required>
+      <input type="text" id="ordem" required>
       <p id="ordemErro" class="error"></p>
 
       <label for="pt">Número da PT:</label>
-      <input type="text" id="pt" name="pt" required>
+      <input type="text" id="pt" required>
       <p id="ptErro" class="error"></p>
 
       <button type="submit">Enviar</button>
