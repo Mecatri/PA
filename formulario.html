@@ -9,6 +9,7 @@
     label { display: block; margin-top: 10px; }
     input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
     button { margin-top: 15px; padding: 10px 15px; }
+    .error { color: red; font-size: 0.9em; margin-top: 5px; }
     .readonly { background-color: #f0f0f0; }
   </style>
   <script>
@@ -31,13 +32,57 @@
       if (fim) document.getElementById('fim').value = fim;
     }
 
+    // Função para validar os campos
+    function validarFormulario(event) {
+      event.preventDefault(); // Previne o envio do formulário se houver erros
+
+      let isValid = true;
+
+      // Validação do campo "Nome do Operador Liberador"
+      const operador = document.getElementById('operador');
+      const operadorErro = document.getElementById('operadorErro');
+      if (operador.value.trim() === '') {
+        operadorErro.textContent = 'Por favor, preencha o Nome do Operador Liberador.';
+        isValid = false;
+      } else {
+        operadorErro.textContent = '';
+      }
+
+      // Validação do campo "Número da Ordem de Serviço"
+      const ordem = document.getElementById('ordem');
+      const ordemErro = document.getElementById('ordemErro');
+      if (ordem.value.trim() === '') {
+        ordemErro.textContent = 'Por favor, preencha o Número da Ordem de Serviço.';
+        isValid = false;
+      } else {
+        ordemErro.textContent = '';
+      }
+
+      // Validação do campo "Número da PT"
+      const pt = document.getElementById('pt');
+      const ptErro = document.getElementById('ptErro');
+      if (pt.value.trim() === '') {
+        ptErro.textContent = 'Por favor, preencha o Número da PT.';
+        isValid = false;
+      } else {
+        ptErro.textContent = '';
+      }
+
+      // Se todos os campos forem válidos, envia o formulário
+      if (isValid) {
+        alert('Formulário enviado com sucesso!');
+        // Aqui você pode enviar os dados para o servidor ou processá-los
+        // Exemplo: document.getElementById('formulario').submit();
+      }
+    }
+
     // Executa ao carregar a página
     window.onload = preencherFormulario;
   </script>
 </head>
 <body>
   <h1>Formulário da Atividade</h1>
-  <form action="#" method="post">
+  <form id="formulario" onsubmit="validarFormulario(event)">
     <!-- Campos pré-preenchidos -->
     <label for="descricao">Descrição da Atividade:</label>
     <textarea id="descricao" name="descricao" class="readonly" readonly></textarea>
@@ -51,12 +96,15 @@
     <!-- Campos a serem preenchidos pelo operador -->
     <label for="operador">Nome do Operador Liberador:</label>
     <input type="text" id="operador" name="operador" required>
+    <p id="operadorErro" class="error"></p>
 
     <label for="ordem">Número da Ordem de Serviço:</label>
     <input type="text" id="ordem" name="ordem" required>
+    <p id="ordemErro" class="error"></p>
 
     <label for="pt">Número da PT:</label>
     <input type="text" id="pt" name="pt" required>
+    <p id="ptErro" class="error"></p>
 
     <button type="submit">Enviar</button>
   </form>
