@@ -20,6 +20,15 @@
         .pendente { border: 2px solid yellow !important; }
         .atrasado { border: 2px solid red !important; }
         .admin-actions button { background-color: #007bff; color: white; }
+        #graficos-container {
+            margin-top: 30px;
+            display: flex; /* Adiciona flexbox para centralizar o conteúdo */
+            justify-content: center; /* Centraliza horizontalmente */
+        }
+        #statusAtividadesChart {
+            width: 300px !important; /* Reduz a largura do gráfico */
+            height: 200px !important; /* Reduz a altura do gráfico */
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -293,8 +302,8 @@
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false, // Permite que o gráfico preencha o canvas
+                        responsive: false, // Desabilita a responsividade para manter o tamanho fixo
+                        maintainAspectRatio: false, // Permite definir width e height no canvas
                         plugins: {
                             legend: {
                                 position: 'bottom', // Legenda abaixo do gráfico
