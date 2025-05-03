@@ -218,8 +218,10 @@
                 const hoje = new Date();
                 hoje.setHours(0, 0, 0, 0);
 
+                const todosFormularios = []; // Array para armazenar todos os formulários
                 querySnapshot.forEach((doc) => {
                     const f = doc.data();
+                    todosFormularios.push(f); // Adiciona o formulário ao array
                     const registro = document.createElement('div');
                     registro.className = 'registro';
 
@@ -265,6 +267,49 @@
                     `;
                     historicoContainer.appendChild(registro);
                 });
+
+                // Contar atividades pendentes e concluídas usando o array 'todosFormularios'
+                const atividadesPendentes = todosFormularios.filter(f => !f.fimReal || f.fimReal.trim() === '').length;
+                const atividadesConcluidas = todosFormularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
+
+                // Criar o gráfico de status usando Chart.js
+                const statusCtx = document.getElementById('statusAtividadesChart').getContext('2d');
+                const statusChart = new Chart(statusCtx, {
+                    type: 'pie', // Gráfico de pizza
+                    data: {
+                        labels: ['Pendentes', 'Concluídas'],
+                        datasets: [{
+                            label: 'Status das Atividades',
+                            data: [atividadesPendentes, atividadesConcluidas],
+                            backgroundColor: [
+                                'rgba(255, 206, 86, 0.8)', // Amarelo para pendente
+                                'rgba(75, 192, 192, 0.8)'  // Verde para concluída
+                            ],
+                            borderColor: [
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // Permite que o gráfico preencha o canvas
+                        plugins: {
+                            legend: {
+                                position: 'bottom', // Legenda abaixo do gráfico
+                            },
+                            title: {
+                                display: true,
+                                text: 'Status das Atividades', // Título do gráfico
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        }
+                    }
+                });
+
             } catch (error) {
                 historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
             }
