@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Formulário da Atividade</title>
+  <title>Formulário da Atividade com Modificação</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
     label { display: block; margin-top: 10px; }
@@ -26,15 +26,15 @@
       apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
       authDomain: "pa-pg-a7abc.firebaseapp.com",
       projectId: "pa-pg-a7abc",
-      storageBucket: "pa-pg-a7abc.firebasestorage.app",
+      storageBucket: "pa-pg-a7abc.appspot.com",
       messagingSenderId: "102164980919",
-      appId: "1:102164980919:web:72220a8b2ed478a2cdd932",
-      clientId: "460190166657-18jbdvae4cemj3n38ivsnol1r975nkee.apps.googleusercontent.com"
+      appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
     };
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    let formularioIdEmEdicao = null;
 
     auth.onAuthStateChanged((user) => {
       if (user) {
@@ -42,6 +42,7 @@
         document.getElementById('form-container').style.display = 'block';
         document.getElementById('email').value = user.email;
         carregarHistorico();
+        preencherFormulario();
       } else {
         document.getElementById('login').style.display = 'block';
         document.getElementById('form-container').style.display = 'none';
@@ -51,83 +52,92 @@
     function login() {
       const provider = new firebase.auth.GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-
       auth.signInWithPopup(provider)
         .catch((error) => alert('Erro no login: ' + error.message));
     }
 
     function logout() {
-      auth.signOut();
+      auth.signOut().catch((error) => alert('Erro ao sair: ' + error.message));
     }
 
     function getQueryParams() {
       const params = new URLSearchParams(window.location.search);
       return {
         descricao: params.get('descricao'),
-        inicio: params.get('inicio'),
-        fim: params.get('fim')
+        inicioPrevisto: params.get('inicio'),
+        fimPrevisto: params.get('fim')
       };
     }
 
     function preencherFormulario() {
-      const { descricao, inicio, fim } = getQueryParams();
+      const { descricao, inicioPrevisto, fimPrevisto } = getQueryParams();
       if (descricao) document.getElementById('descricao').value = descricao;
-      if (inicio) document.getElementById('inicioPrevisto').value = inicio;
-      if (fim) document.getElementById('fimPrevisto').value = fim;
+      if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
+      if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
     }
 
     function validarFormulario(event) {
       event.preventDefault();
-
       let isValid = true;
 
-      const operador = document.getElementById('operador');
-      const operadorErro = document.getElementById('operadorErro');
-      if (operador.value.trim() === '') {
-        operadorErro.textContent = 'Preencha o nome do operador.';
-        isValid = false;
-      } else {
-        operadorErro.textContent = '';
-      }
+      const camposObrigatorios = [
+        { id: 'operador', erro: 'operadorErro', msg: 'Preencha o Nome do Operador.' },
+        { id: 'ordem', erro: 'ordemErro', msg: 'Preencha o Número da Ordem de Serviço.' },
+        { id: 'pt', erro: 'ptErro', msg: 'Preencha o Número da PT.' },
+        { id: 'inicioReal', erro: 'inicioRealErro', msg: 'Preencha a Data e Hora de Início Real.' }
+      ];
 
-      const ordem = document.getElementById('ordem');
-      const ordemErro = document.getElementById('ordemErro');
-      if (ordem.value.trim() === '') {
-        ordemErro.textContent = 'Preencha o número da ordem.';
-        isValid = false;
-      } else {
-        ordemErro.textContent = '';
-      }
+      camposObrigatorios.forEach(({ id, erro, msg }) => {
+        const input = document.getElementById(id);
+        const errorLabel = document.getElementById(erro);
+        if (input.value.trim() === '') {
+          errorLabel.textContent = msg;
+          isValid = false;
+        } else {
+          errorLabel.textContent = '';
+        }
+      });
 
-      const pt = document.getElementById('pt');
-      const ptErro = document.getElementById('ptErro');
-      if (pt.value.trim() === '') {
-        ptErro.textContent = 'Preencha o número da PT.';
-        isValid = false;
-      } else {
-        ptErro.textContent = '';
+      if (isValid) {
+        formularioIdEmEdicao ? salvarEdicao() : salvarFormulario();
       }
-
-      const inicioReal = document.getElementById('inicioReal');
-      const inicioRealErro = document.getElementById('inicioRealErro');
-      if (inicioReal.value.trim() === '') {
-        inicioRealErro.textContent = 'Preencha a data/hora de início real.';
-        isValid = false;
-      } else {
-        inicioRealErro.textContent = '';
-      }
-
-      if (isValid) salvarFormulario();
     }
 
     async function salvarFormulario() {
       const user = auth.currentUser;
-      if (!user) {
-        alert('Você precisa estar logado.');
-        return;
-      }
+      if (!user) return alert('Você precisa estar logado.');
 
-      const formulario = {
+      const dados = coletarDados(user);
+      try {
+        await db.collection('formularios').add(dados);
+        alert('Formulário enviado!');
+        document.getElementById('formulario').reset();
+        preencherFormulario();
+        carregarHistorico();
+      } catch (error) {
+        alert('Erro ao salvar: ' + error.message);
+      }
+    }
+
+    async function salvarEdicao() {
+      const user = auth.currentUser;
+      if (!user || !formularioIdEmEdicao) return;
+
+      const dados = coletarDados(user);
+      try {
+        await db.collection('formularios').doc(formularioIdEmEdicao).update(dados);
+        alert('Formulário atualizado!');
+        document.getElementById('formulario').reset();
+        formularioIdEmEdicao = null;
+        preencherFormulario();
+        carregarHistorico();
+      } catch (error) {
+        alert('Erro ao editar: ' + error.message);
+      }
+    }
+
+    function coletarDados(user) {
+      return {
         descricao: document.getElementById('descricao').value,
         inicioPrevisto: document.getElementById('inicioPrevisto').value,
         fimPrevisto: document.getElementById('fimPrevisto').value,
@@ -140,15 +150,6 @@
         userId: user.uid,
         timestamp: new Date()
       };
-
-      try {
-        await db.collection('formularios').add(formulario);
-        alert('Formulário enviado!');
-        document.getElementById('formulario').reset();
-        carregarHistorico();
-      } catch (error) {
-        alert('Erro ao salvar: ' + error.message);
-      }
     }
 
     async function carregarHistorico() {
@@ -156,7 +157,7 @@
       if (!user) return;
 
       const historicoContainer = document.getElementById('historico');
-      historicoContainer.innerHTML = '<h3>Histórico de Formulários</h3>';
+      historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
 
       try {
         const querySnapshot = await db.collection('formularios')
@@ -175,51 +176,81 @@
           registro.className = 'registro';
           registro.innerHTML = `
             <p><strong>Descrição:</strong> ${f.descricao}</p>
-            <p><strong>Início Previsto:</strong> ${new Date(f.inicioPrevisto).toLocaleString()}</p>
-            <p><strong>Término Previsto:</strong> ${new Date(f.fimPrevisto).toLocaleString()}</p>
-            <p><strong>Início Real:</strong> ${f.inicioReal ? new Date(f.inicioReal).toLocaleString() : ''}</p>
-            <p><strong>Término Real:</strong> ${f.fimReal ? new Date(f.fimReal).toLocaleString() : ''}</p>
+            <p><strong>Início Previsto:</strong> ${f.inicioPrevisto}</p>
+            <p><strong>Término Previsto:</strong> ${f.fimPrevisto}</p>
+            <p><strong>Início Real:</strong> ${f.inicioReal || '-'}</p>
+            <p><strong>Término Real:</strong> ${f.fimReal || '-'}</p>
             <p><strong>Operador:</strong> ${f.operador}</p>
             <p><strong>OS:</strong> ${f.ordem}</p>
             <p><strong>PT:</strong> ${f.pt}</p>
-            <p><strong>Email:</strong> ${f.email}</p>
+            <div class="registro-actions">
+              <button onclick="editarFormulario('${doc.id}')">Editar</button>
+              <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
+            </div>
           `;
           historicoContainer.appendChild(registro);
         });
       } catch (error) {
-        historicoContainer.innerHTML += '<p>Erro ao carregar histórico.</p>';
+        historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
       }
     }
 
-    window.onload = preencherFormulario;
+    async function editarFormulario(id) {
+      try {
+        const doc = await db.collection('formularios').doc(id).get();
+        if (!doc.exists) return alert('Registro não encontrado.');
+
+        const f = doc.data();
+        formularioIdEmEdicao = id;
+        document.getElementById('descricao').value = f.descricao;
+        document.getElementById('inicioPrevisto').value = f.inicioPrevisto;
+        document.getElementById('fimPrevisto').value = f.fimPrevisto;
+        document.getElementById('inicioReal').value = f.inicioReal || '';
+        document.getElementById('fimReal').value = f.fimReal || '';
+        document.getElementById('operador').value = f.operador;
+        document.getElementById('ordem').value = f.ordem;
+        document.getElementById('pt').value = f.pt;
+      } catch (error) {
+        alert('Erro ao carregar para edição.');
+      }
+    }
+
+    async function excluirFormulario(id) {
+      if (!confirm('Tem certeza que deseja excluir?')) return;
+      try {
+        await db.collection('formularios').doc(id).delete();
+        alert('Excluído com sucesso!');
+        carregarHistorico();
+      } catch (error) {
+        alert('Erro ao excluir: ' + error.message);
+      }
+    }
   </script>
 </head>
 <body>
   <div id="login">
     <h2>Login Necessário</h2>
-    <p>Faça login com sua conta Gmail para acessar o formulário.</p>
+    <p>Faça login com sua conta Gmail.</p>
     <button onclick="login()">Entrar com Gmail</button>
   </div>
 
   <div id="form-container">
     <h1>Formulário da Atividade</h1>
     <form id="formulario" onsubmit="validarFormulario(event)">
-      <!-- Campos pré-preenchidos (previstos) -->
       <label for="descricao">Descrição da Atividade:</label>
       <textarea id="descricao" class="readonly" readonly></textarea>
 
-      <label for="inicioPrevisto">Data e Hora de Início Previsto:</label>
+      <label for="inicioPrevisto">Início Previsto:</label>
       <input type="datetime-local" id="inicioPrevisto" class="readonly" readonly>
 
-      <label for="fimPrevisto">Data e Hora de Término Previsto:</label>
+      <label for="fimPrevisto">Término Previsto:</label>
       <input type="datetime-local" id="fimPrevisto" class="readonly" readonly>
 
-      <!-- Campos preenchíveis -->
-      <label for="inicioReal">Data e Hora de Início Real:</label>
+      <label for="inicioReal">Início Real:</label>
       <input type="datetime-local" id="inicioReal" required>
       <p id="inicioRealErro" class="error"></p>
 
-      <label for="fimReal">Data e Hora de Término Real (opcional):</label>
+      <label for="fimReal">Término Real:</label>
       <input type="datetime-local" id="fimReal">
 
       <label for="email">Email do Operador:</label>
@@ -237,7 +268,7 @@
       <input type="text" id="pt" required>
       <p id="ptErro" class="error"></p>
 
-      <button type="submit">Enviar</button>
+      <button type="submit">Salvar</button>
       <button type="button" onclick="logout()">Sair</button>
     </form>
 
