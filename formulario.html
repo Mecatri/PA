@@ -1,318 +1,379 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Formulário da Atividade com Modificação</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-    label { display: block; margin-top: 10px; }
-    input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-    button { margin-top: 15px; padding: 10px 15px; }
-    .error { color: red; font-size: 0.9em; margin-top: 5px; }
-    .readonly { background-color: #f0f0f0; }
-    #login { display: none; text-align: center; }
-    #form-container { display: none; }
-    #historico { margin-top: 30px; }
-    .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-    .registro-actions { margin-top: 10px; }
-    .registro-actions button { margin-right: 10px; }
-    .pendente { border: 2px solid yellow !important; }
-    .atrasado { border: 2px solid red !important; }
-    .admin-actions button { background-color: #007bff; color: white; }
-  </style>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
-      authDomain: "pa-pg-a7abc.firebaseapp.com",
-      projectId: "pa-pg-a7abc",
-      storageBucket: "pa-pg-a7abc.appspot.com",
-      messagingSenderId: "102164980919",
-      appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
-    };
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Formulário da Atividade com Modificação</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+        label { display: block; margin-top: 10px; }
+        input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+        button { margin-top: 15px; padding: 10px 15px; }
+        .error { color: red; font-size: 0.9em; margin-top: 5px; }
+        .readonly { background-color: #f0f0f0; }
+        #login { text-align: center; }
+        #form-container { display: none; }
+        #historico { margin-top: 30px; }
+        .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+        .registro-actions { margin-top: 10px; }
+        .registro-actions button { margin-right: 10px; }
+        .pendente { border: 2px solid yellow !important; }
+        .atrasado { border: 2px solid red !important; }
+        .admin-actions button { background-color: #007bff; color: white; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
+          authDomain: "pa-pg-a7abc.firebaseapp.com",
+          projectId: "pa-pg-a7abc",
+          storageBucket: "pa-pg-a7abc.appspot.com",
+          messagingSenderId: "102164980919",
+          appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
+        };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    let formularioIdEmEdicao = null;
-    let isAdmin = false; // Variável para controlar se o usuário é administrador
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        let formularioIdEmEdicao = null;
+        let isAdmin = false;
 
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        document.getElementById('login').style.display = 'none';
-        document.getElementById('form-container').style.display = 'block';
-        document.getElementById('email').value = user.email;
+        auth.onAuthStateChanged(async (user) => {
+          if (user) {
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('form-container').style.display = 'block';
+            document.getElementById('email').value = user.email;
 
-        // Verificar se o usuário é administrador (assumindo que você configurou isso no Firebase Auth)
-        const tokenResult = await user.getIdTokenResult();
-        isAdmin = tokenResult.claims.admin === true; // Ou outra forma de identificar o admin
+            const tokenResult = await user.getIdTokenResult();
+            isAdmin = tokenResult.claims.admin === true;
 
-        carregarHistorico();
-        preencherFormulario();
-      } else {
-        document.getElementById('login').style.display = 'block';
-        document.getElementById('form-container').style.display = 'none';
-        isAdmin = false;
-      }
-    });
-
-    function login() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
-      auth.signInWithPopup(provider)
-        .catch((error) => alert('Erro no login: ' + error.message));
-    }
-
-    function logout() {
-      auth.signOut().catch((error) => alert('Erro ao sair: ' + error.message));
-    }
-
-    function getQueryParams() {
-      const params = new URLSearchParams(window.location.search);
-      return {
-        descricao: params.get('descricao'),
-        inicioPrevisto: params.get('inicio'),
-        fimPrevisto: params.get('fim')
-      };
-    }
-
-    function preencherFormulario() {
-      const { descricao, inicioPrevisto, fimPrevisto } = getQueryParams();
-      if (descricao) document.getElementById('descricao').value = descricao;
-      if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
-      if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
-    }
-
-    function validarFormulario(event) {
-      event.preventDefault();
-      let isValid = true;
-
-      const camposObrigatorios = [
-        { id: 'operador', erro: 'operadorErro', msg: 'Preencha o Nome do Operador.' },
-        { id: 'ordem', erro: 'ordemErro', msg: 'Preencha o Número da Ordem de Serviço.' },
-        { id: 'pt', erro: 'ptErro', msg: 'Preencha o Número da PT.' },
-        { id: 'inicioReal', erro: 'inicioRealErro', msg: 'Preencha a Data e Hora de Início Real.' }
-      ];
-
-      camposObrigatorios.forEach(({ id, erro, msg }) => {
-        const input = document.getElementById(id);
-        const errorLabel = document.getElementById(erro);
-        if (input.value.trim() === '') {
-          errorLabel.textContent = msg;
-          isValid = false;
-        } else {
-          errorLabel.textContent = '';
-        }
-      });
-
-      if (isValid) {
-        formularioIdEmEdicao ? salvarEdicao() : salvarFormulario();
-      }
-    }
-
-    async function salvarFormulario() {
-      const user = auth.currentUser;
-      if (!user) return alert('Você precisa estar logado.');
-
-      const dados = coletarDados(user);
-      try {
-        await db.collection('formularios').add(dados);
-        alert('Formulário enviado!');
-        document.getElementById('formulario').reset();
-        preencherFormulario();
-        carregarHistorico();
-      } catch (error) {
-        alert('Erro ao salvar: ' + error.message);
-      }
-    }
-
-    async function salvarEdicao() {
-      const user = auth.currentUser;
-      if (!user || !formularioIdEmEdicao) return;
-
-      const dados = coletarDados(user);
-      try {
-        await db.collection('formularios').doc(formularioIdEmEdicao).update(dados);
-        alert('Formulário atualizado!');
-        document.getElementById('formulario').reset();
-        formularioIdEmEdicao = null;
-        preencherFormulario();
-        carregarHistorico();
-      } catch (error) {
-        alert('Erro ao editar: ' + error.message);
-      }
-    }
-
-    function coletarDados(user) {
-      return {
-        descricao: document.getElementById('descricao').value,
-        inicioPrevisto: document.getElementById('inicioPrevisto').value,
-        fimPrevisto: document.getElementById('fimPrevisto').value,
-        inicioReal: document.getElementById('inicioReal').value,
-        fimReal: document.getElementById('fimReal').value,
-        operador: document.getElementById('operador').value,
-        ordem: document.getElementById('ordem').value,
-        pt: document.getElementById('pt').value,
-        email: user.email,
-        userId: user.uid,
-        timestamp: new Date()
-      };
-    }
-
-    async function carregarHistorico() {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const historicoContainer = document.getElementById('historico');
-      historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
-
-      try {
-        let query = db.collection('formularios').orderBy('timestamp', 'desc');
-        if (!isAdmin) {
-          query = query.where('userId', '==', user.uid);
-        }
-        const querySnapshot = await query.get();
-
-        if (querySnapshot.empty) {
-          historicoContainer.innerHTML += '<p>Nenhum formulário encontrado.</p>';
-          return;
-        }
-
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-
-        querySnapshot.forEach((doc) => {
-          const f = doc.data();
-          const registro = document.createElement('div');
-          registro.className = 'registro';
-
-          if (!f.fimReal || f.fimReal.trim() === '') {
-            registro.classList.add('pendente');
+            carregarHistorico();
+            preencherFormulario();
+          } else {
+            document.getElementById('login').style.display = 'block';
+            document.getElementById('form-container').style.display = 'none';
+            isAdmin = false;
           }
+        });
 
-          if (f.fimPrevisto) {
-            const fimPrevistoDate = new Date(f.fimPrevisto);
-            fimPrevistoDate.setHours(0, 0, 0, 0);
-            if (fimPrevistoDate < hoje) {
-              registro.classList.add('atrasado');
+        function login() {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          auth.signInWithPopup(provider)
+            .catch((error) => alert('Erro no login com Gmail: ' + error.message));
+        }
+
+        function loginComEmail() {
+          const email = document.getElementById('emailLogin').value;
+          const password = document.getElementById('passwordLogin').value;
+          const errorLabel = document.getElementById('loginEmailErro');
+
+          auth.signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+              console.log('Usuário logado com e-mail:', userCredential.user);
+              errorLabel.textContent = '';
+            })
+            .catch((error) => {
+              console.error('Erro ao fazer login com e-mail:', error.code, error.message);
+              errorLabel.textContent = 'Erro ao fazer login: ' + error.message;
+            });
+        }
+
+        function cadastrarNovoUsuario() {
+          const email = document.getElementById('emailCadastro').value;
+          const password = document.getElementById('passwordCadastro').value;
+          const errorLabel = document.getElementById('cadastroEmailErro');
+
+          auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+              console.log('Novo usuário cadastrado:', userCredential.user);
+              errorLabel.textContent = '';
+              // Opcional: Enviar e-mail de verificação
+              // userCredential.user.sendEmailVerification();
+            })
+            .catch((error) => {
+              console.error('Erro ao cadastrar usuário:', error.code, error.message);
+              errorLabel.textContent = 'Erro ao cadastrar: ' + error.message;
+            });
+        }
+
+        function logout() {
+          auth.signOut().catch((error) => alert('Erro ao sair: ' + error.message));
+        }
+
+        function getQueryParams() {
+          const params = new URLSearchParams(window.location.search);
+          return {
+            descricao: params.get('descricao'),
+            inicioPrevisto: params.get('inicio'),
+            fimPrevisto: params.get('fim')
+          };
+        }
+
+        function preencherFormulario() {
+          const { descricao, inicioPrevisto, fimPrevisto } = getQueryParams();
+          if (descricao) document.getElementById('descricao').value = descricao;
+          if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
+          if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
+        }
+
+        function validarFormulario(event) {
+          event.preventDefault();
+          let isValid = true;
+
+          const camposObrigatorios = [
+            { id: 'operador', erro: 'operadorErro', msg: 'Preencha o Nome do Operador.' },
+            { id: 'ordem', erro: 'ordemErro', msg: 'Preencha o Número da Ordem de Serviço.' },
+            { id: 'pt', erro: 'ptErro', msg: 'Preencha o Número da PT.' },
+            { id: 'inicioReal', erro: 'inicioRealErro', msg: 'Preencha a Data e Hora de Início Real.' }
+          ];
+
+          camposObrigatorios.forEach(({ id, erro, msg }) => {
+            const input = document.getElementById(id);
+            const errorLabel = document.getElementById(erro);
+            if (input.value.trim() === '') {
+              errorLabel.textContent = msg;
+              isValid = false;
+            } else {
+              errorLabel.textContent = '';
+            }
+          });
+
+          if (isValid) {
+            formularioIdEmEdicao ? salvarEdicao() : salvarFormulario();
+          }
+        }
+
+        async function salvarFormulario() {
+          const user = auth.currentUser;
+          if (!user) return alert('Você precisa estar logado.');
+
+          const dados = coletarDados(user);
+          try {
+            await db.collection('formularios').add(dados);
+            alert('Formulário enviado!');
+            document.getElementById('formulario').reset();
+            preencherFormulario();
+            carregarHistorico();
+          } catch (error) {
+            alert('Erro ao salvar: ' + error.message);
+          }
+        }
+
+        async function salvarEdicao() {
+          const user = auth.currentUser;
+          if (!user || !formularioIdEmEdicao) return;
+
+          const dados = coletarDados(user);
+          try {
+            await db.collection('formularios').doc(formularioIdEmEdicao).update(dados);
+            alert('Formulário atualizado!');
+            document.getElementById('formulario').reset();
+            formularioIdEmEdicao = null;
+            preencherFormulario();
+            carregarHistorico();
+          } catch (error) {
+            alert('Erro ao editar: ' + error.message);
+          }
+        }
+
+        function coletarDados(user) {
+          return {
+            descricao: document.getElementById('descricao').value,
+            inicioPrevisto: document.getElementById('inicioPrevisto').value,
+            fimPrevisto: document.getElementById('fimPrevisto').value,
+            inicioReal: document.getElementById('inicioReal').value,
+            fimReal: document.getElementById('fimReal').value,
+            operador: document.getElementById('operador').value,
+            ordem: document.getElementById('ordem').value,
+            pt: document.getElementById('pt').value,
+            email: user.email,
+            userId: user.uid,
+            timestamp: new Date()
+          };
+        }
+
+        async function carregarHistorico() {
+          const user = auth.currentUser;
+          if (!user) return;
+
+          const historicoContainer = document.getElementById('historico');
+          historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
+
+          try {
+            let query = db.collection('formularios').orderBy('timestamp', 'desc');
+            if (!isAdmin) {
+              query = query.where('userId', '==', user.uid);
+            }
+            const querySnapshot = await query.get();
+
+            if (querySnapshot.empty) {
+              historicoContainer.innerHTML += '<p>Nenhum formulário encontrado.</p>';
+              return;
+            }
+
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+
+            querySnapshot.forEach((doc) => {
+              const f = doc.data();
+              const registro = document.createElement('div');
+              registro.className = 'registro';
+
+              if (!f.fimReal || f.fimReal.trim() === '') {
+                registro.classList.add('pendente');
+              }
+
+              if (f.fimPrevisto) {
+                const fimPrevistoDate = new Date(f.fimPrevisto);
+                fimPrevistoDate.setHours(0, 0, 0, 0);
+                if (fimPrevistoDate < hoje) {
+                  registro.classList.add('atrasado');
+                }
+              }
+
+              let actionsHTML = `
+                <div class="registro-actions">
+                  <button onclick="editarFormulario('${doc.id}')">Editar</button>
+                  <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
+                </div>
+              `;
+
+              if (isAdmin) {
+                actionsHTML = `
+                  <div class="registro-actions admin-actions">
+                    <button onclick="editarFormulario('${doc.id}')">Editar</button>
+                    <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
+                  </div>
+                `;
+              }
+
+              registro.innerHTML = `
+                <p><strong>Descrição:</strong> ${f.descricao}</p>
+                <p><strong>Início Previsto:</strong> ${f.inicioPrevisto}</p>
+                <p><strong>Término Previsto:</strong> ${f.fimPrevisto}</p>
+                <p><strong>Início Real:</strong> ${f.inicioReal || '-'}</p>
+                <p><strong>Término Real:</strong> ${f.fimReal || '-'}</p>
+                <p><strong>Operador:</strong> ${f.operador}</p>
+                <p><strong>OS:</strong> ${f.ordem}</p>
+                <p><strong>PT:</strong> ${f.pt}</p>
+                ${actionsHTML}
+              `;
+              historicoContainer.appendChild(registro);
+            });
+          } catch (error) {
+            historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
+          }
+        }
+
+        async function editarFormulario(id) {
+          formularioIdEmEdicao = id;
+          try {
+            const doc = await db.collection('formularios').doc(id).get();
+            if (doc.exists) {
+              const data = doc.data();
+              document.getElementById('descricao').value = data.descricao || '';
+              document.getElementById('inicioPrevisto').value = data.inicioPrevisto || '';
+              document.getElementById('fimPrevisto').value = data.fimPrevisto || '';
+              document.getElementById('inicioReal').value = data.inicioReal || '';
+              document.getElementById('fimReal').value = data.fimReal || '';
+              document.getElementById('operador').value = data.operador || '';
+              document.getElementById('ordem').value = data.ordem || '';
+              document.getElementById('pt').value = data.pt || '';
+            } else {
+              alert('Formulário não encontrado.');
+            }
+          } catch (error) {
+            alert('Erro ao carregar formulário para edição: ' + error.message);
+          }
+        }
+
+        async function excluirFormulario(id) {
+          if (confirm('Tem certeza que deseja excluir este formulário?')) {
+            try {
+              await db.collection('formularios').doc(id).delete();
+              alert('Formulário excluído com sucesso!');
+              carregarHistorico();
+            } catch (error) {
+              alert('Erro ao excluir formulário: ' + error.message);
             }
           }
-
-          let actionsHTML = `
-            <div class="registro-actions">
-              <button onclick="editarFormulario('${doc.id}')">Editar</button>
-              <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
-            </div>
-          `;
-
-          if (isAdmin) {
-            actionsHTML = `
-              <div class="registro-actions admin-actions">
-                <button onclick="editarFormulario('${doc.id}')">Editar</button>
-                <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
-              </div>
-            `;
-          }
-
-          registro.innerHTML = `
-            <p><strong>Descrição:</strong> ${f.descricao}</p>
-            <p><strong>Início Previsto:</strong> ${f.inicioPrevisto}</p>
-            <p><strong>Término Previsto:</strong> ${f.fimPrevisto}</p>
-            <p><strong>Início Real:</strong> ${f.inicioReal || '-'}</p>
-            <p><strong>Término Real:</strong> ${f.fimReal || '-'}</p>
-            <p><strong>Operador:</strong> ${f.operador}</p>
-            <p><strong>OS:</strong> ${f.ordem}</p>
-            <p><strong>PT:</strong> ${f.pt}</p>
-            ${actionsHTML}
-          `;
-          historicoContainer.appendChild(registro);
-        });
-      } catch (error) {
-        historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
-      }
-    }
-
-    async function editarFormulario(id) {
-      try {
-        const doc = await db.collection('formularios').doc(id).get();
-        if (!doc.exists) return alert('Registro não encontrado.');
-
-        const f = doc.data();
-        formularioIdEmEdicao = id;
-        document.getElementById('descricao').value = f.descricao;
-        document.getElementById('inicioPrevisto').value = f.inicioPrevisto;
-        document.getElementById('fimPrevisto').value = f.fimPrevisto;
-        document.getElementById('inicioReal').value = f.inicioReal || '';
-        document.getElementById('fimReal').value = f.fimReal || '';
-        document.getElementById('operador').value = f.operador;
-        document.getElementById('ordem').value = f.ordem;
-        document.getElementById('pt').value = f.pt;
-      } catch (error) {
-        alert('Erro ao carregar para edição.');
-      }
-    }
-
-    async function excluirFormulario(id) {
-      if (!confirm('Tem certeza que deseja excluir?')) return;
-      try {
-        await db.collection('formularios').doc(id).delete();
-        alert('Excluído com sucesso!');
-        carregarHistorico();
-      } catch (error) {
-        alert('Erro ao excluir: ' + error.message);
-      }
-    }
-  </script>
+        }
+    </script>
 </head>
 <body>
-  <div id="login">
-    <h2>Login Necessário</h2>
-    <p>Faça login com sua conta Gmail.</p>
-    <button onclick="login()">Entrar com Gmail</button>
-  </div>
+    <div id="login">
+        <h2>Login Necessário</h2>
+        <p>Faça login com sua conta Gmail ou e-mail.</p>
 
-  <div id="form-container">
-    <h1>Formulário da Atividade</h1>
-    <form id="formulario" onsubmit="validarFormulario(event)">
-      <label for="descricao">Descrição da Atividade:</label>
-      <textarea id="descricao" class="readonly" readonly></textarea>
+        <div>
+            <h3>Entrar com E-mail</h3>
+            <label for="emailLogin">E-mail:</label>
+            <input type="email" id="emailLogin" />
+            <label for="passwordLogin">Senha:</label>
+            <input type="password" id="passwordLogin" />
+            <button onclick="loginComEmail()">Entrar</button>
+            <p id="loginEmailErro" class="error"></p>
+        </div>
 
-      <label for="inicioPrevisto">Início Previsto:</label>
-      <input type="datetime-local" id="inicioPrevisto" class="readonly" readonly>
+        <hr>
 
-      <label for="fimPrevisto">Término Previsto:</label>
-      <input type="datetime-local" id="fimPrevisto" class="readonly" readonly>
+        <p>Ou</p>
 
-      <label for="inicioReal">Início Real:</label>
-      <input type="datetime-local" id="inicioReal" required>
-      <p id="inicioRealErro" class="error"></p>
+        <button onclick="login()">Entrar com Gmail</button>
 
-      <label for="fimReal">Término Real:</label>
-      <input type="datetime-local" id="fimReal">
+        <div>
+            <h3>Cadastrar Novo Usuário</h3>
+            <label for="emailCadastro">E-mail:</label>
+            <input type="email" id="emailCadastro" />
+            <label for="passwordCadastro">Senha:</label>
+            <input type="password" id="passwordCadastro" />
+            <button onclick="cadastrarNovoUsuario()">Cadastrar</button>
+            <p id="cadastroEmailErro" class="error"></p>
+        </div>
+    </div>
 
-      <label for="email">Email do Operador:</label>
-      <input type="email" id="email" class="readonly" readonly>
+    <div id="form-container" style="display: none;">
+        <h1>Formulário da Atividade</h1>
+        <form id="formulario" onsubmit="validarFormulario(event)">
+            <label for="descricao">Descrição da Atividade:</label>
+            <textarea id="descricao" class="readonly" readonly></textarea>
 
-      <label for="operador">Nome do Operador Liberador:</label>
-      <input type="text" id="operador" required>
-      <p id="operadorErro" class="error"></p>
+            <label for="inicioPrevisto">Início Previsto:</label>
+            <input type="datetime-local" id="inicioPrevisto" class="readonly" readonly>
 
-      <label for="ordem">Número da Ordem de Serviço:</label>
-      <input type="text" id="ordem" required>
-      <p id="ordemErro" class="error"></p>
+            <label for="fimPrevisto">Término Previsto:</label>
+            <input type="datetime-local" id="fimPrevisto" class="readonly" readonly>
 
-      <label for="pt">Número da PT:</label>
-      <input type="text" id="pt" required>
-      <p id="ptErro" class="error"></p>
+            <label for="inicioReal">Início Real:</label>
+            <input type="datetime-local" id="inicioReal" required>
+            <p id="inicioRealErro" class="error"></p>
 
-      <button type="submit">Salvar</button>
-      <button type="button" onclick="logout()">Sair</button>
-    </form>
+            <label for="fimReal">Término Real:</label>
+            <input type="datetime-local" id="fimReal">
 
-    <div id="historico"></div>
-  </div>
+            <label for="email">Email do Operador:</label>
+            <input type="email" id="email" class="readonly" readonly>
+
+            <label for="operador">Nome do Operador Liberador:</label>
+            <input type="text" id="operador" required>
+            <p id="operadorErro" class="error"></p>
+
+            <label for="ordem">Número da Ordem de Serviço:</label>
+            <input type="text" id="ordem" required>
+            <p id="ordemErro" class="error"></p>
+
+            <label for="pt">Número da PT:</label>
+            <input type="text" id="pt" required>
+            <p id="ptErro" class="error"></p>
+
+            <button type="submit">Salvar</button>
+            <button type="button" onclick="logout()">Sair</button>
+        </form>
+
+        <div id="historico"></div>
+    </div>
 </body>
 </html>
