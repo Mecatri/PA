@@ -40,6 +40,8 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    let currentEditId = null; // Armazena o ID do formulário que está sendo editado
+
     // Função para iniciar o scanner de QR Code
     async function iniciarScannerQRCode() {
       const qrCanvas = document.createElement("canvas");
@@ -188,12 +190,56 @@
             <p><strong>Operador:</strong> ${formulario.operador}</p>
             <p><strong>OS:</strong> ${formulario.ordem}</p>
             <p><strong>PT:</strong> ${formulario.pt}</p>
+            <div class="registro-actions">
+              <button onclick="editarFormulario('${doc.id}')">Editar</button>
+              <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
+            </div>
           `;
           historicoContainer.appendChild(registro);
         });
       } catch (error) {
         console.error("Erro ao carregar o histórico:", error.message);
         historicoContainer.innerHTML += "<p>Erro ao carregar o histórico.</p>";
+      }
+    }
+
+    // Função para editar um formulário
+    async function editarFormulario(formularioId) {
+      const novoOperador = prompt("Informe o novo nome do operador:");
+      const novaOrdem = prompt("Informe o novo número da ordem de serviço:");
+      const novaPT = prompt("Informe o novo número da PT:");
+
+      if (!novoOperador || !novaOrdem || !novaPT) {
+        alert("Todos os campos devem ser preenchidos.");
+        return;
+      }
+
+      try {
+        await db.collection("formularios").doc(formularioId).update({
+          operador: novoOperador,
+          ordem: novaOrdem,
+          pt: novaPT,
+        });
+        alert("Formulário atualizado com sucesso!");
+        carregarHistorico(); // Atualiza o histórico
+      } catch (error) {
+        console.error("Erro ao editar o formulário:", error.message);
+        alert("Erro ao editar o formulário: " + error.message);
+      }
+    }
+
+    // Função para excluir um formulário
+    async function excluirFormulario(formularioId) {
+      const confirmar = confirm("Tem certeza de que deseja excluir este formulário?");
+      if (!confirmar) return;
+
+      try {
+        await db.collection("formularios").doc(formularioId).delete();
+        alert("Formulário excluído com sucesso!");
+        carregarHistorico(); // Atualiza o histórico
+      } catch (error) {
+        console.error("Erro ao excluir o formulário:", error.message);
+        alert("Erro ao excluir o formulário: " + error.message);
       }
     }
   </script>
