@@ -19,6 +19,7 @@
     .registro-actions button { margin-right: 10px; }
     .pendente { border: 2px solid yellow !important; }
     .atrasado { border: 2px solid red !important; }
+    .admin-actions button { background-color: #007bff; color: white; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -37,17 +38,24 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
     let formularioIdEmEdicao = null;
+    let isAdmin = false; // Variável para controlar se o usuário é administrador
 
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged(async (user) => {
       if (user) {
         document.getElementById('login').style.display = 'none';
         document.getElementById('form-container').style.display = 'block';
         document.getElementById('email').value = user.email;
+
+        // Verificar se o usuário é administrador (assumindo que você configurou isso no Firebase Auth)
+        const tokenResult = await user.getIdTokenResult();
+        isAdmin = tokenResult.claims.admin === true; // Ou outra forma de identificar o admin
+
         carregarHistorico();
         preencherFormulario();
       } else {
         document.getElementById('login').style.display = 'block';
         document.getElementById('form-container').style.display = 'none';
+        isAdmin = false;
       }
     });
 
@@ -162,36 +170,51 @@
       historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
 
       try {
-        const querySnapshot = await db.collection('formularios')
-          .where('userId', '==', user.uid)
-          .orderBy('timestamp', 'desc')
-          .get();
+        let query = db.collection('formularios').orderBy('timestamp', 'desc');
+        if (!isAdmin) {
+          query = query.where('userId', '==', user.uid);
+        }
+        const querySnapshot = await query.get();
 
         if (querySnapshot.empty) {
-          historicoContainer.innerHTML += '<p>Nenhum formulário enviado ainda.</p>';
+          historicoContainer.innerHTML += '<p>Nenhum formulário encontrado.</p>';
           return;
         }
 
         const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0); // Define o horário para o início do dia para comparação de datas
+        hoje.setHours(0, 0, 0, 0);
 
         querySnapshot.forEach((doc) => {
           const f = doc.data();
           const registro = document.createElement('div');
           registro.className = 'registro';
 
-          // Verifica se o campo fimReal está vazio para aplicar a classe 'pendente'
           if (!f.fimReal || f.fimReal.trim() === '') {
             registro.classList.add('pendente');
           }
 
-          // Verifica se a data de fimPrevisto é anterior ao dia atual para aplicar a classe 'atrasado'
           if (f.fimPrevisto) {
             const fimPrevistoDate = new Date(f.fimPrevisto);
-            fimPrevistoDate.setHours(0, 0, 0, 0); // Define o horário para o início do dia para comparação de datas
+            fimPrevistoDate.setHours(0, 0, 0, 0);
             if (fimPrevistoDate < hoje) {
               registro.classList.add('atrasado');
             }
+          }
+
+          let actionsHTML = `
+            <div class="registro-actions">
+              <button onclick="editarFormulario('${doc.id}')">Editar</button>
+              <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
+            </div>
+          `;
+
+          if (isAdmin) {
+            actionsHTML = `
+              <div class="registro-actions admin-actions">
+                <button onclick="editarFormulario('${doc.id}')">Editar</button>
+                <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
+              </div>
+            `;
           }
 
           registro.innerHTML = `
@@ -203,10 +226,7 @@
             <p><strong>Operador:</strong> ${f.operador}</p>
             <p><strong>OS:</strong> ${f.ordem}</p>
             <p><strong>PT:</strong> ${f.pt}</p>
-            <div class="registro-actions">
-              <button onclick="editarFormulario('${doc.id}')">Editar</button>
-              <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
-            </div>
+            ${actionsHTML}
           `;
           historicoContainer.appendChild(registro);
         });
