@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulário da Atividade com Edição</title>
+  <title>Formulário da Atividade com Edição e QR Code</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
     label { display: block; margin-top: 10px; }
@@ -28,10 +28,9 @@
       apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
       authDomain: "pa-pg-a7abc.firebaseapp.com",
       projectId: "pa-pg-a7abc",
-      storageBucket: "pa-pg-a7abc.firebasestorage.app",
+      storageBucket: "pa-pg-a7abc.firebaseapp.com",
       messagingSenderId: "102164980919",
       appId: "1:102164980919:web:72220a8b2ed478a2cdd932",
-      clientId: "460190166657-18jbdvae4cemj3n38ivsnol1r975nkee.apps.googleusercontent.com"
     };
 
     // Inicialize o Firebase
@@ -80,6 +79,13 @@
       }).catch((error) => {
         console.error('Erro ao sair:', error.message);
       });
+    }
+
+    // Função para preencher o formulário com os parâmetros da URL ou QR Code
+    function preencherFormularioComQRCode(data) {
+      if (data.descricao) document.getElementById('descricao').value = data.descricao;
+      if (data.inicioPrevisto) document.getElementById('inicioPrevisto').value = data.inicioPrevisto;
+      if (data.fimPrevisto) document.getElementById('fimPrevisto').value = data.fimPrevisto;
     }
 
     // Função para validar os campos
@@ -252,7 +258,6 @@
   <div id="form-container">
     <h1>Formulário da Atividade</h1>
     <form id="formulario" onsubmit="validarFormulario(event)">
-      <!-- Campos do formulário original -->
       <label for="descricao">Descrição da Atividade:</label>
       <textarea id="descricao" name="descricao" class="readonly" readonly></textarea>
 
@@ -285,10 +290,8 @@
       <button type="button" onclick="logout()">Sair</button>
     </form>
 
-    <!-- Histórico de formulários -->
     <div id="historico"></div>
 
-    <!-- Formulário de edição -->
     <div id="edit-form-container">
       <h3>Editar Formulário</h3>
       <label for="edit-inicio">Data e Hora de Início da Atividade:</label>
