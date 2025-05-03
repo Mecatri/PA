@@ -9,20 +9,99 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-        label { display: block; margin-top: 10px; }
-        input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-        button { margin-top: 15px; padding: 10px 15px; }
-        #qrcode { margin-top: 20px; text-align: center; }
-        #historico { margin-top: 30px; }
-        .atividade { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-        .atividade a { word-break: break-word; }
-        .error { color: red; margin-top: 10px; }
-        .success { color: green; margin-top: 10px; }
-        .delete-btn { background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto; /* Centraliza horizontalmente */
+            padding: 20px;
+            display: flex; /* Para centralizar verticalmente se necessário */
+            flex-direction: column;
+            align-items: center; /* Centraliza os itens filhos horizontalmente */
+        }
+        h2, h3 {
+            text-align: center;
+        }
+        #login {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            width: 100%; /* Para ocupar a largura do container */
+        }
+        input, textarea {
+            width: calc(100% - 16px); /* Considera o padding */
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Evita que padding/border aumentem a largura */
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #qrcode {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #historico {
+            margin-top: 30px;
+            width: 100%;
+        }
+        #listaAtividades {
+            margin-top: 10px;
+        }
+        .atividade {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            text-align: left; /* Alinha o texto da atividade à esquerda */
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .atividade a {
+            word-break: break-word;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .success {
+            color: green;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .delete-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
         @media (max-width: 600px) {
-            body { padding: 10px; }
-            button { width: 100%; }
+            body {
+                padding: 10px;
+            }
+            button {
+                width: 100%;
+            }
         }
     </style>
 </head>
