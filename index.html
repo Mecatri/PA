@@ -7,6 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
     label { display: block; margin-top: 10px; }
@@ -86,7 +87,7 @@
           document.getElementById("login").style.display = "none";
           document.getElementById("app").style.display = "block";
           document.getElementById("loginMessage").textContent = "";
-          mostrarHistorico();
+          mostrarHistorico(); // Carregar histórico após login
         })
         .catch((error) => {
           console.error("Erro no login:", error);
@@ -123,6 +124,11 @@
 
     // Função para gerar QR Code
     async function gerarQRCode() {
+      if (!auth.currentUser) {
+        alert("Você precisa estar logado para realizar esta ação.");
+        return;
+      }
+
       const descricao = document.getElementById("descricao").value.trim();
       const inicio = document.getElementById("inicio").value;
       const fim = document.getElementById("fim").value;
@@ -174,6 +180,11 @@
     async function mostrarHistorico() {
       const lista = document.getElementById("listaAtividades");
       lista.innerHTML = "";
+
+      if (!auth.currentUser) {
+        alert("Você precisa estar logado para acessar o histórico.");
+        return;
+      }
 
       try {
         const querySnapshot = await db.collection("historico").where("userId", "==", auth.currentUser.uid).get();
