@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador de QR Code - Atividades</title>
+  <title>Gerador de QR Code - Ajustado</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -14,128 +14,32 @@
     input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
     button { margin-top: 15px; padding: 10px 15px; }
     #qrcode { margin-top: 20px; text-align: center; }
-    #historico { margin-top: 30px; }
-    .atividade { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-    .atividade a { word-break: break-word; }
     .error { color: red; margin-top: 10px; }
-    .success { color: green; margin-top: 10px; }
-    .delete-btn { background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer; }
-    @media (max-width: 600px) {
-      body { padding: 10px; }
-      button { width: 100%; }
-    }
   </style>
 </head>
 <body>
   <h2>Gerador de QR Code - Atividade</h2>
 
-  <!-- Área de Login -->
-  <div id="login">
-    <h3>Login</h3>
-    <button onclick="login()">Entrar com Gmail</button>
-    <p id="loginMessage"></p>
-  </div>
+  <label for="descricao">Descrição da Atividade</label>
+  <textarea id="descricao" rows="3" placeholder="Ex: Troca da válvula CV-210"></textarea>
 
-  <!-- Área do Aplicativo (oculta até login) -->
-  <div id="app" style="display: none;">
-    <label for="descricao">Descrição da Atividade</label>
-    <textarea id="descricao" rows="3" placeholder="Ex: Troca da válvula CV-210"></textarea>
+  <label for="inicio">Data e Hora de Início Prevista</label>
+  <input type="datetime-local" id="inicio">
 
-    <label for="inicio">Data e Hora de Início Prevista</label>
-    <input type="datetime-local" id="inicio">
+  <label for="fim">Data e Hora de Término Prevista</label>
+  <input type="datetime-local" id="fim">
 
-    <label for="fim">Data e Hora de Término Prevista</label>
-    <input type="datetime-local" id="fim">
+  <button onclick="gerarQRCode()">Gerar QR Code</button>
 
-    <button onclick="gerarQRCode()">Gerar QR Code</button>
-
-    <div id="qrcode"></div>
-    <p id="mensagem" class="error"></p>
-
-    <div id="historico">
-      <h3>📂 Histórico de Atividades Geradas</h3>
-      <div id="listaAtividades"></div>
-    </div>
-
-    <button onclick="logout()">Sair</button>
-  </div>
+  <div id="qrcode"></div>
+  <p id="mensagem" class="error"></p>
 
   <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
-      authDomain: "pa-pg-a7abc.firebaseapp.com",
-      projectId: "pa-pg-a7abc",
-      storageBucket: "pa-pg-a7abc.firebasestorage.app",
-      messagingSenderId: "102164980919",
-      appId: "1:102164980919:web:72220a8b2ed478a2cdd932",
-      clientId: "460190166657-18jbdvae4cemj3n38ivsnol1r975nkee.apps.googleusercontent.com"
-    };
-
-    // Inicialize o Firebase
-    firebase.initializeApp(firebaseConfig);
-
-    // Inicialize os serviços do Firebase
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // Função de login com Gmail
-    function login() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ client_id: firebaseConfig.clientId });
-
-      auth.signInWithPopup(provider)
-        .then((result) => {
-          console.log("Usuário logado:", result.user);
-          document.getElementById("login").style.display = "none";
-          document.getElementById("app").style.display = "block";
-          document.getElementById("loginMessage").textContent = "";
-          mostrarHistorico();
-        })
-        .catch((error) => {
-          console.error("Erro no login:", error);
-          document.getElementById("loginMessage").textContent = "Erro no login: " + error.message;
-        });
-    }
-
-    // Função de logout
-    function logout() {
-      auth.signOut()
-        .then(() => {
-          console.log("Usuário deslogado");
-          document.getElementById("login").style.display = "block";
-          document.getElementById("app").style.display = "none";
-        })
-        .catch((error) => {
-          console.error("Erro ao sair:", error);
-        });
-    }
-
-    // Verificar estado de autenticação
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        console.log("Usuário autenticado:", user);
-        document.getElementById("login").style.display = "none";
-        document.getElementById("app").style.display = "block";
-        mostrarHistorico();
-      } else {
-        console.log("Nenhum usuário autenticado");
-        document.getElementById("login").style.display = "block";
-        document.getElementById("app").style.display = "none";
-      }
-    });
-
-    // Função para gerar QR Code
-    async function gerarQRCode() {
-      if (!auth.currentUser) {
-        alert("Você precisa estar logado para realizar esta ação.");
-        return;
-      }
-
-      const descricao = document.getElementById("descricao").value.trim();
-      const inicio = document.getElementById("inicio").value;
-      const fim = document.getElementById("fim").value;
-      const mensagem = document.getElementById("mensagem");
+    function gerarQRCode() {
+      const descricao = document.getElementById('descricao').value.trim();
+      const inicio = document.getElementById('inicio').value;
+      const fim = document.getElementById('fim').value;
+      const mensagem = document.getElementById('mensagem');
 
       if (!descricao || !inicio || !fim) {
         mensagem.textContent = "Por favor, preencha todos os campos.";
@@ -149,7 +53,9 @@
 
       mensagem.textContent = "";
 
-      const url = `https://seu-dominio.com/formulario.html?descricao=${encodeURIComponent(descricao)}&inicio=${inicio}&fim=${fim}`;
+      // URL da página do formulário com parâmetros
+      const url = `https://mecatri.github.io/PA/formulario.html?descricao=${encodeURIComponent(descricao)}&inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`;
+
       const container = document.getElementById("qrcode");
       container.innerHTML = "";
       const canvas = document.createElement("canvas");
@@ -166,67 +72,6 @@
           container.appendChild(link);
         }
       });
-
-      // Salvar no Firestore
-      const atividade = { descricao, inicio, fim, url, userId: auth.currentUser.uid };
-      try {
-        const docRef = await db.collection("historico").add(atividade);
-        console.log("Atividade salva no Firebase com ID:", docRef.id);
-        mostrarHistorico();
-      } catch (error) {
-        console.error("Erro ao salvar atividade:", error);
-      }
-    }
-
-    // Função para mostrar histórico
-    async function mostrarHistorico() {
-      const lista = document.getElementById("listaAtividades");
-      lista.innerHTML = "";
-
-      if (!auth.currentUser) {
-        alert("Você precisa estar logado para acessar o histórico.");
-        return;
-      }
-
-      try {
-        const querySnapshot = await db.collection("historico").where("userId", "==", auth.currentUser.uid).get();
-        if (querySnapshot.empty) {
-          lista.innerHTML = "<p>Nenhuma atividade encontrada.</p>";
-          return;
-        }
-
-        querySnapshot.forEach((doc) => {
-          const atv = doc.data();
-          const div = document.createElement("div");
-          div.className = "atividade";
-          div.innerHTML = `
-            <strong>Descrição:</strong> ${atv.descricao}<br>
-            <strong>Início:</strong> ${new Date(atv.inicio).toLocaleString()}<br>
-            <strong>Fim:</strong> ${new Date(atv.fim).toLocaleString()}<br>
-            <a href="${atv.url}" target="_blank">Abrir Formulário</a>
-            <button class="delete-btn" onclick="confirmarExclusao('${doc.id}')">Excluir</button>
-          `;
-          lista.appendChild(div);
-        });
-      } catch (error) {
-        console.error("Erro ao carregar histórico:", error);
-        lista.innerHTML = `<p class="error">Erro ao carregar histórico: ${error.message}</p>`;
-      }
-    }
-
-    // Função para confirmar e excluir uma atividade
-    async function confirmarExclusao(docId) {
-      const confirmar = confirm("Tem certeza de que deseja excluir esta atividade?");
-      if (confirmar) {
-        try {
-          await db.collection("historico").doc(docId).delete();
-          console.log("Atividade excluída com sucesso:", docId);
-          mostrarHistorico(); // Atualiza o histórico após exclusão
-        } catch (error) {
-          console.error("Erro ao excluir atividade:", error);
-          alert("Erro ao excluir atividade: " + error.message);
-        }
-      }
     }
   </script>
 </body>
