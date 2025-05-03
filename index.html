@@ -104,10 +104,10 @@
 
       try {
         // Salvar no Firestore
-        await db.collection("historico").add(atividade);
-        console.log("Atividade salva no Firebase com sucesso!");
+        const docRef = await db.collection("historico").add(atividade);
+        console.log("Atividade salva no Firebase com ID:", docRef.id);
       } catch (error) {
-        console.error("Erro ao salvar no Firebase:", error);
+        console.error("Erro ao salvar a atividade no Firestore:", error);
       }
 
       mostrarHistorico();
@@ -119,10 +119,20 @@
     // Função para mostrar histórico
     async function mostrarHistorico() {
       const lista = document.getElementById("listaAtividades");
-      lista.innerHTML = "";
+      lista.innerHTML = ""; // Limpa a lista antes de carregar
 
       try {
+        // Recupera os dados do Firestore
         const querySnapshot = await db.collection("historico").get();
+
+        // Verifica se há documentos no Firestore
+        if (querySnapshot.empty) {
+          console.log("Nenhuma atividade encontrada no Firestore.");
+          lista.innerHTML = "<p>Nenhuma atividade encontrada.</p>";
+          return;
+        }
+
+        // Adiciona cada atividade ao histórico
         querySnapshot.forEach((doc) => {
           const atv = doc.data();
           const div = document.createElement("div");
@@ -135,8 +145,11 @@
           `;
           lista.appendChild(div);
         });
+
+        console.log("Histórico carregado com sucesso!");
       } catch (error) {
         console.error("Erro ao carregar histórico:", error);
+        lista.innerHTML = `<p class="error">Erro ao carregar histórico: ${error.message}</p>`;
       }
     }
 
