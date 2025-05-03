@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulário da Atividade com Edição e QR Code</title>
+  <title>Formulário da Atividade com QR Code</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
     label { display: block; margin-top: 10px; }
@@ -18,10 +18,10 @@
     .registro-actions { margin-top: 10px; }
     .registro-actions button { margin-right: 10px; }
     #edit-form-container { display: none; margin-top: 30px; border: 1px solid #ccc; padding: 20px; border-radius: 5px; }
+    #qr-scanner-container { margin-top: 20px; border: 1px dashed #ccc; padding: 20px; text-align: center; }
+    #qr-video { width: 100%; max-height: 300px; }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
   <script>
     // Configuração do Firebase
     const firebaseConfig = {
@@ -40,171 +40,90 @@
 
     let currentEditId = null; // Armazena o ID do formulário que está sendo editado
 
-    // Função para simular a leitura de um QR Code
-    function lerQRCode() {
-      // Dados simulados do QR Code
-      const dadosQRCode = {
-        descricao: "Manutenção de Equipamento X", // Exemplo de descrição
-        inicioPrevisto: "2025-05-04T08:00", // Data de início prevista
-        fimPrevisto: "2025-05-04T12:00" // Data de término prevista
-      };
+    // Função para iniciar o scanner de QR Code
+    async function iniciarScannerQRCode() {
+      const qrCanvas = document.createElement("canvas");
+      const qrContext = qrCanvas.getContext("2d");
+      const video = document.getElementById("qr-video");
 
-      // Preencher os campos automaticamente com os dados
-      preencherCamposComQRCode(dadosQRCode);
+      try {
+        // Solicita acesso à câmera
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true); // Necessário para funcionar no iOS
+        video.play();
+
+        // Lê o QR Code continuamente
+        const scannerInterval = setInterval(() => {
+          qrCanvas.width = video.videoWidth;
+          qrCanvas.height = video.videoHeight;
+          qrContext.drawImage(video, 0, 0, qrCanvas.width, qrCanvas.height);
+          const imageData = qrContext.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+          if (code) {
+            clearInterval(scannerInterval);
+            video.srcObject.getTracks().forEach((track) => track.stop()); // Para o vídeo
+            processarDadosQRCode(code.data);
+          }
+        }, 500);
+      } catch (error) {
+        console.error("Erro ao acessar a câmera:", error);
+        alert("Não foi possível acessar a câmera. Verifique as permissões.");
+      }
     }
 
-    // Função para preencher os campos com os dados do QR Code
-    function preencherCamposComQRCode(data) {
-      if (data.descricao) document.getElementById('descricao').value = data.descricao;
-      if (data.inicioPrevisto) document.getElementById('inicioPrevisto').value = data.inicioPrevisto;
-      if (data.fimPrevisto) document.getElementById('fimPrevisto').value = data.fimPrevisto;
+    // Processa os dados do QR Code e preenche os campos do formulário
+    function processarDadosQRCode(data) {
+      try {
+        const qrData = JSON.parse(data); // Decodifica os dados do QR Code (JSON esperado)
+        if (qrData.descricao) document.getElementById("descricao").value = qrData.descricao;
+        if (qrData.inicioPrevisto) document.getElementById("inicioPrevisto").value = qrData.inicioPrevisto;
+        if (qrData.fimPrevisto) document.getElementById("fimPrevisto").value = qrData.fimPrevisto;
+      } catch (error) {
+        console.error("Erro ao processar os dados do QR Code:", error);
+        alert("O QR Code não contém dados válidos.");
+      }
     }
 
     // Verificar estado de autenticação
     auth.onAuthStateChanged((user) => {
       if (user) {
-        document.getElementById('login').style.display = 'none';
-        document.getElementById('form-container').style.display = 'block';
+        document.getElementById("login").style.display = "none";
+        document.getElementById("form-container").style.display = "block";
 
         // Exibir email do operador logado
-        document.getElementById('email').value = user.email;
+        document.getElementById("email").value = user.email;
 
-        carregarHistorico(); // Carrega o histórico ao logar
-        console.log('Usuário autenticado:', user.email);
-
-        // Simular leitura do QR Code ao carregar a página
-        lerQRCode();
+        carregarHistorico(); // Carrega o histórico
       } else {
-        document.getElementById('login').style.display = 'block';
-        document.getElementById('form-container').style.display = 'none';
+        document.getElementById("login").style.display = "block";
+        document.getElementById("form-container").style.display = "none";
       }
     });
 
     // Função para login com Gmail
     function login() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
+      provider.setCustomParameters({ prompt: "select_account" });
 
       auth.signInWithPopup(provider)
         .then((result) => {
-          console.log('Usuário logado:', result.user.email);
+          console.log("Usuário logado:", result.user.email);
         })
         .catch((error) => {
-          console.error('Erro no login:', error.message);
-          alert('Erro no login: ' + error.message);
+          console.error("Erro no login:", error.message);
+          alert("Erro no login: " + error.message);
         });
     }
 
     // Função para logout
     function logout() {
       auth.signOut().then(() => {
-        console.log('Usuário deslogado');
+        console.log("Usuário deslogado");
       }).catch((error) => {
-        console.error('Erro ao sair:', error.message);
+        console.error("Erro ao sair:", error.message);
       });
-    }
-
-    // Função para validar os campos
-    function validarFormulario(event) {
-      event.preventDefault(); // Previne o envio do formulário se houver erros
-
-      let isValid = true;
-
-      // Validação do campo "Data e Hora de Início da Atividade"
-      const inicio = document.getElementById('inicio').value;
-      const inicioErro = document.getElementById('inicioErro');
-      if (!inicio) { // Campo obrigatório
-        inicioErro.textContent = 'Por favor, preencha a Data e Hora de Início da Atividade.';
-        isValid = false;
-      } else {
-        inicioErro.textContent = '';
-      }
-
-      // Se todos os campos obrigatórios forem preenchidos
-      if (isValid) {
-        salvarFormulario();
-      }
-    }
-
-    // Função para salvar o formulário no Firestore
-    async function salvarFormulario() {
-      const user = auth.currentUser;
-      if (!user) {
-        alert('Você precisa estar logado para enviar o formulário.');
-        return;
-      }
-
-      const formulario = {
-        descricao: document.getElementById('descricao').value,
-        inicioPrevisto: document.getElementById('inicioPrevisto').value,
-        fimPrevisto: document.getElementById('fimPrevisto').value,
-        inicio: document.getElementById('inicio').value,
-        fim: document.getElementById('fim').value,
-        operador: document.getElementById('operador').value,
-        ordem: document.getElementById('ordem').value,
-        pt: document.getElementById('pt').value,
-        email: user.email, // Adiciona o email do usuário logado
-        userId: user.uid,
-        timestamp: new Date()
-      };
-
-      try {
-        await db.collection('formularios').add(formulario);
-        alert('Formulário enviado com sucesso!');
-        document.getElementById('formulario').reset();
-        carregarHistorico(); // Atualiza o histórico após salvar
-
-        // Simular leitura do QR Code novamente após envio
-        lerQRCode();
-      } catch (error) {
-        console.error('Erro ao salvar o formulário:', error.message);
-        alert('Erro ao salvar o formulário: ' + error.message);
-      }
-    }
-
-    // Função para carregar o histórico do usuário autenticado
-    async function carregarHistorico() {
-      const user = auth.currentUser;
-      if (!user) {
-        alert('Você precisa estar logado para acessar o histórico.');
-        return;
-      }
-
-      const historicoContainer = document.getElementById('historico');
-      historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
-
-      try {
-        const querySnapshot = await db.collection('formularios')
-          .where('userId', '==', user.uid)
-          .orderBy('timestamp', 'desc')
-          .get();
-
-        if (querySnapshot.empty) {
-          historicoContainer.innerHTML += '<p>Nenhum formulário enviado ainda.</p>';
-          return;
-        }
-
-        querySnapshot.forEach((doc) => {
-          const formulario = doc.data();
-          const registro = document.createElement('div');
-          registro.className = 'registro';
-          registro.innerHTML = `
-            <p><strong>Descrição:</strong> ${formulario.descricao}</p>
-            <p><strong>Início Previsto:</strong> ${formulario.inicioPrevisto || 'Não informado'}</p>
-            <p><strong>Término Previsto:</strong> ${formulario.fimPrevisto || 'Não informado'}</p>
-            <p><strong>Início:</strong> ${formulario.inicio || 'Não informado'}</p>
-            <p><strong>Término:</strong> ${formulario.fim || 'Não informado'}</p>
-            <p><strong>Email:</strong> ${formulario.email}</p>
-            <p><strong>Operador:</strong> ${formulario.operador}</p>
-            <p><strong>OS:</strong> ${formulario.ordem}</p>
-            <p><strong>PT:</strong> ${formulario.pt}</p>
-          `;
-          historicoContainer.appendChild(registro);
-        });
-      } catch (error) {
-        console.error('Erro ao carregar o histórico:', error.message);
-        historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
-      }
     }
   </script>
 </head>
@@ -217,7 +136,7 @@
 
   <div id="form-container">
     <h1>Formulário da Atividade</h1>
-    <form id="formulario" onsubmit="validarFormulario(event)">
+    <form id="formulario">
       <label for="descricao">Descrição da Atividade:</label>
       <textarea id="descricao" name="descricao" class="readonly" readonly></textarea>
 
@@ -229,7 +148,6 @@
 
       <label for="inicio">Data e Hora de Início da Atividade:</label>
       <input type="datetime-local" id="inicio" name="inicio" required>
-      <p id="inicioErro" class="error"></p>
 
       <label for="fim">Data e Hora de Término da Atividade (opcional):</label>
       <input type="datetime-local" id="fim" name="fim">
@@ -246,9 +164,13 @@
       <label for="pt">Número da PT:</label>
       <input type="text" id="pt" name="pt" required>
 
-      <button type="submit">Enviar</button>
+      <button type="button" onclick="iniciarScannerQRCode()">Ler QR Code</button>
       <button type="button" onclick="logout()">Sair</button>
     </form>
+
+    <div id="qr-scanner-container">
+      <video id="qr-video"></video>
+    </div>
 
     <div id="historico"></div>
   </div>
