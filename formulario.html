@@ -7,14 +7,28 @@
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
     label { display: block; margin-top: 10px; }
-    input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-    button { margin-top: 15px; padding: 10px 15px; }
+    input, textarea { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; /* Added for consistent sizing */ }
+    button { margin-top: 15px; padding: 10px 15px; cursor: pointer; /* Added cursor */ }
     .error { color: red; font-size: 0.9em; margin-top: 5px; }
     .readonly { background-color: #f0f0f0; }
     #login { display: none; text-align: center; }
     #form-container { display: none; }
     #historico { margin-top: 30px; }
-    .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+    .registro {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      transition: border 0.3s ease; /* Smooth transition for border changes */
+    }
+    /* Style for pending activities (yellow border) */
+    .registro-pendente {
+      border-left: 5px solid gold;
+    }
+    /* Style for overdue activities (red border) */
+    .registro-atrasado {
+      border-left: 5px solid red;
+    }
     .registro-actions { margin-top: 10px; }
     .registro-actions button { margin-right: 10px; }
   </style>
@@ -23,6 +37,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script>
     const firebaseConfig = {
+      // IMPORTANT: Replace with your actual Firebase config
       apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
       authDomain: "pa-pg-a7abc.firebaseapp.com",
       projectId: "pa-pg-a7abc",
@@ -31,35 +46,43 @@
       appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
     };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    let formularioIdEmEdicao = null;
+    let formularioIdEmEdicao = null; // Track if editing an existing entry
 
+    // Authentication state listener
     auth.onAuthStateChanged((user) => {
       if (user) {
+        // User is signed in
         document.getElementById('login').style.display = 'none';
         document.getElementById('form-container').style.display = 'block';
         document.getElementById('email').value = user.email;
-        carregarHistorico();
-        preencherFormulario();
+        carregarHistorico(); // Load user's history
+        preencherFormulario(); // Pre-fill form from URL params if any
       } else {
+        // User is signed out
         document.getElementById('login').style.display = 'block';
         document.getElementById('form-container').style.display = 'none';
+        document.getElementById('historico').innerHTML = ''; // Clear history on logout
       }
     });
 
+    // Google Login function
     function login() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
+      provider.setCustomParameters({ prompt: 'select_account' }); // Force account selection
       auth.signInWithPopup(provider)
         .catch((error) => alert('Erro no login: ' + error.message));
     }
 
+    // Logout function
     function logout() {
       auth.signOut().catch((error) => alert('Erro ao sair: ' + error.message));
     }
 
+    // Get URL query parameters
     function getQueryParams() {
       const params = new URLSearchParams(window.location.search);
       return {
@@ -69,16 +92,22 @@
       };
     }
 
+    // Pre-fill form fields from URL parameters
     function preencherFormulario() {
       const { descricao, inicioPrevisto, fimPrevisto } = getQueryParams();
       if (descricao) document.getElementById('descricao').value = descricao;
       if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
       if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
+      // Also pre-fill email if user is logged in (handled in onAuthStateChanged)
+      const user = auth.currentUser;
+      if(user) document.getElementById('email').value = user.email;
     }
 
+    // Validate form before submission
     function validarFormulario(event) {
-      event.preventDefault();
+      event.preventDefault(); // Prevent default form submission
       let isValid = true;
+      document.querySelectorAll('.error').forEach(el => el.textContent = ''); // Clear previous errors
 
       const camposObrigatorios = [
         { id: 'operador', erro: 'operadorErro', msg: 'Preencha o Nome do Operador.' },
@@ -90,52 +119,19 @@
       camposObrigatorios.forEach(({ id, erro, msg }) => {
         const input = document.getElementById(id);
         const errorLabel = document.getElementById(erro);
-        if (input.value.trim() === '') {
+        if (!input.value || input.value.trim() === '') { // Check if null or empty after trimming
           errorLabel.textContent = msg;
           isValid = false;
-        } else {
-          errorLabel.textContent = '';
         }
       });
 
       if (isValid) {
+        // If editing, call update function, otherwise call save function
         formularioIdEmEdicao ? salvarEdicao() : salvarFormulario();
       }
     }
 
-    async function salvarFormulario() {
-      const user = auth.currentUser;
-      if (!user) return alert('Você precisa estar logado.');
-
-      const dados = coletarDados(user);
-      try {
-        await db.collection('formularios').add(dados);
-        alert('Formulário enviado!');
-        document.getElementById('formulario').reset();
-        preencherFormulario();
-        carregarHistorico();
-      } catch (error) {
-        alert('Erro ao salvar: ' + error.message);
-      }
-    }
-
-    async function salvarEdicao() {
-      const user = auth.currentUser;
-      if (!user || !formularioIdEmEdicao) return;
-
-      const dados = coletarDados(user);
-      try {
-        await db.collection('formularios').doc(formularioIdEmEdicao).update(dados);
-        alert('Formulário atualizado!');
-        document.getElementById('formulario').reset();
-        formularioIdEmEdicao = null;
-        preencherFormulario();
-        carregarHistorico();
-      } catch (error) {
-        alert('Erro ao editar: ' + error.message);
-      }
-    }
-
+    // Collect form data into an object
     function coletarDados(user) {
       return {
         descricao: document.getElementById('descricao').value,
@@ -146,23 +142,67 @@
         operador: document.getElementById('operador').value,
         ordem: document.getElementById('ordem').value,
         pt: document.getElementById('pt').value,
-        email: user.email,
-        userId: user.uid,
-        timestamp: new Date()
+        email: user.email, // Use authenticated user's email
+        userId: user.uid, // Store user ID for filtering history
+        timestamp: firebase.firestore.FieldValue.serverTimestamp() // Use server timestamp
       };
     }
 
+    // Save new form data to Firestore
+    async function salvarFormulario() {
+      const user = auth.currentUser;
+      if (!user) return alert('Você precisa estar logado para salvar.');
+
+      const dados = coletarDados(user);
+      try {
+        await db.collection('formularios').add(dados);
+        alert('Formulário enviado com sucesso!');
+        document.getElementById('formulario').reset(); // Reset form fields
+        formularioIdEmEdicao = null; // Ensure not in edit mode
+        preencherFormulario(); // Re-apply URL params if needed
+        carregarHistorico(); // Refresh history display
+      } catch (error) {
+        console.error("Erro ao salvar formulário: ", error);
+        alert('Erro ao salvar o formulário: ' + error.message);
+      }
+    }
+
+    // Update existing form data in Firestore
+    async function salvarEdicao() {
+      const user = auth.currentUser;
+      if (!user || !formularioIdEmEdicao) return alert('Erro: Usuário não logado ou formulário inválido para edição.');
+
+      const dados = coletarDados(user);
+      // We keep the original timestamp on edit, or update if needed
+      // delete dados.timestamp; // Remove timestamp if you don't want to update it on edit
+      dados.lastUpdated = firebase.firestore.FieldValue.serverTimestamp(); // Add a last updated field
+
+      try {
+        await db.collection('formularios').doc(formularioIdEmEdicao).update(dados);
+        alert('Formulário atualizado com sucesso!');
+        document.getElementById('formulario').reset();
+        formularioIdEmEdicao = null; // Exit edit mode
+        preencherFormulario();
+        carregarHistorico();
+      } catch (error) {
+        console.error("Erro ao atualizar formulário: ", error);
+        alert('Erro ao atualizar o formulário: ' + error.message);
+      }
+    }
+
+    // Load and display user's form history from Firestore
     async function carregarHistorico() {
       const user = auth.currentUser;
       if (!user) return;
 
       const historicoContainer = document.getElementById('historico');
-      historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
+      historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>'; // Clear previous history
+      const agora = new Date(); // Get current date/time for comparison
 
       try {
         const querySnapshot = await db.collection('formularios')
-          .where('userId', '==', user.uid)
-          .orderBy('timestamp', 'desc')
+          .where('userId', '==', user.uid) // Filter by logged-in user
+          .orderBy('timestamp', 'desc') // Show newest first
           .get();
 
         if (querySnapshot.empty) {
@@ -173,16 +213,53 @@
         querySnapshot.forEach((doc) => {
           const f = doc.data();
           const registro = document.createElement('div');
-          registro.className = 'registro';
+          registro.className = 'registro'; // Base class
+
+          // MODIFICATION: Add classes based on conditions
+          // 1. Yellow border if 'fimReal' is empty
+          if (!f.fimReal || f.fimReal.trim() === '') {
+            registro.classList.add('registro-pendente');
+          }
+
+          // 2. Red border if 'fimPrevisto' is in the past
+          if (f.fimPrevisto) {
+            try {
+              // Firestore timestamp might be null or a Timestamp object
+              let fimPrevistoDate = null;
+              if (typeof f.fimPrevisto === 'string' && f.fimPrevisto.includes('T')) {
+                 // Handle datetime-local string format
+                 fimPrevistoDate = new Date(f.fimPrevisto);
+              } else if (f.fimPrevisto.toDate) {
+                 // Handle Firestore Timestamp object
+                 fimPrevistoDate = f.fimPrevisto.toDate();
+              }
+
+              // Check if the date is valid and in the past
+              if (fimPrevistoDate && !isNaN(fimPrevistoDate.getTime()) && fimPrevistoDate < agora) {
+                registro.classList.add('registro-atrasado');
+              }
+            } catch (e) {
+              console.warn("Could not parse fimPrevisto date: ", f.fimPrevisto, e);
+            }
+          }
+
+          // Format timestamp for display (optional)
+          let timestampStr = '-';
+          if (f.timestamp && f.timestamp.toDate) {
+            timestampStr = f.timestamp.toDate().toLocaleString('pt-BR');
+          }
+
+          // Populate the history entry element
           registro.innerHTML = `
-            <p><strong>Descrição:</strong> ${f.descricao}</p>
-            <p><strong>Início Previsto:</strong> ${f.inicioPrevisto}</p>
-            <p><strong>Término Previsto:</strong> ${f.fimPrevisto}</p>
+            <p><strong>Descrição:</strong> ${f.descricao || '-'}</p>
+            <p><strong>Início Previsto:</strong> ${f.inicioPrevisto || '-'}</p>
+            <p><strong>Término Previsto:</strong> ${f.fimPrevisto || '-'}</p>
             <p><strong>Início Real:</strong> ${f.inicioReal || '-'}</p>
             <p><strong>Término Real:</strong> ${f.fimReal || '-'}</p>
-            <p><strong>Operador:</strong> ${f.operador}</p>
-            <p><strong>OS:</strong> ${f.ordem}</p>
-            <p><strong>PT:</strong> ${f.pt}</p>
+            <p><strong>Operador:</strong> ${f.operador || '-'}</p>
+            <p><strong>OS:</strong> ${f.ordem || '-'}</p>
+            <p><strong>PT:</strong> ${f.pt || '-'}</p>
+            <p><small>Enviado/Atualizado: ${timestampStr}</small></p>
             <div class="registro-actions">
               <button onclick="editarFormulario('${doc.id}')">Editar</button>
               <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
@@ -191,54 +268,90 @@
           historicoContainer.appendChild(registro);
         });
       } catch (error) {
-        historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
+        console.error("Erro ao carregar histórico: ", error);
+        historicoContainer.innerHTML += '<p style="color:red;">Erro ao carregar o histórico.</p>';
       }
     }
 
+    // Load data of a specific form entry for editing
     async function editarFormulario(id) {
       try {
-        const doc = await db.collection('formularios').doc(id).get();
-        if (!doc.exists) return alert('Registro não encontrado.');
+        const docRef = db.collection('formularios').doc(id);
+        const docSnap = await docRef.get();
 
-        const f = doc.data();
-        formularioIdEmEdicao = id;
-        document.getElementById('descricao').value = f.descricao;
-        document.getElementById('inicioPrevisto').value = f.inicioPrevisto;
-        document.getElementById('fimPrevisto').value = f.fimPrevisto;
+        if (!docSnap.exists) {
+          return alert('Erro: Registro não encontrado para edição.');
+        }
+
+        const f = docSnap.data();
+        formularioIdEmEdicao = id; // Set edit mode
+
+        // Populate form fields with data from the selected entry
+        document.getElementById('descricao').value = f.descricao || '';
+        document.getElementById('inicioPrevisto').value = f.inicioPrevisto || '';
+        document.getElementById('fimPrevisto').value = f.fimPrevisto || '';
         document.getElementById('inicioReal').value = f.inicioReal || '';
         document.getElementById('fimReal').value = f.fimReal || '';
-        document.getElementById('operador').value = f.operador;
-        document.getElementById('ordem').value = f.ordem;
-        document.getElementById('pt').value = f.pt;
+        document.getElementById('operador').value = f.operador || '';
+        document.getElementById('ordem').value = f.ordem || '';
+        document.getElementById('pt').value = f.pt || '';
+        // Email is already set from logged-in user
+
+        // Scroll to the form for better UX
+        document.getElementById('formulario').scrollIntoView({ behavior: 'smooth' });
+
       } catch (error) {
-        alert('Erro ao carregar para edição.');
+        console.error("Erro ao carregar para edição: ", error);
+        alert('Erro ao carregar dados para edição.');
+        formularioIdEmEdicao = null; // Reset edit mode on error
       }
     }
 
+    // Delete a specific form entry from Firestore
     async function excluirFormulario(id) {
-      if (!confirm('Tem certeza que deseja excluir?')) return;
+      if (!confirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.')) {
+        return; // User cancelled
+      }
+
       try {
         await db.collection('formularios').doc(id).delete();
-        alert('Excluído com sucesso!');
-        carregarHistorico();
+        alert('Registro excluído com sucesso!');
+        // If the deleted item was being edited, reset the form
+        if (formularioIdEmEdicao === id) {
+            document.getElementById('formulario').reset();
+            formularioIdEmEdicao = null;
+            preencherFormulario(); // Re-apply URL params
+        }
+        carregarHistorico(); // Refresh history
       } catch (error) {
-        alert('Erro ao excluir: ' + error.message);
+        console.error("Erro ao excluir: ", error);
+        alert('Erro ao excluir o registro: ' + error.message);
       }
     }
+
+    // Initial setup on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      // The auth listener handles initial loading, but we can prefill here too
+      // if needed before auth state is confirmed.
+      // preencherFormulario();
+    });
+
   </script>
 </head>
 <body>
+
   <div id="login">
     <h2>Login Necessário</h2>
-    <p>Faça login com sua conta Gmail.</p>
-    <button onclick="login()">Entrar com Gmail</button>
+    <p>Para acessar o formulário e seu histórico, por favor, faça login com sua conta Google.</p>
+    <button onclick="login()">Entrar com Google</button>
   </div>
 
   <div id="form-container">
     <h1>Formulário da Atividade</h1>
     <form id="formulario" onsubmit="validarFormulario(event)">
+
       <label for="descricao">Descrição da Atividade:</label>
-      <textarea id="descricao" class="readonly" readonly></textarea>
+      <textarea id="descricao" class="readonly" readonly rows="3"></textarea>
 
       <label for="inicioPrevisto">Início Previsto:</label>
       <input type="datetime-local" id="inicioPrevisto" class="readonly" readonly>
@@ -246,33 +359,27 @@
       <label for="fimPrevisto">Término Previsto:</label>
       <input type="datetime-local" id="fimPrevisto" class="readonly" readonly>
 
+      <hr style="margin: 20px 0;">
+
       <label for="inicioReal">Início Real:</label>
       <input type="datetime-local" id="inicioReal" required>
       <p id="inicioRealErro" class="error"></p>
 
       <label for="fimReal">Término Real:</label>
       <input type="datetime-local" id="fimReal">
+      <p id="fimRealErro" class="error"></p> <!-- Added error placeholder if needed -->
 
-      <label for="email">Email do Operador:</label>
+      <label for="email">Email do Operador (Logado):</label>
       <input type="email" id="email" class="readonly" readonly>
 
       <label for="operador">Nome do Operador Liberador:</label>
       <input type="text" id="operador" required>
       <p id="operadorErro" class="error"></p>
 
-      <label for="ordem">Número da Ordem de Serviço:</label>
+      <label for="ordem">Número da Ordem de Serviço (OS):</label>
       <input type="text" id="ordem" required>
       <p id="ordemErro" class="error"></p>
 
-      <label for="pt">Número da PT:</label>
-      <input type="text" id="pt" required>
-      <p id="ptErro" class="error"></p>
-
-      <button type="submit">Salvar</button>
-      <button type="button" onclick="logout()">Sair</button>
-    </form>
-
-    <div id="historico"></div>
-  </div>
-</body>
-</html>
+      <label for="pt">Número da Permissão de Trabalho (PT):</label>
+      <input type="
+(Content truncated due to size limit. Use line ranges to read in chunks)
