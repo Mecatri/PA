@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulário da Atividade com Modificação</title>
+  <title>Formulário da Atividade com QR Code</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
     label { display: block; margin-top: 10px; }
@@ -79,23 +79,11 @@
       });
     }
 
-    // Função para obter parâmetros da URL
-    function getQueryParams() {
-      const params = new URLSearchParams(window.location.search);
-      return {
-        descricao: params.get('descricao'),
-        inicio: params.get('inicio'),
-        fim: params.get('fim')
-      };
-    }
-
-    // Função para preencher o formulário com os parâmetros da URL
-    function preencherFormulario() {
-      const { descricao, inicio, fim } = getQueryParams();
-
-      if (descricao) document.getElementById('descricao').value = descricao;
-      if (inicio) document.getElementById('inicio').value = inicio;
-      if (fim) document.getElementById('fim').value = fim;
+    // Função para preencher o formulário com os parâmetros da URL ou QR Code
+    function preencherFormularioComQRCode(data) {
+      if (data.descricao) document.getElementById('descricao').value = data.descricao;
+      if (data.inicioPrevisto) document.getElementById('inicioPrevisto').value = data.inicioPrevisto;
+      if (data.fimPrevisto) document.getElementById('fimPrevisto').value = data.fimPrevisto;
     }
 
     // Função para validar os campos
@@ -104,37 +92,17 @@
 
       let isValid = true;
 
-      // Validação do campo "Nome do Operador Liberador"
-      const operador = document.getElementById('operador');
-      const operadorErro = document.getElementById('operadorErro');
-      if (operador.value.trim() === '') {
-        operadorErro.textContent = 'Por favor, preencha o Nome do Operador Liberador.';
+      // Validação do campo "Data e Hora de Início da Atividade"
+      const inicio = document.getElementById('inicio').value;
+      const inicioErro = document.getElementById('inicioErro');
+      if (!inicio) { // Campo obrigatório
+        inicioErro.textContent = 'Por favor, preencha a Data e Hora de Início da Atividade.';
         isValid = false;
       } else {
-        operadorErro.textContent = '';
+        inicioErro.textContent = '';
       }
 
-      // Validação do campo "Número da Ordem de Serviço"
-      const ordem = document.getElementById('ordem');
-      const ordemErro = document.getElementById('ordemErro');
-      if (ordem.value.trim() === '') {
-        ordemErro.textContent = 'Por favor, preencha o Número da Ordem de Serviço.';
-        isValid = false;
-      } else {
-        ordemErro.textContent = '';
-      }
-
-      // Validação do campo "Número da PT"
-      const pt = document.getElementById('pt');
-      const ptErro = document.getElementById('ptErro');
-      if (pt.value.trim() === '') {
-        ptErro.textContent = 'Por favor, preencha o Número da PT.';
-        isValid = false;
-      } else {
-        ptErro.textContent = '';
-      }
-
-      // Se todos os campos forem válidos
+      // Se todos os campos obrigatórios forem preenchidos
       if (isValid) {
         salvarFormulario();
       }
@@ -150,6 +118,8 @@
 
       const formulario = {
         descricao: document.getElementById('descricao').value,
+        inicioPrevisto: document.getElementById('inicioPrevisto').value,
+        fimPrevisto: document.getElementById('fimPrevisto').value,
         inicio: document.getElementById('inicio').value,
         fim: document.getElementById('fim').value,
         operador: document.getElementById('operador').value,
@@ -199,16 +169,14 @@
           registro.className = 'registro';
           registro.innerHTML = `
             <p><strong>Descrição:</strong> ${formulario.descricao}</p>
-            <p><strong>Início:</strong> ${new Date(formulario.inicio).toLocaleString()}</p>
-            <p><strong>Término:</strong> ${new Date(formulario.fim).toLocaleString()}</p>
+            <p><strong>Início Previsto:</strong> ${formulario.inicioPrevisto || 'Não informado'}</p>
+            <p><strong>Término Previsto:</strong> ${formulario.fimPrevisto || 'Não informado'}</p>
+            <p><strong>Início:</strong> ${formulario.inicio || 'Não informado'}</p>
+            <p><strong>Término:</strong> ${formulario.fim || 'Não informado'}</p>
             <p><strong>Email:</strong> ${formulario.email}</p>
             <p><strong>Operador:</strong> ${formulario.operador}</p>
             <p><strong>OS:</strong> ${formulario.ordem}</p>
             <p><strong>PT:</strong> ${formulario.pt}</p>
-            <div class="registro-actions">
-              <button onclick="editarFormulario('${doc.id}')">Editar</button>
-              <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
-            </div>
           `;
           historicoContainer.appendChild(registro);
         });
@@ -218,48 +186,16 @@
       }
     }
 
-    // Função para editar um formulário
-    async function editarFormulario(formularioId) {
-      const novoOperador = prompt('Informe o novo nome do operador:');
-      const novaOrdem = prompt('Informe o novo número da ordem de serviço:');
-      const novaPT = prompt('Informe o novo número da PT:');
-
-      if (!novoOperador || !novaOrdem || !novaPT) {
-        alert('Todos os campos devem ser preenchidos.');
-        return;
-      }
-
-      try {
-        await db.collection('formularios').doc(formularioId).update({
-          operador: novoOperador,
-          ordem: novaOrdem,
-          pt: novaPT,
-        });
-        alert('Formulário atualizado com sucesso!');
-        carregarHistorico(); // Atualiza o histórico
-      } catch (error) {
-        console.error('Erro ao editar o formulário:', error.message);
-        alert('Erro ao editar o formulário: ' + error.message);
-      }
-    }
-
-    // Função para excluir um formulário
-    async function excluirFormulario(formularioId) {
-      const confirmar = confirm('Tem certeza de que deseja excluir este formulário?');
-      if (!confirmar) return;
-
-      try {
-        await db.collection('formularios').doc(formularioId).delete();
-        alert('Formulário excluído com sucesso!');
-        carregarHistorico(); // Atualiza o histórico
-      } catch (error) {
-        console.error('Erro ao excluir o formulário:', error.message);
-        alert('Erro ao excluir o formulário: ' + error.message);
-      }
-    }
-
     // Executa ao carregar a página
-    window.onload = preencherFormulario;
+    window.onload = () => {
+      // Simulação de leitura de QR Code (você pode integrar aqui a funcionalidade de leitura de QR Code real)
+      const qrCodeData = {
+        descricao: "Atividade Exemplo",
+        inicioPrevisto: "2025-05-04T08:00",
+        fimPrevisto: "2025-05-04T12:00"
+      };
+      preencherFormularioComQRCode(qrCodeData);
+    };
   </script>
 </head>
 <body>
@@ -276,17 +212,23 @@
       <label for="descricao">Descrição da Atividade:</label>
       <textarea id="descricao" name="descricao" class="readonly" readonly></textarea>
 
-      <label for="inicio">Data e Hora de Início:</label>
-      <input type="datetime-local" id="inicio" name="inicio" class="readonly" readonly>
+      <label for="inicioPrevisto">Data e Hora de Início Prevista:</label>
+      <input type="datetime-local" id="inicioPrevisto" name="inicioPrevisto" class="readonly" readonly>
 
-      <label for="fim">Data e Hora de Término:</label>
-      <input type="datetime-local" id="fim" name="fim" class="readonly" readonly>
+      <label for="fimPrevisto">Data e Hora de Término Prevista:</label>
+      <input type="datetime-local" id="fimPrevisto" name="fimPrevisto" class="readonly" readonly>
 
-      <!-- Campo de email -->
+      <!-- Campos a serem preenchidos pelo operador -->
+      <label for="inicio">Data e Hora de Início da Atividade:</label>
+      <input type="datetime-local" id="inicio" name="inicio" required>
+      <p id="inicioErro" class="error"></p>
+
+      <label for="fim">Data e Hora de Término da Atividade (opcional):</label>
+      <input type="datetime-local" id="fim" name="fim">
+
       <label for="email">Email do Operador:</label>
       <input type="email" id="email" name="email" class="readonly" readonly>
 
-      <!-- Campos a serem preenchidos pelo operador -->
       <label for="operador">Nome do Operador Liberador:</label>
       <input type="text" id="operador" name="operador" required>
       <p id="operadorErro" class="error"></p>
