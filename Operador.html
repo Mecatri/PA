@@ -3,9 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Olá</title>
+  <title>Formulário da Atividade</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 15px; padding: 10px 15px; }
+    .readonly { background-color: #f0f0f0; }
+  </style>
+  <script>
+    // Função para obter parâmetros da URL
+    function getQueryParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        descricao: params.get('descricao'),
+        inicio: params.get('inicio'),
+        fim: params.get('fim')
+      };
+    }
+
+    // Função para preencher o formulário com os parâmetros da URL
+    function preencherFormulario() {
+      const { descricao, inicio, fim } = getQueryParams();
+
+      if (descricao) document.getElementById('descricao').value = descricao;
+      if (inicio) document.getElementById('inicio').value = inicio;
+      if (fim) document.getElementById('fim').value = fim;
+    }
+
+    // Executa ao carregar a página
+    window.onload = preencherFormulario;
+  </script>
 </head>
 <body>
-  <h1>Olá</h1>
+  <h1>Formulário da Atividade</h1>
+  <form action="#" method="post">
+    <!-- Campos pré-preenchidos -->
+    <label for="descricao">Descrição da Atividade:</label>
+    <textarea id="descricao" name="descricao" class="readonly" readonly></textarea>
+
+    <label for="inicio">Data e Hora de Início:</label>
+    <input type="datetime-local" id="inicio" name="inicio" class="readonly" readonly>
+
+    <label for="fim">Data e Hora de Término:</label>
+    <input type="datetime-local" id="fim" name="fim" class="readonly" readonly>
+
+    <!-- Campos a serem preenchidos pelo operador -->
+    <label for="operador">Nome do Operador Liberador:</label>
+    <input type="text" id="operador" name="operador" required>
+
+    <label for="ordem">Número da Ordem de Serviço:</label>
+    <input type="text" id="ordem" name="ordem" required>
+
+    <label for="pt">Número da PT:</label>
+    <input type="text" id="pt" name="pt" required>
+
+    <button type="submit">Enviar</button>
+  </form>
 </body>
 </html>
