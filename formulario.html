@@ -41,20 +41,20 @@
     let currentEditId = null; // Armazena o ID do formulário que está sendo editado
 
     // Função para simular a leitura de um QR Code
-    function simularLeituraQRCode() {
+    function lerQRCode() {
       // Dados simulados do QR Code
       const dadosQRCode = {
-        descricao: "Manutenção de Equipamento X",
-        inicioPrevisto: "2025-05-04T08:00",
-        fimPrevisto: "2025-05-04T12:00"
+        descricao: "Manutenção de Equipamento X", // Exemplo de descrição
+        inicioPrevisto: "2025-05-04T08:00", // Data de início prevista
+        fimPrevisto: "2025-05-04T12:00" // Data de término prevista
       };
 
-      // Preencher os campos automaticamente
-      preencherFormularioComQRCode(dadosQRCode);
+      // Preencher os campos automaticamente com os dados
+      preencherCamposComQRCode(dadosQRCode);
     }
 
-    // Preenche o formulário com os dados do QR Code
-    function preencherFormularioComQRCode(data) {
+    // Função para preencher os campos com os dados do QR Code
+    function preencherCamposComQRCode(data) {
       if (data.descricao) document.getElementById('descricao').value = data.descricao;
       if (data.inicioPrevisto) document.getElementById('inicioPrevisto').value = data.inicioPrevisto;
       if (data.fimPrevisto) document.getElementById('fimPrevisto').value = data.fimPrevisto;
@@ -73,7 +73,7 @@
         console.log('Usuário autenticado:', user.email);
 
         // Simular leitura do QR Code ao carregar a página
-        simularLeituraQRCode();
+        lerQRCode();
       } else {
         document.getElementById('login').style.display = 'block';
         document.getElementById('form-container').style.display = 'none';
@@ -155,7 +155,7 @@
         carregarHistorico(); // Atualiza o histórico após salvar
 
         // Simular leitura do QR Code novamente após envio
-        simularLeituraQRCode();
+        lerQRCode();
       } catch (error) {
         console.error('Erro ao salvar o formulário:', error.message);
         alert('Erro ao salvar o formulário: ' + error.message);
