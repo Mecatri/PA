@@ -19,6 +19,7 @@
     .atividade a { word-break: break-word; }
     .error { color: red; margin-top: 10px; }
     .success { color: green; margin-top: 10px; }
+    .delete-btn { background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer; }
     @media (max-width: 600px) {
       body { padding: 10px; }
       button { width: 100%; }
@@ -47,7 +48,6 @@
     <input type="datetime-local" id="fim">
 
     <button onclick="gerarQRCode()">Gerar QR Code</button>
-    <button onclick="limparHistorico()">Limpar Histórico</button>
 
     <div id="qrcode"></div>
     <p id="mensagem" class="error"></p>
@@ -69,7 +69,7 @@
       storageBucket: "pa-pg-a7abc.firebasestorage.app",
       messagingSenderId: "102164980919",
       appId: "1:102164980919:web:72220a8b2ed478a2cdd932",
-      clientId: "460190166657-18jbdvae4cemj3n38ivsnol1r975nkee.apps.googleusercontent.com" // Client ID atualizado
+      clientId: "460190166657-18jbdvae4cemj3n38ivsnol1r975nkee.apps.googleusercontent.com"
     };
 
     // Inicialize o Firebase
@@ -82,11 +82,7 @@
     // Função de login com Gmail
     function login() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      
-      // Configurar o Client ID explicitamente, se necessário
-      provider.setCustomParameters({
-        client_id: firebaseConfig.clientId
-      });
+      provider.setCustomParameters({ client_id: firebaseConfig.clientId });
 
       auth.signInWithPopup(provider)
         .then((result) => {
@@ -176,11 +172,10 @@
       try {
         const docRef = await db.collection("historico").add(atividade);
         console.log("Atividade salva no Firebase com ID:", docRef.id);
+        mostrarHistorico();
       } catch (error) {
         console.error("Erro ao salvar atividade:", error);
       }
-
-      mostrarHistorico();
     }
 
     // Função para mostrar histórico
@@ -209,6 +204,7 @@
             <strong>Início:</strong> ${new Date(atv.inicio).toLocaleString()}<br>
             <strong>Fim:</strong> ${new Date(atv.fim).toLocaleString()}<br>
             <a href="${atv.url}" target="_blank">Abrir Formulário</a>
+            <button class="delete-btn" onclick="excluirAtividade('${doc.id}')">Excluir</button>
           `;
           lista.appendChild(div);
         });
@@ -218,10 +214,15 @@
       }
     }
 
-    // Função para limpar histórico (apenas local)
-    function limparHistorico() {
-      if (confirm("Tem certeza de que deseja limpar o histórico local?")) {
-        document.getElementById("listaAtividades").innerHTML = "";
+    // Função para excluir uma atividade
+    async function excluirAtividade(docId) {
+      try {
+        await db.collection("historico").doc(docId).delete();
+        console.log("Atividade excluída com sucesso:", docId);
+        mostrarHistorico(); // Atualiza o histórico após exclusão
+      } catch (error) {
+        console.error("Erro ao excluir atividade:", error);
+        alert("Erro ao excluir atividade: " + error.message);
       }
     }
   </script>
