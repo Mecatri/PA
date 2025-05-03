@@ -204,7 +204,7 @@
             <strong>Início:</strong> ${new Date(atv.inicio).toLocaleString()}<br>
             <strong>Fim:</strong> ${new Date(atv.fim).toLocaleString()}<br>
             <a href="${atv.url}" target="_blank">Abrir Formulário</a>
-            <button class="delete-btn" onclick="excluirAtividade('${doc.id}')">Excluir</button>
+            <button class="delete-btn" onclick="confirmarExclusao('${doc.id}')">Excluir</button>
           `;
           lista.appendChild(div);
         });
@@ -214,15 +214,18 @@
       }
     }
 
-    // Função para excluir uma atividade
-    async function excluirAtividade(docId) {
-      try {
-        await db.collection("historico").doc(docId).delete();
-        console.log("Atividade excluída com sucesso:", docId);
-        mostrarHistorico(); // Atualiza o histórico após exclusão
-      } catch (error) {
-        console.error("Erro ao excluir atividade:", error);
-        alert("Erro ao excluir atividade: " + error.message);
+    // Função para confirmar e excluir uma atividade
+    async function confirmarExclusao(docId) {
+      const confirmar = confirm("Tem certeza de que deseja excluir esta atividade?");
+      if (confirmar) {
+        try {
+          await db.collection("historico").doc(docId).delete();
+          console.log("Atividade excluída com sucesso:", docId);
+          mostrarHistorico(); // Atualiza o histórico após exclusão
+        } catch (error) {
+          console.error("Erro ao excluir atividade:", error);
+          alert("Erro ao excluir atividade: " + error.message);
+        }
       }
     }
   </script>
