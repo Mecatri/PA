@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerador de QR Code - Atividades da Parada</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+  <!-- Scripts do Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
     label { display: block; margin-top: 10px; }
@@ -107,7 +108,6 @@
       const atividade = { descricao, inicio, fim, url };
 
       try {
-        // Salvar no Firestore
         const docRef = await db.collection("historico").add(atividade);
         console.log("Atividade salva no Firebase com ID:", docRef.id);
       } catch (error) {
@@ -115,9 +115,6 @@
       }
 
       mostrarHistorico();
-
-      mensagem.textContent = "QR Code gerado e salvo com sucesso!";
-      mensagem.className = "success";
     }
 
     // Função para mostrar histórico
