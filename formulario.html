@@ -17,6 +17,8 @@
     .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
     .registro-actions { margin-top: 10px; }
     .registro-actions button { margin-right: 10px; }
+    .pendente { border: 2px solid yellow !important; }
+    .atrasado { border: 2px solid red !important; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -170,10 +172,28 @@
           return;
         }
 
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0); // Define o horário para o início do dia para comparação de datas
+
         querySnapshot.forEach((doc) => {
           const f = doc.data();
           const registro = document.createElement('div');
           registro.className = 'registro';
+
+          // Verifica se o campo fimReal está vazio para aplicar a classe 'pendente'
+          if (!f.fimReal || f.fimReal.trim() === '') {
+            registro.classList.add('pendente');
+          }
+
+          // Verifica se a data de fimPrevisto é anterior ao dia atual para aplicar a classe 'atrasado'
+          if (f.fimPrevisto) {
+            const fimPrevistoDate = new Date(f.fimPrevisto);
+            fimPrevistoDate.setHours(0, 0, 0, 0); // Define o horário para o início do dia para comparação de datas
+            if (fimPrevistoDate < hoje) {
+              registro.classList.add('atrasado');
+            }
+          }
+
           registro.innerHTML = `
             <p><strong>Descrição:</strong> ${f.descricao}</p>
             <p><strong>Início Previsto:</strong> ${f.inicioPrevisto}</p>
@@ -275,4 +295,4 @@
     <div id="historico"></div>
   </div>
 </body>
-</html>  
+</html>
