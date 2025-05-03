@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulário da Atividade com QR Code</title>
+  <title>Formulário da Atividade com Edição</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
     label { display: block; margin-top: 10px; }
@@ -17,6 +17,7 @@
     .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
     .registro-actions { margin-top: 10px; }
     .registro-actions button { margin-right: 10px; }
+    #edit-form-container { display: none; margin-top: 30px; border: 1px solid #ccc; padding: 20px; border-radius: 5px; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -37,6 +38,8 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+
+    let currentEditId = null; // Armazena o ID do formulário que está sendo editado
 
     // Verificar estado de autenticação
     auth.onAuthStateChanged((user) => {
@@ -77,13 +80,6 @@
       }).catch((error) => {
         console.error('Erro ao sair:', error.message);
       });
-    }
-
-    // Função para preencher o formulário com os parâmetros da URL ou QR Code
-    function preencherFormularioComQRCode(data) {
-      if (data.descricao) document.getElementById('descricao').value = data.descricao;
-      if (data.inicioPrevisto) document.getElementById('inicioPrevisto').value = data.inicioPrevisto;
-      if (data.fimPrevisto) document.getElementById('fimPrevisto').value = data.fimPrevisto;
     }
 
     // Função para validar os campos
@@ -177,6 +173,9 @@
             <p><strong>Operador:</strong> ${formulario.operador}</p>
             <p><strong>OS:</strong> ${formulario.ordem}</p>
             <p><strong>PT:</strong> ${formulario.pt}</p>
+            <div class="registro-actions">
+              <button onclick="abrirFormularioParaEdicao('${doc.id}')">Editar</button>
+            </div>
           `;
           historicoContainer.appendChild(registro);
         });
@@ -186,16 +185,61 @@
       }
     }
 
-    // Executa ao carregar a página
-    window.onload = () => {
-      // Simulação de leitura de QR Code (você pode integrar aqui a funcionalidade de leitura de QR Code real)
-      const qrCodeData = {
-        descricao: "Atividade Exemplo",
-        inicioPrevisto: "2025-05-04T08:00",
-        fimPrevisto: "2025-05-04T12:00"
+    // Função para abrir o formulário para edição
+    async function abrirFormularioParaEdicao(formularioId) {
+      currentEditId = formularioId; // Armazena o ID do formulário que será editado
+      const editContainer = document.getElementById('edit-form-container');
+
+      try {
+        const doc = await db.collection('formularios').doc(formularioId).get();
+        if (!doc.exists) {
+          alert('O formulário não foi encontrado.');
+          return;
+        }
+
+        const formulario = doc.data();
+
+        // Preenche os campos do formulário de edição
+        document.getElementById('edit-inicio').value = formulario.inicio || '';
+        document.getElementById('edit-fim').value = formulario.fim || '';
+        document.getElementById('edit-operador').value = formulario.operador || '';
+        document.getElementById('edit-ordem').value = formulario.ordem || '';
+        document.getElementById('edit-pt').value = formulario.pt || '';
+
+        editContainer.style.display = 'block'; // Mostra o formulário de edição
+      } catch (error) {
+        console.error('Erro ao carregar o formulário para edição:', error.message);
+        alert('Erro ao carregar o formulário para edição.');
+      }
+    }
+
+    // Função para salvar as alterações do formulário
+    async function salvarAlteracoesFormulario() {
+      if (!currentEditId) {
+        alert('Nenhum formulário selecionado para edição.');
+        return;
+      }
+
+      const editContainer = document.getElementById('edit-form-container');
+
+      const formularioAtualizado = {
+        inicio: document.getElementById('edit-inicio').value,
+        fim: document.getElementById('edit-fim').value,
+        operador: document.getElementById('edit-operador').value,
+        ordem: document.getElementById('edit-ordem').value,
+        pt: document.getElementById('edit-pt').value
       };
-      preencherFormularioComQRCode(qrCodeData);
-    };
+
+      try {
+        await db.collection('formularios').doc(currentEditId).update(formularioAtualizado);
+        alert('Formulário atualizado com sucesso!');
+        editContainer.style.display = 'none'; // Esconde o formulário de edição
+        carregarHistorico(); // Atualiza o histórico
+      } catch (error) {
+        console.error('Erro ao salvar alterações no formulário:', error.message);
+        alert('Erro ao salvar alterações no formulário.');
+      }
+    }
   </script>
 </head>
 <body>
@@ -208,7 +252,7 @@
   <div id="form-container">
     <h1>Formulário da Atividade</h1>
     <form id="formulario" onsubmit="validarFormulario(event)">
-      <!-- Campos pré-preenchidos -->
+      <!-- Campos do formulário original -->
       <label for="descricao">Descrição da Atividade:</label>
       <textarea id="descricao" name="descricao" class="readonly" readonly></textarea>
 
@@ -218,7 +262,6 @@
       <label for="fimPrevisto">Data e Hora de Término Prevista:</label>
       <input type="datetime-local" id="fimPrevisto" name="fimPrevisto" class="readonly" readonly>
 
-      <!-- Campos a serem preenchidos pelo operador -->
       <label for="inicio">Data e Hora de Início da Atividade:</label>
       <input type="datetime-local" id="inicio" name="inicio" required>
       <p id="inicioErro" class="error"></p>
@@ -231,21 +274,40 @@
 
       <label for="operador">Nome do Operador Liberador:</label>
       <input type="text" id="operador" name="operador" required>
-      <p id="operadorErro" class="error"></p>
 
       <label for="ordem">Número da Ordem de Serviço:</label>
       <input type="text" id="ordem" name="ordem" required>
-      <p id="ordemErro" class="error"></p>
 
       <label for="pt">Número da PT:</label>
       <input type="text" id="pt" name="pt" required>
-      <p id="ptErro" class="error"></p>
 
       <button type="submit">Enviar</button>
       <button type="button" onclick="logout()">Sair</button>
     </form>
 
+    <!-- Histórico de formulários -->
     <div id="historico"></div>
+
+    <!-- Formulário de edição -->
+    <div id="edit-form-container">
+      <h3>Editar Formulário</h3>
+      <label for="edit-inicio">Data e Hora de Início da Atividade:</label>
+      <input type="datetime-local" id="edit-inicio" name="edit-inicio">
+
+      <label for="edit-fim">Data e Hora de Término da Atividade:</label>
+      <input type="datetime-local" id="edit-fim" name="edit-fim">
+
+      <label for="edit-operador">Nome do Operador Liberador:</label>
+      <input type="text" id="edit-operador" name="edit-operador">
+
+      <label for="edit-ordem">Número da Ordem de Serviço:</label>
+      <input type="text" id="edit-ordem" name="edit-ordem">
+
+      <label for="edit-pt">Número da PT:</label>
+      <input type="text" id="edit-pt" name="edit-pt">
+
+      <button onclick="salvarAlteracoesFormulario()">Salvar Alterações</button>
+    </div>
   </div>
 </body>
 </html>
