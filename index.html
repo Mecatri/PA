@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerador de QR Code - Atividades da Parada</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <!-- Scripts do Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
   <style>
@@ -60,9 +59,14 @@
       measurementId: "G-CZVR8YGQL7"
     };
 
-    // Inicializar Firebase
+    // Inicialize o Firebase
     const app = firebase.initializeApp(firebaseConfig);
+
+    // Inicialize o Firestore
     const db = firebase.firestore();
+
+    console.log("Firebase App:", app);
+    console.log("Firestore Database:", db);
 
     // Função para gerar QR Code
     async function gerarQRCode() {
@@ -122,17 +126,13 @@
       lista.innerHTML = ""; // Limpa a lista antes de carregar
 
       try {
-        // Recupera os dados do Firestore
         const querySnapshot = await db.collection("historico").get();
-
-        // Verifica se há documentos no Firestore
         if (querySnapshot.empty) {
           console.log("Nenhuma atividade encontrada no Firestore.");
           lista.innerHTML = "<p>Nenhuma atividade encontrada.</p>";
           return;
         }
 
-        // Adiciona cada atividade ao histórico
         querySnapshot.forEach((doc) => {
           const atv = doc.data();
           const div = document.createElement("div");
@@ -145,8 +145,6 @@
           `;
           lista.appendChild(div);
         });
-
-        console.log("Histórico carregado com sucesso!");
       } catch (error) {
         console.error("Erro ao carregar histórico:", error);
         lista.innerHTML = `<p class="error">Erro ao carregar histórico: ${error.message}</p>`;
