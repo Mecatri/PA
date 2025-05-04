@@ -1,75 +1,111 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <style>
-        body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-image: url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg'); /* Caminho da imagem */
-    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg'); /* Adiciona transparência diretamente na imagem */
-    background-size: cover;  /* Ajusta a imagem ao tamanho dela */
-    background-position: center; /* Centraliza a imagem */
-    background-repeat: no-repeat; /* Impede a repetição da imagem */
-    background-color: rgba(255, 255, 255, 0.5); /* Adiciona uma camada semitransparente branca sobre a imagem */
-    height: 100vh; /* Define que o fundo ocupe toda a altura da tela */
-    }
     <title>Formulário da Atividade com Modificação</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0; /* Alterado de auto para 0 */
+            margin: 0;
             padding: 20px;
-            display: flex; /* Adicionado para centralizar o conteúdo */
+            display: flex;
             flex-direction: column;
-            align-items: center; /* Centraliza horizontalmente */
+            align-items: center;
+            background-image: url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Adiciona esta linha */
+            background-repeat: no-repeat;
+            height: 100vh;
+            transition: opacity 0.3s ease;
         }
 
         #form-container {
             display: none;
-            width: 100%; /* Garante que ocupe a largura total do body */
-            max-width: 600px; /* Limita a largura máxima do formulário */
-            margin: 0 auto; /* Centraliza o formulário */
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        label { display: block; margin-top: 10px; }
-        input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-        button { margin-top: 15px; padding: 10px 15px; }
-        .error { color: red; font-size: 0.9em; margin-top: 5px; }
-        .readonly { background-color: #f0f0f0; }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 15px;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .readonly {
+            background-color: #f0f0f0;
+        }
+
         #login {
             text-align: center;
-            width: 100%; /* Garante que ocupe a largura total do body */
-            max-width: 400px; /* Limita a largura máxima do login */
-            margin: 0 auto; /* Centraliza o login */
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
         }
+
         #historico {
             margin-top: 30px;
-            width: 100%; /* Garante que ocupe a largura total */
-            max-width: 600px; /* Limita a largura do histórico */
-            margin: 0 auto; /* Centraliza o histórico */
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-        .registro-actions { margin-top: 10px; }
-        .registro-actions button { margin-right: 10px; }
-        .pendente { border: 2px solid yellow !important; }
-        .atrasado { border: 2px solid red !important; }
-        .admin-actions button { background-color: #007bff; color: white; }
+
+        .registro {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .registro-actions {
+            margin-top: 10px;
+        }
+
+        .registro-actions button {
+            margin-right: 10px;
+        }
+
+        .pendente {
+            border: 2px solid yellow !important;
+        }
+
+        .atrasado {
+            border: 2px solid red !important;
+        }
+
+        .admin-actions button {
+            background-color: #007bff;
+            color: white;
+        }
+
         #graficos-container {
             margin-top: 30px;
             display: flex;
             justify-content: center;
-            width: 100%; /* Garante que ocupe a largura total */
+            width: 100%;
         }
+
         #statusAtividadesChart {
             width: 100%;
-            max-width: 800px; /* Limita a largura do gráfico */
+            max-width: 800px;
             height: 400px !important;
             margin: 0 auto;
         }
@@ -77,15 +113,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
-            authDomain: "pa-pg-a7abc.firebaseapp.com",
-            projectId: "pa-pg-a7abc",
-            storageBucket: "pa-pg-a7abc.appspot.com",
-            messagingSenderId: "102164980919",
-            appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
+            apiKey: "YOUR_API_KEY", // Replace with your actual API key
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // Replace with your project ID
+            projectId: "YOUR_PROJECT_ID",                 // Replace with your project ID
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",  // Replace with your project ID
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",  // Replace with your sender ID
+            appId: "YOUR_APP_ID"                      // Replace with your app ID
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -108,7 +144,7 @@
             } else {
                 document.getElementById('login').style.display = 'block';
                 document.getElementById('form-container').style.display = 'none';
-                 isAdmin = false;
+                isAdmin = false;
             }
         });
 
@@ -127,7 +163,7 @@
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     console.log('Usuário logado com e-mail:', userCredential.user);
-                     errorLabel.textContent = '';
+                    errorLabel.textContent = '';
                 })
                 .catch((error) => {
                     console.error('Erro ao fazer login com e-mail:', error.code, error.message);
@@ -138,7 +174,7 @@
         function cadastrarNovoUsuario() {
             const email = document.getElementById('emailCadastro').value;
             const password = document.getElementById('passwordCadastro').value;
-             const errorLabel = document.getElementById('cadastroEmailErro');
+            const errorLabel = document.getElementById('cadastroEmailErro');
 
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
@@ -274,7 +310,7 @@
                 const todosFormularios = [];
                 querySnapshot.forEach((doc) => {
                     const f = doc.data();
-                     todosFormularios.push(f);
+                    todosFormularios.push(f);
                     const registro = document.createElement('div');
                     registro.className = 'registro';
 
@@ -282,7 +318,7 @@
                         registro.classList.add('pendente');
                     }
 
-                     if (f.fimPrevisto) {
+                    if (f.fimPrevisto) {
                         const fimPrevistoDate = new Date(f.fimPrevisto);
                         fimPrevistoDate.setHours(0, 0, 0, 0);
                         if (fimPrevistoDate < hoje) {
@@ -298,7 +334,7 @@
                     `;
 
                     if (isAdmin) {
-                         actionsHTML = `
+                        actionsHTML = `
                             <div class="registro-actions admin-actions">
                                 <button onclick="editarFormulario('${doc.id}')">Editar</button>
                                 <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
@@ -381,7 +417,7 @@
                     document.getElementById('ordem').value = data.ordem || '';
                     document.getElementById('pt').value = data.pt || '';
 
-                     // Remove a classe readonly dos campos ao carregar para edição
+                    // Remove a classe readonly dos campos ao carregar para edição
                     document.getElementById('descricao').classList.remove('readonly');
                     document.getElementById('inicioPrevisto').classList.remove('readonly');
                     document.getElementById('fimPrevisto').classList.remove('readonly');
@@ -437,7 +473,7 @@
 
         <button onclick="login()">Entrar com Gmail</button>
 
-         <div>
+        <div>
             <h3>Cadastrar Novo Usuário</h3>
             <label for="emailCadastro">E-mail:</label>
             <input type="email" id="emailCadastro" />
