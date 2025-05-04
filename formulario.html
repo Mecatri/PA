@@ -5,7 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Formulário da Atividade com Modificação</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-image: url('https://ldcelulose.com.br/wp-content/themes/ld/assets/images/logo.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-blend-mode: overlay;
+            background-color: rgba(255, 255, 255, 0.1); /* Ajuste o valor alfa para controlar a transparência */
+        }
         label { display: block; margin-top: 10px; }
         input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
         button { margin-top: 15px; padding: 10px 15px; }
@@ -372,82 +382,82 @@
         }
     </script>
 </head>
-<body>
-    <div id="login">
-        <h2>Login Necessário</h2>
-        <p>Faça login com sua conta Gmail ou e-mail.</p>
+<body style="background-image: url('https://ldcelulose.com.br/wp-content/themes/ld/assets/images/logo.png'); background-repeat: no-repeat; background-size: cover; background-blend-mode: overlay; background-color: rgba(255, 255, 255, 0.1);">
+        <div id="login">
+            <h2>Login Necessário</h2>
+            <p>Faça login com sua conta Gmail ou e-mail.</p>
 
-        <div>
-            <h3>Entrar com E-mail</h3>
-            <label for="emailLogin">E-mail:</label>
-            <input type="email" id="emailLogin" />
-            <label for="passwordLogin">Senha:</label>
-            <input type="password" id="passwordLogin" />
-            <button onclick="loginComEmail()">Entrar</button>
-            <p id="loginEmailErro" class="error"></p>
+            <div>
+                <h3>Entrar com E-mail</h3>
+                <label for="emailLogin">E-mail:</label>
+                <input type="email" id="emailLogin" />
+                <label for="passwordLogin">Senha:</label>
+                <input type="password" id="passwordLogin" />
+                <button onclick="loginComEmail()">Entrar</button>
+                <p id="loginEmailErro" class="error"></p>
+            </div>
+
+            <hr>
+
+            <p>Ou</p>
+
+            <button onclick="login()">Entrar com Gmail</button>
+
+            <div>
+                <h3>Cadastrar Novo Usuário</h3>
+                <label for="emailCadastro">E-mail:</label>
+                <input type="email" id="emailCadastro" />
+                <label for="passwordCadastro">Senha:</label>
+                <input type="password" id="passwordCadastro" />
+                <button onclick="cadastrarNovoUsuario()">Cadastrar</button>
+                <p id="cadastroEmailErro" class="error"></p>
+            </div>
         </div>
 
-        <hr>
+        <div id="form-container" style="display: none;">
+            <h1>Formulário da Atividade</h1>
+            <form id="formulario" onsubmit="validarFormulario(event)">
+                <label for="descricao">Descrição da Atividade:</label>
+                <textarea id="descricao" class="readonly" readonly></textarea>
 
-        <p>Ou</p>
+                <label for="inicioPrevisto">Início Previsto:</label>
+                <input type="datetime-local" id="inicioPrevisto" class="readonly" readonly>
 
-        <button onclick="login()">Entrar com Gmail</button>
+                <label for="fimPrevisto">Término Previsto:</label>
+                <input type="datetime-local" id="fimPrevisto" class="readonly" readonly>
 
-        <div>
-            <h3>Cadastrar Novo Usuário</h3>
-            <label for="emailCadastro">E-mail:</label>
-            <input type="email" id="emailCadastro" />
-            <label for="passwordCadastro">Senha:</label>
-            <input type="password" id="passwordCadastro" />
-            <button onclick="cadastrarNovoUsuario()">Cadastrar</button>
-            <p id="cadastroEmailErro" class="error"></p>
+                <label for="inicioReal">Início Real:</label>
+                <input type="datetime-local" id="inicioReal" required>
+                <p id="inicioRealErro" class="error"></p>
+
+                <label for="fimReal">Término Real:</label>
+                <input type="datetime-local" id="fimReal">
+
+                <label for="email">Email do Operador:</label>
+                <input type="email" id="email" class="readonly" readonly>
+
+                <label for="operador">Nome do Operador Liberador:</label>
+                <input type="text" id="operador" required>
+                <p id="operadorErro" class="error"></p>
+
+                <label for="ordem">Número da Ordem de Serviço:</label>
+                <input type="text" id="ordem" required>
+                <p id="ordemErro" class="error"></p>
+
+                <label for="pt">Número da PT:</label>
+                <input type="text" id="pt" required>
+                <p id="ptErro" class="error"></p>
+
+                <button type="submit">Salvar</button>
+                <button type="button" onclick="logout()">Sair</button>
+            </form>
+
+            <div id="graficos-container" style="margin-top: 30px;">
+                <h3>Status das Atividades</h3>
+                <canvas id="statusAtividadesChart" width="400" height="300"></canvas>
+            </div>
+
+            <div id="historico"></div>
         </div>
-    </div>
-
-    <div id="form-container" style="display: none;">
-        <h1>Formulário da Atividade</h1>
-        <form id="formulario" onsubmit="validarFormulario(event)">
-            <label for="descricao">Descrição da Atividade:</label>
-            <textarea id="descricao" class="readonly" readonly></textarea>
-
-            <label for="inicioPrevisto">Início Previsto:</label>
-            <input type="datetime-local" id="inicioPrevisto" class="readonly" readonly>
-
-            <label for="fimPrevisto">Término Previsto:</label>
-            <input type="datetime-local" id="fimPrevisto" class="readonly" readonly>
-
-            <label for="inicioReal">Início Real:</label>
-            <input type="datetime-local" id="inicioReal" required>
-            <p id="inicioRealErro" class="error"></p>
-
-            <label for="fimReal">Término Real:</label>
-            <input type="datetime-local" id="fimReal">
-
-            <label for="email">Email do Operador:</label>
-            <input type="email" id="email" class="readonly" readonly>
-
-            <label for="operador">Nome do Operador Liberador:</label>
-            <input type="text" id="operador" required>
-            <p id="operadorErro" class="error"></p>
-
-            <label for="ordem">Número da Ordem de Serviço:</label>
-            <input type="text" id="ordem" required>
-            <p id="ordemErro" class="error"></p>
-
-            <label for="pt">Número da PT:</label>
-            <input type="text" id="pt" required>
-            <p id="ptErro" class="error"></p>
-
-            <button type="submit">Salvar</button>
-            <button type="button" onclick="logout()">Sair</button>
-        </form>
-
-        <div id="graficos-container" style="margin-top: 30px;">
-            <h3>Status das Atividades</h3>
-            <canvas id="statusAtividadesChart" width="400" height="300"></canvas>
-        </div>
-
-        <div id="historico"></div>
-    </div>
-</body>
+    </body>
 </html>
