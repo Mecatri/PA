@@ -22,12 +22,12 @@
         .admin-actions button { background-color: #007bff; color: white; }
         #graficos-container {
             margin-top: 30px;
-            display: flex; /* Adiciona flexbox para centralizar o conteúdo */
-            justify-content: center; /* Centraliza horizontalmente */
+            display: flex;
+            justify-content: center;
         }
         #statusAtividadesChart {
-            width: 800px !important; /* Reduz a largura do gráfico */
-            height: 400px !important; /* Reduz a altura do gráfico */
+            width: 800px !important;
+            height: 400px !important;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -227,10 +227,10 @@
                 const hoje = new Date();
                 hoje.setHours(0, 0, 0, 0);
 
-                const todosFormularios = []; // Array para armazenar todos os formulários
+                const todosFormularios = [];
                 querySnapshot.forEach((doc) => {
                     const f = doc.data();
-                    todosFormularios.push(f); // Adiciona o formulário ao array
+                    todosFormularios.push(f);
                     const registro = document.createElement('div');
                     registro.className = 'registro';
 
@@ -277,22 +277,20 @@
                     historicoContainer.appendChild(registro);
                 });
 
-                // Contar atividades pendentes e concluídas usando o array 'todosFormularios'
                 const atividadesPendentes = todosFormularios.filter(f => !f.fimReal || f.fimReal.trim() === '').length;
                 const atividadesConcluidas = todosFormularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
 
-                // Criar o gráfico de status usando Chart.js
                 const statusCtx = document.getElementById('statusAtividadesChart').getContext('2d');
                 const statusChart = new Chart(statusCtx, {
-                    type: 'pie', // Gráfico de pizza
+                    type: 'pie',
                     data: {
                         labels: ['Pendentes', 'Concluídas'],
                         datasets: [{
                             label: 'Status das Atividades',
                             data: [atividadesPendentes, atividadesConcluidas],
                             backgroundColor: [
-                                'rgba(255, 206, 86, 0.8)', // Amarelo para pendente
-                                'rgba(75, 192, 192, 0.8)'  // Verde para concluída
+                                'rgba(255, 206, 86, 0.8)',
+                                'rgba(75, 192, 192, 0.8)'
                             ],
                             borderColor: [
                                 'rgba(255, 206, 86, 1)',
@@ -302,15 +300,15 @@
                         }]
                     },
                     options: {
-                        responsive: false, // Desabilita a responsividade para manter o tamanho fixo
-                        maintainAspectRatio: false, // Permite definir width e height no canvas
+                        responsive: false,
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                position: 'bottom', // Legenda abaixo do gráfico
+                                position: 'bottom',
                             },
                             title: {
                                 display: true,
-                                text: 'Status das Atividades', // Título do gráfico
+                                text: 'Status das Atividades',
                                 font: {
                                     size: 16
                                 }
@@ -338,6 +336,17 @@
                     document.getElementById('operador').value = data.operador || '';
                     document.getElementById('ordem').value = data.ordem || '';
                     document.getElementById('pt').value = data.pt || '';
+
+                    // Remova a classe readonly dos campos ao carregar para edição
+                    document.getElementById('descricao').classList.remove('readonly');
+                    document.getElementById('inicioPrevisto').classList.remove('readonly');
+                    document.getElementById('fimPrevisto').classList.remove('readonly');
+                    document.getElementById('inicioReal').classList.remove('readonly');
+                    document.getElementById('fimReal').classList.remove('readonly');
+                    document.getElementById('operador').classList.remove('readonly');
+                    document.getElementById('ordem').classList.remove('readonly');
+                    document.getElementById('pt').classList.remove('readonly');
+
                 } else {
                     alert('Formulário não encontrado.');
                 }
