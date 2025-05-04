@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Formulário da Atividade com Modificação</title>
     <style>
-        body {
+        body, #login { /* Aplica o estilo ao body e ao #login */
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            /* Removido o background-image para adicionar via tag img */
+            background-image: url('DSC4511_-1-1536x1024.jpg'); /* Insira o URL da sua imagem aqui */
             background-repeat: no-repeat;
             background-size: cover;
             background-position: center;
@@ -83,7 +83,6 @@
             margin-bottom: 20px;
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
-            padding: 20px;
         }
         #statusAtividadesChart {
             width: 100%;
@@ -465,7 +464,6 @@
     </div>
 
     <div id="form-container" style="display: none;">
-        <img src="" id="background-image" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
         <h1>Formulário da Atividade</h1>
         <form id="formulario" onsubmit="validarFormulario(event)">
             <label for="descricao">Descrição da Atividade:</label>
@@ -510,77 +508,5 @@
 
         <div id="historico"></div>
     </div>
-    <script>
-        // Este script está dentro do body para garantir que o DOM esteja carregado
-        const backgroundImage = document.getElementById('background-image');
-        const body = document.querySelector('body');
-
-        function setBackgroundImage(imageUrl) {
-            backgroundImage.src = imageUrl;
-            // Aplica os estilos diretamente ao body para manter o comportamento do background
-            body.style.backgroundImage = `url('${imageUrl}')`;
-            body.style.backgroundRepeat = 'no-repeat';
-            body.style.backgroundSize = 'cover';
-            body.style.backgroundPosition = 'center';
-            body.style.backgroundBlendMode = 'overlay';
-            body.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-        }
-
-        // Substitua 'URL_DA_SUA_IMAGEM.jpg' pelo caminho da sua imagem
-        const imagePath = 'URL_DA_SUA_IMAGEM.jpg';  // Caminho do arquivo da imagem
-        setBackgroundImage(imagePath); // Chama a função para definir a imagem de fundo
-
-
-        // Restante do seu código JavaScript (Firebase, etc.)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
-            authDomain: "pa-pg-a7abc.firebaseapp.com",
-            projectId: "pa-pg-a7abc",
-            storageBucket: "pa-pg-a7abc.appspot.com",
-            messagingSenderId: "102164980919",
-            appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        let formularioIdEmEdicao = null;
-        let isAdmin = false;
-
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('form-container').style.display = 'block';
-                document.getElementById('email').value = user.email;
-
-                const tokenResult = await user.getIdTokenResult();
-                isAdmin = tokenResult.claims.admin === true;
-
-                carregarHistorico();
-                preencherFormulario();
-            } else {
-                document.getElementById('login').style.display = 'block';
-                document.getElementById('form-container').style.display = 'none';
-                isAdmin = false;
-            }
-        });
-
-        function login() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
-            auth.signInWithPopup(provider)
-                .catch((error) => alert('Erro no login com Gmail: ' + error.message));
-        }
-
-        function loginComEmail() {
-            const email = document.getElementById('emailLogin').value;
-            const password = document.getElementById('passwordLogin').value;
-            const errorLabel = document.getElementById('loginEmailErro');
-
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    console.log('Usuário logado com e-mail:', userCredential.user);
-                    errorLabel.textContent = '';
-                })
-                .catch((error) => {
-                    console.error('Erro ao fazer login com e-mail:', error.code, error.mess
+</body>
+</html>
