@@ -7,30 +7,46 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: auto;
-            padding: 20px;
+            margin: 0; /* Removido o margin: auto; */
+            padding: 0; /* Removido o padding: 20px; */
             background-image: url('https://ldcelulose.com.br/wp-content/themes/ld/assets/images/logo.png');
             background-repeat: no-repeat;
             background-size: cover;
-            background-position: center; /* Adicionado para centralizar a imagem */
+            background-position: center;
             background-blend-mode: overlay;
-            background-color: rgba(255, 255, 255, 0.1); /* Ajuste o valor alfa para controlar a transparência */
-            min-height: 100vh; /* Garante que o body tenha pelo menos a altura da viewport */
-            display: flex; /* Para centralizar o conteúdo verticalmente */
+            background-color: rgba(255, 255, 255, 0.1);
+            min-height: 100vh;
+            display: flex;
             flex-direction: column;
+            align-items: center; /* Centraliza o conteúdo horizontalmente */
+        }
+
+        #login {
+            text-align: center;
+            /* flex-grow: 1; Removido daqui */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px; /* Adicionado padding para melhor espaçamento interno */
+            width: 100%; /* Garante que ocupe a largura total do container */
+            max-width: 400px; /* Limita a largura do formulário de login */
+            box-sizing: border-box; /* Inclui padding na largura total */
         }
 
         #form-container {
             display: none;
-            flex-grow: 1; /* Permite que o container cresça e ocupe o espaço restante */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
-            align-items: center; /* Centraliza o formulário horizontalmente */
+            align-items: center;
+            width: 100%; /* Garante que ocupe a largura total do container */
+            padding: 20px; /* Adicionado padding para melhor espaçamento */
+            box-sizing: border-box; /* Inclui padding na largura total */
         }
 
         form {
             width: 100%;
-            max-width: 600px; /* Mantém a largura máxima do formulário */
+            max-width: 600px;
         }
 
         label { display: block; margin-top: 10px; }
@@ -38,14 +54,7 @@
         button { margin-top: 15px; padding: 10px 15px; }
         .error { color: red; font-size: 0.9em; margin-top: 5px; }
         .readonly { background-color: #f0f0f0; }
-        #login {
-            text-align: center;
-            flex-grow: 1; /* Permite que o container cresça e ocupe o espaço restante */
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* Centraliza o conteúdo verticalmente */
-        }
-        #historico { margin-top: 30px; }
+        #historico { margin-top: 30px; width: 100%; max-width: 600px;} /* Largura máxima para o histórico */
         .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
         .registro-actions { margin-top: 10px; }
         .registro-actions button { margin-right: 10px; }
@@ -56,9 +65,11 @@
             margin-top: 30px;
             display: flex;
             justify-content: center;
+            width: 100%; /* Garante que ocupe a largura total */
         }
         #statusAtividadesChart {
-            width: 800px !important;
+            width: 100%; /* Garante que ocupe a largura do container */
+            max-width: 800px; /* Limita a largura do gráfico */
             height: 400px !important;
         }
     </style>
@@ -404,8 +415,8 @@
         }
     </script>
 </head>
-<body style="background-image: url('https://ldcelulose.com.br/wp-content/themes/ld/assets/images/logo.png'); background-repeat: no-repeat; background-size: cover; background-position: center; background-blend-mode: overlay; background-color: rgba(255, 255, 255, 0.1); min-height: 100vh; display: flex; flex-direction: column;">
-        <div id="login" style="display: none; flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+<body style="background-image: url('https://ldcelulose.com.br/wp-content/themes/ld/assets/images/logo.png'); background-repeat: no-repeat; background-size: cover; background-position: center; background-blend-mode: overlay; background-color: rgba(255, 255, 255, 0.1); min-height: 100vh; display: flex; flex-direction: column; align-items: center;">
+        <div id="login" style="display: none;  display: flex; flex-direction: column; justify-content: center; padding: 20px; width: 100%; max-width: 400px; box-sizing: border-box;">
             <h2>Login Necessário</h2>
             <p>Faça login com sua conta Gmail ou e-mail.</p>
 
@@ -436,7 +447,7 @@
             </div>
         </div>
 
-        <div id="form-container" style="display: none; flex-grow: 1; display: flex; flex-direction: column; align-items: center;">
+        <div id="form-container" style="display: none; flex-grow: 1; display: flex; flex-direction: column; align-items: center; width: 100%; padding: 20px; box-sizing: border-box;">
             <h1>Formulário da Atividade</h1>
             <form id="formulario" onsubmit="validarFormulario(event)" style="width: 100%; max-width: 600px;">
                 <label for="descricao">Descrição da Atividade:</label>
@@ -474,12 +485,12 @@
                 <button type="button" onclick="logout()">Sair</button>
             </form>
 
-            <div id="graficos-container" style="margin-top: 30px;">
+            <div id="graficos-container" style="margin-top: 30px; display: flex; justify-content: center; width: 100%;">
                 <h3>Status das Atividades</h3>
                 <canvas id="statusAtividadesChart" width="400" height="300"></canvas>
             </div>
 
-            <div id="historico"></div>
+            <div id="historico" style="margin-top: 30px; width: 100%; max-width: 600px;"></div>
         </div>
     </body>
 </html>
