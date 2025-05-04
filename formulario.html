@@ -30,6 +30,9 @@
             width: 100%;
             max-width: 400px;
             box-sizing: border-box;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.9); /* Adiciona um fundo branco semi-transparente ao login */
+            border-radius: 10px; /* Adiciona bordas arredondadas ao login */
         }
 
         #form-container {
@@ -46,6 +49,10 @@
         form {
             width: 100%;
             max-width: 600px;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.9); /* Adiciona um fundo branco semi-transparente ao formulário */
+            border-radius: 10px; /* Adiciona bordas arredondadas ao formulário */
+            padding: 20px; /* Adiciona padding interno ao formulário */
         }
 
         label { display: block; margin-top: 10px; }
@@ -53,7 +60,15 @@
         button { margin-top: 15px; padding: 10px 15px; }
         .error { color: red; font-size: 0.9em; margin-top: 5px; }
         .readonly { background-color: #f0f0f0; }
-        #historico { margin-top: 30px; width: 100%; max-width: 600px;}
+        #historico {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.9); /* Adiciona fundo ao histórico */
+            border-radius: 10px;
+            padding: 20px;
+        }
         .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
         .registro-actions { margin-top: 10px; }
         .registro-actions button { margin-right: 10px; }
@@ -65,6 +80,10 @@
             display: flex;
             justify-content: center;
             width: 100%;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.9); /* Adiciona fundo ao gráficos container */
+            border-radius: 10px;
+            padding: 20px;
         }
         #statusAtividadesChart {
             width: 100%;
@@ -224,7 +243,6 @@
                 alert('Formulário atualizado!');
                 document.getElementById('formulario').reset();
                 formularioIdEmEdicao = null;
-                preencherFormulario();
                 carregarHistorico();
             } catch (error) {
                 alert('Erro ao editar: ' + error.message);
@@ -493,3 +511,4 @@
     </div>
 </body>
 </html>
+
