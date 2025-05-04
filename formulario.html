@@ -337,7 +337,7 @@
                     document.getElementById('ordem').value = data.ordem || '';
                     document.getElementById('pt').value = data.pt || '';
 
-                    // Remova a classe readonly dos campos ao carregar para edição
+                    // Remove a classe readonly dos campos ao carregar para edição
                     document.getElementById('descricao').classList.remove('readonly');
                     document.getElementById('inicioPrevisto').classList.remove('readonly');
                     document.getElementById('fimPrevisto').classList.remove('readonly');
@@ -346,6 +346,10 @@
                     document.getElementById('operador').classList.remove('readonly');
                     document.getElementById('ordem').classList.remove('readonly');
                     document.getElementById('pt').classList.remove('readonly');
+
+                    // Atualiza o texto do botão para "Salvar Edição"
+                    document.querySelector('button[type="submit"]').textContent = 'Salvar Edição';
+
 
                 } else {
                     alert('Formulário não encontrado.');
