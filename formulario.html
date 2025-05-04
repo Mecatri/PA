@@ -7,18 +7,45 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0; /* Alterado de auto para 0 */
-            padding: 20px;
-            display: flex; /* Adicionado para centralizar o conteúdo */
+            margin: 0;
+            padding: 0;
+            background-image: url('https://via.placeholder.com/1920x1080?text=Fundo+do+Formulario'); /* URL de imagem de exemplo */
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            background-color: rgba(255, 255, 255, 0.1);
+            min-height: 100vh;
+            display: flex;
             flex-direction: column;
-            align-items: center; /* Centraliza horizontalmente */
+            align-items: center;
+        }
+
+        #login {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
         }
 
         #form-container {
             display: none;
-            width: 100%; /* Garante que ocupe a largura total do body */
-            max-width: 600px; /* Limita a largura máxima do formulário */
-            margin: 0 auto; /* Centraliza o formulário */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        form {
+            width: 100%;
+            max-width: 600px;
         }
 
         label { display: block; margin-top: 10px; }
@@ -26,18 +53,7 @@
         button { margin-top: 15px; padding: 10px 15px; }
         .error { color: red; font-size: 0.9em; margin-top: 5px; }
         .readonly { background-color: #f0f0f0; }
-        #login {
-            text-align: center;
-            width: 100%; /* Garante que ocupe a largura total do body */
-            max-width: 400px; /* Limita a largura máxima do login */
-            margin: 0 auto; /* Centraliza o login */
-        }
-        #historico {
-            margin-top: 30px;
-            width: 100%; /* Garante que ocupe a largura total */
-            max-width: 600px; /* Limita a largura do histórico */
-            margin: 0 auto; /* Centraliza o histórico */
-        }
+        #historico { margin-top: 30px; width: 100%; max-width: 600px;}
         .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
         .registro-actions { margin-top: 10px; }
         .registro-actions button { margin-right: 10px; }
@@ -48,19 +64,18 @@
             margin-top: 30px;
             display: flex;
             justify-content: center;
-            width: 100%; /* Garante que ocupe a largura total */
+            width: 100%;
         }
         #statusAtividadesChart {
             width: 100%;
-            max-width: 800px; /* Limita a largura do gráfico */
+            max-width: 800px;
             height: 400px !important;
-            margin: 0 auto;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
@@ -91,7 +106,7 @@
             } else {
                 document.getElementById('login').style.display = 'block';
                 document.getElementById('form-container').style.display = 'none';
-                 isAdmin = false;
+                isAdmin = false;
             }
         });
 
@@ -110,7 +125,7 @@
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     console.log('Usuário logado com e-mail:', userCredential.user);
-                     errorLabel.textContent = '';
+                    errorLabel.textContent = '';
                 })
                 .catch((error) => {
                     console.error('Erro ao fazer login com e-mail:', error.code, error.message);
@@ -121,7 +136,7 @@
         function cadastrarNovoUsuario() {
             const email = document.getElementById('emailCadastro').value;
             const password = document.getElementById('passwordCadastro').value;
-             const errorLabel = document.getElementById('cadastroEmailErro');
+            const errorLabel = document.getElementById('cadastroEmailErro');
 
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
@@ -257,7 +272,7 @@
                 const todosFormularios = [];
                 querySnapshot.forEach((doc) => {
                     const f = doc.data();
-                     todosFormularios.push(f);
+                    todosFormularios.push(f);
                     const registro = document.createElement('div');
                     registro.className = 'registro';
 
@@ -265,7 +280,7 @@
                         registro.classList.add('pendente');
                     }
 
-                     if (f.fimPrevisto) {
+                    if (f.fimPrevisto) {
                         const fimPrevistoDate = new Date(f.fimPrevisto);
                         fimPrevistoDate.setHours(0, 0, 0, 0);
                         if (fimPrevistoDate < hoje) {
@@ -281,7 +296,7 @@
                     `;
 
                     if (isAdmin) {
-                         actionsHTML = `
+                        actionsHTML = `
                             <div class="registro-actions admin-actions">
                                 <button onclick="editarFormulario('${doc.id}')">Editar</button>
                                 <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
@@ -364,7 +379,7 @@
                     document.getElementById('ordem').value = data.ordem || '';
                     document.getElementById('pt').value = data.pt || '';
 
-                     // Remove a classe readonly dos campos ao carregar para edição
+                    // Remove a classe readonly dos campos ao carregar para edição
                     document.getElementById('descricao').classList.remove('readonly');
                     document.getElementById('inicioPrevisto').classList.remove('readonly');
                     document.getElementById('fimPrevisto').classList.remove('readonly');
@@ -400,7 +415,7 @@
     </script>
 </head>
 <body>
-    <div id="login" style="display: none;">
+    <div id="login">
         <h2>Login Necessário</h2>
         <p>Faça login com sua conta Gmail ou e-mail.</p>
 
@@ -471,7 +486,7 @@
 
         <div id="graficos-container">
             <h3>Status das Atividades</h3>
-            <canvas id="statusAtividadesChart" width="300" height="600"></canvas>
+            <canvas id="statusAtividadesChart" width="400" height="300"></canvas>
         </div>
 
         <div id="historico"></div>
