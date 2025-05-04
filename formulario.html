@@ -1,553 +1,983 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Formulário da Atividade com Modificação</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            height: 100vh;
-            transition: background-position 0.3s ease, opacity 0.3s ease; /* Adiciona transições suaves */
-        }
 
-        #form-container {
-            display: none;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-        }
+    <meta charset="UTF-8" />
 
-        label {
-            display: block;
-            margin-top: 10px;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-        input, textarea {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-        }
+    <title>Formulário da Atividade com Modificação</title>
 
-        button {
-            margin-top: 15px;
-            padding: 10px 15px;
-        }
-
-        .error {
-            color: red;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-
-        .readonly {
-            background-color: #f0f0f0;
-        }
-
-        #login {
-            text-align: center;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        #historico {
-            margin-top: 30px;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .registro {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-
-        .registro-actions {
-            margin-top: 10px;
-        }
-
-        .registro-actions button {
-            margin-right: 10px;
-        }
-
-        .pendente {
-            border: 2px solid yellow !important;
-        }
-
-        .atrasado {
-            border: 2px solid red !important;
-        }
-
-        .admin-actions button {
-            background-color: #007bff;
-            color: white;
-        }
-
-        #graficos-container {
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-
-        #statusAtividadesChart {
-            width: 100%;
-            max-width: 800px;
-            height: 400px !important;
-            margin: 0 auto;
-        }
-    </style>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // Replace with your actual API key
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // Replace with your project ID
-            projectId: "YOUR_PROJECT_ID",                 // Replace with your project ID
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",  // Replace with your project ID
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",  // Replace with your sender ID
-            appId: "YOUR_APP_ID"                      // Replace with your app ID
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        let formularioIdEmEdicao = null;
-        let isAdmin = false;
-
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('form-container').style.display = 'block';
-                document.getElementById('email').value = user.email;
-
-                const tokenResult = await user.getIdTokenResult();
-                isAdmin = tokenResult.claims.admin === true;
-
-                carregarHistorico();
-                preencherFormulario();
-                setupScrollEffect(); // Inicializa o efeito de rolagem
-            } else {
-                document.getElementById('login').style.display = 'block';
-                document.getElementById('form-container').style.display = 'none';
-                isAdmin = false;
-            }
-        });
-
-        function login() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
-            auth.signInWithPopup(provider)
-                .catch((error) => alert('Erro no login com Gmail: ' + error.message));
-        }
-
-        function loginComEmail() {
-            const email = document.getElementById('emailLogin').value;
-            const password = document.getElementById('passwordLogin').value;
-            const errorLabel = document.getElementById('loginEmailErro');
-
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    console.log('Usuário logado com e-mail:', userCredential.user);
-                    errorLabel.textContent = '';
-                })
-                .catch((error) => {
-                    console.error('Erro ao fazer login com e-mail:', error.code, error.message);
-                    errorLabel.textContent = 'Erro ao fazer login: ' + error.message;
-                });
-        }
-
-        function cadastrarNovoUsuario() {
-            const email = document.getElementById('emailCadastro').value;
-            const password = document.getElementById('passwordCadastro').value;
-            const errorLabel = document.getElementById('cadastroEmailErro');
-
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    console.log('Novo usuário cadastrado:', userCredential.user);
-                    errorLabel.textContent = '';
-                    // Opcional: Enviar e-mail de verificação
-                    // userCredential.user.sendEmailVerification();
-                })
-                .catch((error) => {
-                    console.error('Erro ao cadastrar usuário:', error.code, error.message);
-                    errorLabel.textContent = 'Erro ao cadastrar: ' + error.message;
-                });
-        }
-
-        function logout() {
-            auth.signOut().catch((error) => alert('Erro ao sair: ' + error.message));
-        }
-
-        function getQueryParams() {
-            const params = new URLSearchParams(window.location.search);
-            return {
-                descricao: params.get('descricao'),
-                inicioPrevisto: params.get('inicio'),
-                fimPrevisto: params.get('fim')
-            };
-        }
-
-        function preencherFormulario() {
-            const { descricao, inicioPrevisto, fimPrevisto } = getQueryParams();
-            if (descricao) document.getElementById('descricao').value = descricao;
-            if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
-            if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
-        }
-
-        function validarFormulario(event) {
-            event.preventDefault();
-            let isValid = true;
-
-            const camposObrigatorios = [
-                { id: 'operador', erro: 'operadorErro', msg: 'Preencha o Nome do Operador.' },
-                { id: 'ordem', erro: 'ordemErro', msg: 'Preencha o Número da Ordem de Serviço.' },
-                { id: 'pt', erro: 'ptErro', msg: 'Preencha o Número da PT.' },
-                { id: 'inicioReal', erro: 'inicioRealErro', msg: 'Preencha a Data e Hora de Início Real.' }
-            ];
-
-            camposObrigatorios.forEach(({ id, erro, msg }) => {
-                const input = document.getElementById(id);
-                const errorLabel = document.getElementById(erro);
-                if (input.value.trim() === '') {
-                    errorLabel.textContent = msg;
-                    isValid = false;
-                } else {
-                    errorLabel.textContent = '';
-                }
-            });
-
-            if (isValid) {
-                formularioIdEmEdicao ? salvarEdicao() : salvarFormulario();
-            }
-        }
-
-        async function salvarFormulario() {
-            const user = auth.currentUser;
-            if (!user) return alert('Você precisa estar logado.');
-
-            const dados = coletarDados(user);
-            try {
-                await db.collection('formularios').add(dados);
-                alert('Formulário enviado!');
-                document.getElementById('formulario').reset();
-                preencherFormulario();
-                carregarHistorico();
-            } catch (error) {
-                alert('Erro ao salvar: ' + error.message);
-            }
-        }
-
-        async function salvarEdicao() {
-            const user = auth.currentUser;
-            if (!user || !formularioIdEmEdicao) return;
-
-            const dados = coletarDados(user);
-            try {
-                await db.collection('formularios').doc(formularioIdEmEdicao).update(dados);
-                alert('Formulário atualizado!');
-                document.getElementById('formulario').reset();
-                formularioIdEmEdicao = null;
-                preencherFormulario();
-                carregarHistorico();
-            } catch (error) {
-                alert('Erro ao editar: ' + error.message);
-            }
-        }
-
-        function coletarDados(user) {
-            return {
-                descricao: document.getElementById('descricao').value,
-                inicioPrevisto: document.getElementById('inicioPrevisto').value,
-                fimPrevisto: document.getElementById('fimPrevisto').value,
-                inicioReal: document.getElementById('inicioReal').value,
-                fimReal: document.getElementById('fimReal').value,
-                operador: document.getElementById('operador').value,
-                ordem: document.getElementById('ordem').value,
-                pt: document.getElementById('pt').value,
-                email: user.email,
-                userId: user.uid,
-                timestamp: new Date()
-            };
-        }
-
-        async function carregarHistorico() {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            const historicoContainer = document.getElementById('historico');
-            historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
-
-            try {
-                let query = db.collection('formularios').orderBy('timestamp', 'desc');
-                if (!isAdmin) {
-                    query = query.where('userId', '==', user.uid);
-                }
-                const querySnapshot = await query.get();
-
-                if (querySnapshot.empty) {
-                    historicoContainer.innerHTML += '<p>Nenhum formulário encontrado.</p>';
-                    return;
-                }
-
-                const hoje = new Date();
-                hoje.setHours(0, 0, 0, 0);
-
-                const todosFormularios = [];
-                querySnapshot.forEach((doc) => {
-                    const f = doc.data();
-                    todosFormularios.push(f);
-                    const registro = document.createElement('div');
-                    registro.className = 'registro';
-
-                    if (!f.fimReal || f.fimReal.trim() === '') {
-                        registro.classList.add('pendente');
-                    }
-
-                    if (f.fimPrevisto) {
-                        const fimPrevistoDate = new Date(f.fimPrevisto);
-                        fimPrevistoDate.setHours(0, 0, 0, 0);
-                        if (fimPrevistoDate < hoje) {
-                            registro.classList.add('atrasado');
-                        }
-                    }
-
-                    let actionsHTML = `
-                        <div class="registro-actions">
-                            <button onclick="editarFormulario('${doc.id}')">Editar</button>
-                            <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
-                        </div>
-                    `;
-
-                    if (isAdmin) {
-                        actionsHTML = `
-                            <div class="registro-actions admin-actions">
-                                <button onclick="editarFormulario('${doc.id}')">Editar</button>
-                                <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
-                            </div>
-                        `;
-                    }
-
-                    registro.innerHTML = `
-                        <p><strong>Descrição:</strong> ${f.descricao}</p>
-                        <p><strong>Início Previsto:</strong> ${f.inicioPrevisto}</p>
-                        <p><strong>Término Previsto:</strong> ${f.fimPrevisto}</p>
-                        <p><strong>Início Real:</strong> ${f.inicioReal || '-'}</p>
-                        <p><strong>Término Real:</strong> ${f.fimReal || '-'}</p>
-                        <p><strong>Operador:</strong> ${f.operador}</p>
-                        <p><strong>OS:</strong> ${f.ordem}</p>
-                        <p><strong>PT:</strong> ${f.pt}</p>
-                        <p><strong>Email:</strong> ${f.email}</p>
-                        ${actionsHTML}
-                    `;
-                    historicoContainer.appendChild(registro);
-                });
-
-                const atividadesPendentes = todosFormularios.filter(f => !f.fimReal || f.fimReal.trim() === '').length;
-                const atividadesConcluidas = todosFormularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
-
-                const statusCtx = document.getElementById('statusAtividadesChart').getContext('2d');
-                const statusChart = new Chart(statusCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: ['Pendentes', 'Concluídas'],
-                        datasets: [{
-                            label: 'Status das Atividades',
-                            data: [atividadesPendentes, atividadesConcluidas],
-                            backgroundColor: [
-                                'rgba(255, 206, 86, 0.8)',
-                                'rgba(75, 192, 192, 0.8)'
-                            ],
-                            borderColor: [
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(75, 192, 192, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: false,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                            },
-                            title: {
-                                display: true,
-                                text: 'Status das Atividades',
-                                font: {
-                                    size: 16
-                                }
-                            }
-                        }
-                    }
-                });
-
-            } catch (error) {
-                historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
-            }
-        }
-
-        async function editarFormulario(id) {
-            formularioIdEmEdicao = id;
-            try {
-                const doc = await db.collection('formularios').doc(id).get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    document.getElementById('descricao').value = data.descricao || '';
-                    document.getElementById('inicioPrevisto').value = data.inicioPrevisto || '';
-                    document.getElementById('fimPrevisto').value = data.fimPrevisto || '';
-                    document.getElementById('inicioReal').value = data.inicioReal || '';
-                    document.getElementById('fimReal').value = data.fimReal || '';
-                    document.getElementById('operador').value = data.operador || '';
-                    document.getElementById('ordem').value = data.ordem || '';
-                    document.getElementById('pt').value = data.pt || '';
-
-                    // Remove a classe readonly dos campos ao carregar para edição
-                    document.getElementById('descricao').classList.remove('readonly');
-                    document.getElementById('inicioPrevisto').classList.remove('readonly');
-                    document.getElementById('fimPrevisto').classList.remove('readonly');
-                    document.getElementById('inicioReal').classList.remove('readonly');
-                    document.getElementById('fimReal').classList.remove('readonly');
-                    document.getElementById('operador').classList.remove('readonly');
-                    document.getElementById('ordem').classList.remove('readonly');
-                    document.getElementById('pt').classList.remove('readonly');
-
-                    // Atualiza o texto do botão para "Salvar Edição"
-                    document.querySelector('button[type="submit"]').textContent = 'Salvar Edição';
+    <style>
 
 
-                } else {
-                    alert('Formulário não encontrado.');
-                }
-            } catch (error) {
-                alert('Erro ao carregar formulário para edição: ' + error.message);
-            }
-        }
 
-        async function excluirFormulario(id) {
-            if (confirm('Tem certeza que deseja excluir este formulário?')) {
-                try {
-                    await db.collection('formularios').doc(id).delete();
-                    alert('Formulário excluído com sucesso!');
-                    carregarHistorico();
-                } catch (error) {
-                    alert('Erro ao excluir formulário: ' + error.message);
-                }
-            }
-        }
+        body {
 
-        function setupScrollEffect() {
-            window.addEventListener('scroll', () => {
-                const scrollY = window.scrollY;
-                const body = document.body;
+            font-family: Arial, sans-serif;
 
-                // Calcula a nova posição vertical da imagem de fundo.
-                const backgroundPositionY = scrollY * 0.5;  // Ajuste o fator para controlar a velocidade do movimento.
+            margin: 0; /* Alterado de auto para 0 */
 
-                // Calcula a nova opacidade, diminuindo conforme a rolagem aumenta.
-                const opacity = Math.max(0.3, 1 - scrollY / 500); // Ajuste os valores para controlar a opacidade.
+            padding: 20px;
 
-                // Aplica os novos estilos ao body.
-                body.style.backgroundPosition = `center ${backgroundPositionY}px`;
-                body.style.opacity = opacity;
-            });
-        }
-    </script>
+            display: flex; /* Adicionado para centralizar o conteúdo */
+
+            flex-direction: column;
+
+            align-items: center; /* Centraliza horizontalmente */
+
+              font-family: Arial, sans-serif;
+
+    margin: 0;
+
+    padding: 20px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg'); /* Adiciona transparência diretamente na imagem */
+
+    background-size: cover;
+
+    background-position: center;
+
+    background-repeat: no-repeat;
+
+    height: 100vh;
+
+        }
+
+
+
+        #form-container {
+
+            display: none;
+
+            width: 100%; /* Garante que ocupe a largura total do body */
+
+            max-width: 600px; /* Limita a largura máxima do formulário */
+
+            margin: 0 auto; /* Centraliza o formulário */
+
+        }
+
+
+
+        label { display: block; margin-top: 10px; }
+
+        input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+
+        button { margin-top: 15px; padding: 10px 15px; }
+
+        .error { color: red; font-size: 0.9em; margin-top: 5px; }
+
+        .readonly { background-color: #f0f0f0; }
+
+        #login {
+
+            text-align: center;
+
+            width: 100%; /* Garante que ocupe a largura total do body */
+
+            max-width: 400px; /* Limita a largura máxima do login */
+
+            margin: 0 auto; /* Centraliza o login */
+
+        }
+
+        #historico {
+
+            margin-top: 30px;
+
+            width: 100%; /* Garante que ocupe a largura total */
+
+            max-width: 600px; /* Limita a largura do histórico */
+
+            margin: 0 auto; /* Centraliza o histórico */
+
+        }
+
+        .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+
+        .registro-actions { margin-top: 10px; }
+
+        .registro-actions button { margin-right: 10px; }
+
+        .pendente { border: 2px solid yellow !important; }
+
+        .atrasado { border: 2px solid red !important; }
+
+        .admin-actions button { background-color: #007bff; color: white; }
+
+        #graficos-container {
+
+            margin-top: 30px;
+
+            display: flex;
+
+            justify-content: center;
+
+            width: 100%; /* Garante que ocupe a largura total */
+
+        }
+
+        #statusAtividadesChart {
+
+            width: 100%;
+
+            max-width: 800px; /* Limita a largura do gráfico */
+
+            height: 400px !important;
+
+            margin: 0 auto;
+
+        }
+
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+
+        const firebaseConfig = {
+
+            apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
+
+            authDomain: "pa-pg-a7abc.firebaseapp.com",
+
+            projectId: "pa-pg-a7abc",
+
+            storageBucket: "pa-pg-a7abc.appspot.com",
+
+            messagingSenderId: "102164980919",
+
+            appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
+
+        };
+
+
+
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+
+        const db = firebase.firestore();
+
+        let formularioIdEmEdicao = null;
+
+        let isAdmin = false;
+
+
+
+        auth.onAuthStateChanged(async (user) => {
+
+            if (user) {
+
+                document.getElementById('login').style.display = 'none';
+
+                document.getElementById('form-container').style.display = 'block';
+
+                document.getElementById('email').value = user.email;
+
+
+
+                const tokenResult = await user.getIdTokenResult();
+
+                isAdmin = tokenResult.claims.admin === true;
+
+
+
+                carregarHistorico();
+
+                preencherFormulario();
+
+            } else {
+
+                document.getElementById('login').style.display = 'block';
+
+                document.getElementById('form-container').style.display = 'none';
+
+                 isAdmin = false;
+
+            }
+
+        });
+
+
+
+        function login() {
+
+            const provider = new firebase.auth.GoogleAuthProvider();
+
+            provider.setCustomParameters({ prompt: 'select_account' });
+
+            auth.signInWithPopup(provider)
+
+                .catch((error) => alert('Erro no login com Gmail: ' + error.message));
+
+        }
+
+
+
+        function loginComEmail() {
+
+            const email = document.getElementById('emailLogin').value;
+
+            const password = document.getElementById('passwordLogin').value;
+
+            const errorLabel = document.getElementById('loginEmailErro');
+
+
+
+            auth.signInWithEmailAndPassword(email, password)
+
+                .then((userCredential) => {
+
+                    console.log('Usuário logado com e-mail:', userCredential.user);
+
+                     errorLabel.textContent = '';
+
+                })
+
+                .catch((error) => {
+
+                    console.error('Erro ao fazer login com e-mail:', error.code, error.message);
+
+                    errorLabel.textContent = 'Erro ao fazer login: ' + error.message;
+
+                });
+
+        }
+
+
+
+        function cadastrarNovoUsuario() {
+
+            const email = document.getElementById('emailCadastro').value;
+
+            const password = document.getElementById('passwordCadastro').value;
+
+             const errorLabel = document.getElementById('cadastroEmailErro');
+
+
+
+            auth.createUserWithEmailAndPassword(email, password)
+
+                .then((userCredential) => {
+
+                    console.log('Novo usuário cadastrado:', userCredential.user);
+
+                    errorLabel.textContent = '';
+
+                    // Opcional: Enviar e-mail de verificação
+
+                    // userCredential.user.sendEmailVerification();
+
+                })
+
+                .catch((error) => {
+
+                    console.error('Erro ao cadastrar usuário:', error.code, error.message);
+
+                    errorLabel.textContent = 'Erro ao cadastrar: ' + error.message;
+
+                });
+
+        }
+
+
+
+        function logout() {
+
+            auth.signOut().catch((error) => alert('Erro ao sair: ' + error.message));
+
+        }
+
+
+
+        function getQueryParams() {
+
+            const params = new URLSearchParams(window.location.search);
+
+            return {
+
+                descricao: params.get('descricao'),
+
+                inicioPrevisto: params.get('inicio'),
+
+                fimPrevisto: params.get('fim')
+
+            };
+
+        }
+
+
+
+        function preencherFormulario() {
+
+            const { descricao, inicioPrevisto, fimPrevisto } = getQueryParams();
+
+            if (descricao) document.getElementById('descricao').value = descricao;
+
+            if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
+
+            if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
+
+        }
+
+
+
+        function validarFormulario(event) {
+
+            event.preventDefault();
+
+            let isValid = true;
+
+
+
+            const camposObrigatorios = [
+
+                { id: 'operador', erro: 'operadorErro', msg: 'Preencha o Nome do Operador.' },
+
+                { id: 'ordem', erro: 'ordemErro', msg: 'Preencha o Número da Ordem de Serviço.' },
+
+                { id: 'pt', erro: 'ptErro', msg: 'Preencha o Número da PT.' },
+
+                { id: 'inicioReal', erro: 'inicioRealErro', msg: 'Preencha a Data e Hora de Início Real.' }
+
+            ];
+
+
+
+            camposObrigatorios.forEach(({ id, erro, msg }) => {
+
+                const input = document.getElementById(id);
+
+                const errorLabel = document.getElementById(erro);
+
+                if (input.value.trim() === '') {
+
+                    errorLabel.textContent = msg;
+
+                    isValid = false;
+
+                } else {
+
+                    errorLabel.textContent = '';
+
+                }
+
+            });
+
+
+
+            if (isValid) {
+
+                formularioIdEmEdicao ? salvarEdicao() : salvarFormulario();
+
+            }
+
+        }
+
+
+
+        async function salvarFormulario() {
+
+            const user = auth.currentUser;
+
+            if (!user) return alert('Você precisa estar logado.');
+
+
+
+            const dados = coletarDados(user);
+
+            try {
+
+                await db.collection('formularios').add(dados);
+
+                alert('Formulário enviado!');
+
+                document.getElementById('formulario').reset();
+
+                preencherFormulario();
+
+                carregarHistorico();
+
+            } catch (error) {
+
+                alert('Erro ao salvar: ' + error.message);
+
+            }
+
+        }
+
+
+
+        async function salvarEdicao() {
+
+            const user = auth.currentUser;
+
+            if (!user || !formularioIdEmEdicao) return;
+
+
+
+            const dados = coletarDados(user);
+
+            try {
+
+                await db.collection('formularios').doc(formularioIdEmEdicao).update(dados);
+
+                alert('Formulário atualizado!');
+
+                document.getElementById('formulario').reset();
+
+                formularioIdEmEdicao = null;
+
+                preencherFormulario();
+
+                carregarHistorico();
+
+            } catch (error) {
+
+                alert('Erro ao editar: ' + error.message);
+
+            }
+
+        }
+
+
+
+        function coletarDados(user) {
+
+            return {
+
+                descricao: document.getElementById('descricao').value,
+
+                inicioPrevisto: document.getElementById('inicioPrevisto').value,
+
+                fimPrevisto: document.getElementById('fimPrevisto').value,
+
+                inicioReal: document.getElementById('inicioReal').value,
+
+                fimReal: document.getElementById('fimReal').value,
+
+                operador: document.getElementById('operador').value,
+
+                ordem: document.getElementById('ordem').value,
+
+                pt: document.getElementById('pt').value,
+
+                email: user.email,
+
+                userId: user.uid,
+
+                timestamp: new Date()
+
+            };
+
+        }
+
+
+
+        async function carregarHistorico() {
+
+            const user = auth.currentUser;
+
+            if (!user) return;
+
+
+
+            const historicoContainer = document.getElementById('historico');
+
+            historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
+
+
+
+            try {
+
+                let query = db.collection('formularios').orderBy('timestamp', 'desc');
+
+                if (!isAdmin) {
+
+                    query = query.where('userId', '==', user.uid);
+
+                }
+
+                const querySnapshot = await query.get();
+
+
+
+                if (querySnapshot.empty) {
+
+                    historicoContainer.innerHTML += '<p>Nenhum formulário encontrado.</p>';
+
+                    return;
+
+                }
+
+
+
+                const hoje = new Date();
+
+                hoje.setHours(0, 0, 0, 0);
+
+
+
+                const todosFormularios = [];
+
+                querySnapshot.forEach((doc) => {
+
+                    const f = doc.data();
+
+                     todosFormularios.push(f);
+
+                    const registro = document.createElement('div');
+
+                    registro.className = 'registro';
+
+
+
+                    if (!f.fimReal || f.fimReal.trim() === '') {
+
+                        registro.classList.add('pendente');
+
+                    }
+
+
+
+                     if (f.fimPrevisto) {
+
+                        const fimPrevistoDate = new Date(f.fimPrevisto);
+
+                        fimPrevistoDate.setHours(0, 0, 0, 0);
+
+                        if (fimPrevistoDate < hoje) {
+
+                            registro.classList.add('atrasado');
+
+                        }
+
+                    }
+
+
+
+                    let actionsHTML = `
+
+                        <div class="registro-actions">
+
+                            <button onclick="editarFormulario('${doc.id}')">Editar</button>
+
+                            <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
+
+                        </div>
+
+                    `;
+
+
+
+                    if (isAdmin) {
+
+                         actionsHTML = `
+
+                            <div class="registro-actions admin-actions">
+
+                                <button onclick="editarFormulario('${doc.id}')">Editar</button>
+
+                                <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
+
+                            </div>
+
+                        `;
+
+                    }
+
+
+
+                    registro.innerHTML = `
+
+                        <p><strong>Descrição:</strong> ${f.descricao}</p>
+
+                        <p><strong>Início Previsto:</strong> ${f.inicioPrevisto}</p>
+
+                        <p><strong>Término Previsto:</strong> ${f.fimPrevisto}</p>
+
+                        <p><strong>Início Real:</strong> ${f.inicioReal || '-'}</p>
+
+                        <p><strong>Término Real:</strong> ${f.fimReal || '-'}</p>
+
+                        <p><strong>Operador:</strong> ${f.operador}</p>
+
+                        <p><strong>OS:</strong> ${f.ordem}</p>
+
+                        <p><strong>PT:</strong> ${f.pt}</p>
+
+                        <p><strong>Email:</strong> ${f.email}</p>
+
+                        ${actionsHTML}
+
+                    `;
+
+                    historicoContainer.appendChild(registro);
+
+                });
+
+
+
+                const atividadesPendentes = todosFormularios.filter(f => !f.fimReal || f.fimReal.trim() === '').length;
+
+                const atividadesConcluidas = todosFormularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
+
+
+
+                const statusCtx = document.getElementById('statusAtividadesChart').getContext('2d');
+
+                const statusChart = new Chart(statusCtx, {
+
+                    type: 'pie',
+
+                    data: {
+
+                        labels: ['Pendentes', 'Concluídas'],
+
+                        datasets: [{
+
+                            label: 'Status das Atividades',
+
+                            data: [atividadesPendentes, atividadesConcluidas],
+
+                            backgroundColor: [
+
+                                'rgba(255, 206, 86, 0.8)',
+
+                                'rgba(75, 192, 192, 0.8)'
+
+                            ],
+
+                            borderColor: [
+
+                                'rgba(255, 206, 86, 1)',
+
+                                'rgba(75, 192, 192, 1)'
+
+                            ],
+
+                            borderWidth: 1
+
+                        }]
+
+                    },
+
+                    options: {
+
+                        responsive: false,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+
+                            legend: {
+
+                                position: 'bottom',
+
+                            },
+
+                            title: {
+
+                                display: true,
+
+                                text: 'Status das Atividades',
+
+                                font: {
+
+                                    size: 16
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                });
+
+
+
+            } catch (error) {
+
+                historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
+
+            }
+
+        }
+
+
+
+        async function editarFormulario(id) {
+
+            formularioIdEmEdicao = id;
+
+            try {
+
+                const doc = await db.collection('formularios').doc(id).get();
+
+                if (doc.exists) {
+
+                    const data = doc.data();
+
+                    document.getElementById('descricao').value = data.descricao || '';
+
+                    document.getElementById('inicioPrevisto').value = data.inicioPrevisto || '';
+
+                    document.getElementById('fimPrevisto').value = data.fimPrevisto || '';
+
+                    document.getElementById('inicioReal').value = data.inicioReal || '';
+
+                    document.getElementById('fimReal').value = data.fimReal || '';
+
+                    document.getElementById('operador').value = data.operador || '';
+
+                    document.getElementById('ordem').value = data.ordem || '';
+
+                    document.getElementById('pt').value = data.pt || '';
+
+
+
+                     // Remove a classe readonly dos campos ao carregar para edição
+
+                    document.getElementById('descricao').classList.remove('readonly');
+
+                    document.getElementById('inicioPrevisto').classList.remove('readonly');
+
+                    document.getElementById('fimPrevisto').classList.remove('readonly');
+
+                    document.getElementById('inicioReal').classList.remove('readonly');
+
+                    document.getElementById('fimReal').classList.remove('readonly');
+
+                    document.getElementById('operador').classList.remove('readonly');
+
+                    document.getElementById('ordem').classList.remove('readonly');
+
+                    document.getElementById('pt').classList.remove('readonly');
+
+
+
+                    // Atualiza o texto do botão para "Salvar Edição"
+
+                    document.querySelector('button[type="submit"]').textContent = 'Salvar Edição';
+
+
+
+
+
+                } else {
+
+                    alert('Formulário não encontrado.');
+
+                }
+
+            } catch (error) {
+
+                alert('Erro ao carregar formulário para edição: ' + error.message);
+
+            }
+
+        }
+
+
+
+        async function excluirFormulario(id) {
+
+            if (confirm('Tem certeza que deseja excluir este formulário?')) {
+
+                try {
+
+                    await db.collection('formularios').doc(id).delete();
+
+                    alert('Formulário excluído com sucesso!');
+
+                    carregarHistorico();
+
+                } catch (error) {
+
+                    alert('Erro ao excluir formulário: ' + error.message);
+
+                }
+
+            }
+
+        }
+
+    </script>
+
 </head>
+
 <body>
-    <div id="login" style="display: none;">
-        <h2>Login Necessário</h2>
-        <p>Faça login com sua conta Gmail ou e-mail.</p>
 
-        <div>
-            <h3>Entrar com E-mail</h3>
-            <label for="emailLogin">E-mail:</label>
-            <input type="email" id="emailLogin" />
-            <label for="passwordLogin">Senha:</label>
-            <input type="password" id="passwordLogin" />
-            <button onclick="loginComEmail()">Entrar</button>
-            <p id="loginEmailErro" class="error"></p>
-        </div>
+    <div id="login" style="display: none;">
 
-        <hr>
+        <h2>Login Necessário</h2>
 
-        <p>Ou</p>
+        <p>Faça login com sua conta Gmail ou e-mail.</p>
 
-        <button onclick="login()">Entrar com Gmail</button>
 
-        <div>
-            <h3>Cadastrar Novo Usuário</h3>
-            <label for="emailCadastro">E-mail:</label>
-            <input type="email" id="emailCadastro" />
-            <label for="passwordCadastro">Senha:</label>
-            <input type="password" id="passwordCadastro" />
-            <button onclick="cadastrarNovoUsuario()">Cadastrar</button>
-            <p id="cadastroEmailErro" class="error"></p>
-        </div>
-    </div>
 
-    <div id="form-container" style="display: none;">
-        <h1>Formulário da Atividade</h1>
-        <form id="formulario" onsubmit="validarFormulario(event)">
-            <label for="descricao">Descrição da Atividade:</label>
-            <textarea id="descricao" class="readonly" readonly></textarea>
+        <div>
 
-            <label for="inicioPrevisto">Início Previsto:</label>
-            <input type="datetime-local" id="inicioPrevisto" class="readonly" readonly>
+            <h3>Entrar com E-mail</h3>
 
-            <label for="fimPrevisto">Término Previsto:</label>
-            <input type="datetime-local" id="fimPrevisto" class="readonly" readonly>
+            <label for="emailLogin">E-mail:</label>
 
-            <label for="inicioReal">Início Real:</label>
-            <input type="datetime-local" id="inicioReal" required>
-            <p id="inicioRealErro" class="error"></p>
+            <input type="email" id="emailLogin" />
 
-            <label for="fimReal">Término Real:</label>
-            <input type="datetime-local" id="fimReal">
+            <label for="passwordLogin">Senha:</label>
 
-            <label for="email">Email do Operador:</label>
-            <input type="email" id="email" class="readonly" readonly>
+            <input type="password" id="passwordLogin" />
 
-            <label for="operador">Nome do Operador Liberador:</label>
-            <input type="text" id="operador" required>
-            <p id="operadorErro" class="error"></p>
+            <button onclick="loginComEmail()">Entrar</button>
 
-            <label for="ordem">Número da Ordem de Serviço:</label>
-            <input type="text" id="ordem" required>
-            <p id="ordemErro" class="error"></p>
+            <p id="loginEmailErro" class="error"></p>
 
-            <label for="pt">Número da PT:</label>
-            <input type="text" id="pt" required>
-            <p id="ptErro" class="error"></p>
+        </div>
 
-            <button type="submit">Salvar</button>
-            <button type="button" onclick="logout()">Sair</button>
-        </form>
 
-        <div id="graficos-container">
-            <h3>Status das Atividades</h3>
-            <canvas id="statusAtividadesChart" width="300" height="600"></canvas>
-        </div>
 
-        <div id="historico"></div>
-    </div>
-    <script>
-       // Seu código JavaScript aqui
-    </script>
+        <hr>
+
+
+
+        <p>Ou</p>
+
+
+
+        <button onclick="login()">Entrar com Gmail</button>
+
+
+
+         <div>
+
+            <h3>Cadastrar Novo Usuário</h3>
+
+            <label for="emailCadastro">E-mail:</label>
+
+            <input type="email" id="emailCadastro" />
+
+            <label for="passwordCadastro">Senha:</label>
+
+            <input type="password" id="passwordCadastro" />
+
+            <button onclick="cadastrarNovoUsuario()">Cadastrar</button>
+
+            <p id="cadastroEmailErro" class="error"></p>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="form-container" style="display: none;">
+
+        <h1>Formulário da Atividade</h1>
+
+        <form id="formulario" onsubmit="validarFormulario(event)">
+
+            <label for="descricao">Descrição da Atividade:</label>
+
+            <textarea id="descricao" class="readonly" readonly></textarea>
+
+
+
+            <label for="inicioPrevisto">Início Previsto:</label>
+
+            <input type="datetime-local" id="inicioPrevisto" class="readonly" readonly>
+
+
+
+            <label for="fimPrevisto">Término Previsto:</label>
+
+            <input type="datetime-local" id="fimPrevisto" class="readonly" readonly>
+
+
+
+            <label for="inicioReal">Início Real:</label>
+
+            <input type="datetime-local" id="inicioReal" required>
+
+            <p id="inicioRealErro" class="error"></p>
+
+
+
+            <label for="fimReal">Término Real:</label>
+
+            <input type="datetime-local" id="fimReal">
+
+
+
+            <label for="email">Email do Operador:</label>
+
+            <input type="email" id="email" class="readonly" readonly>
+
+
+
+            <label for="operador">Nome do Operador Liberador:</label>
+
+            <input type="text" id="operador" required>
+
+            <p id="operadorErro" class="error"></p>
+
+
+
+            <label for="ordem">Número da Ordem de Serviço:</label>
+
+            <input type="text" id="ordem" required>
+
+            <p id="ordemErro" class="error"></p>
+
+
+
+            <label for="pt">Número da PT:</label>
+
+            <input type="text" id="pt" required>
+
+            <p id="ptErro" class="error"></p>
+
+
+
+            <button type="submit">Salvar</button>
+
+            <button type="button" onclick="logout()">Sair</button>
+
+        </form>
+
+
+
+        <div id="graficos-container">
+
+            <h3>Status das Atividades</h3>
+
+            <canvas id="statusAtividadesChart" width="300" height="600"></canvas>
+
+        </div>
+
+
+
+        <div id="historico"></div>
+
+    </div>
+
 </body>
+
 </html>
