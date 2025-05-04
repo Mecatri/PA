@@ -7,35 +7,54 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: auto;
+            margin: 0; /* Alterado de auto para 0 */
             padding: 20px;
+            display: flex; /* Adicionado para centralizar o conteúdo */
+            flex-direction: column;
+            align-items: center; /* Centraliza horizontalmente */
         }
 
         #form-container {
             display: none;
+            width: 100%; /* Garante que ocupe a largura total do body */
+            max-width: 600px; /* Limita a largura máxima do formulário */
+            margin: 0 auto; /* Centraliza o formulário */
         }
 
         label { display: block; margin-top: 10px; }
         input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
         button { margin-top: 15px; padding: 10px 15px; }
         .error { color: red; font-size: 0.9em; margin-top: 5px; }
-         .readonly { background-color: #f0f0f0; }
-        #login { text-align: center; }
-        #historico { margin-top: 30px; }
+        .readonly { background-color: #f0f0f0; }
+        #login {
+            text-align: center;
+            width: 100%; /* Garante que ocupe a largura total do body */
+            max-width: 400px; /* Limita a largura máxima do login */
+            margin: 0 auto; /* Centraliza o login */
+        }
+        #historico {
+            margin-top: 30px;
+            width: 100%; /* Garante que ocupe a largura total */
+            max-width: 600px; /* Limita a largura do histórico */
+            margin: 0 auto; /* Centraliza o histórico */
+        }
         .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
         .registro-actions { margin-top: 10px; }
         .registro-actions button { margin-right: 10px; }
         .pendente { border: 2px solid yellow !important; }
         .atrasado { border: 2px solid red !important; }
-         .admin-actions button { background-color: #007bff; color: white; }
+        .admin-actions button { background-color: #007bff; color: white; }
         #graficos-container {
             margin-top: 30px;
             display: flex;
             justify-content: center;
+            width: 100%; /* Garante que ocupe a largura total */
         }
         #statusAtividadesChart {
-            width: 800px !important;
+            width: 100%;
+            max-width: 800px; /* Limita a largura do gráfico */
             height: 400px !important;
+            margin: 0 auto;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
