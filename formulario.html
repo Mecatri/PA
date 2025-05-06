@@ -409,9 +409,9 @@
         const comparacaoAtividadesChart = new Chart(comparacaoCtx, {
             type: 'bar',
             data: {
-                labels: ['QR Code', 'Formulários (Total)', 'Formulários (Finalizados)', 'Formulários (Abertos)'],
+                labels: ['Total de atividades', 'Total', 'Finalizados', 'Abertos'],
                 datasets: [{
-                    label: 'Total de Atividades',
+                    label: 'Relação de Atividades',
                     data: [totalAtividadesQRCode, totalFormularios, totalFormulariosFinalizados, totalFormulariosAbertos],
                     backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)', 'rgba(75, 192, 192, 0.7)', 'rgba(255, 159, 64, 0.7)'],
                     borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
@@ -430,7 +430,7 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Comparação Atividades: QR Code vs. Formulários',
+                        text: 'Comparação de Atividades:',
                         font: {
                             size: 16
                         }
