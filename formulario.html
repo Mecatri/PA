@@ -409,9 +409,9 @@
         const comparacaoAtividadesChart = new Chart(comparacaoCtx, {
             type: 'bar',
             data: {
-                labels: ['Total de atividades', 'Total', 'Finalizados', 'Abertos'],
+                labels: ['QR Code', 'Formulários (Total)', 'Formulários (Finalizados)', 'Formulários (Abertos)'],
                 datasets: [{
-                    label: 'Total de atividades lançadas no site',
+                    label: 'Total de Atividades',
                     data: [totalAtividadesQRCode, totalFormularios, totalFormulariosFinalizados, totalFormulariosAbertos],
                     backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)', 'rgba(75, 192, 192, 0.7)', 'rgba(255, 159, 64, 0.7)'],
                     borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
@@ -430,9 +430,29 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Comparação de Atividades:',
+                        text: 'Comparação Atividades: QR Code vs. Formulários',
                         font: {
                             size: 16
+                        }
+                    },
+                    tooltip: {  // Configuração das tooltips
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y;
+                                }
+                                if (context.label !== 'QR Code') {  // Adiciona a porcentagem para as barras de formulário
+                                    const total = totalAtividadesQRCode;
+                                    const value = context.parsed.y;
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(2) + '%' : '0%';
+                                    label += ' (' + percentage + ')';
+                                }
+                                return label;
+                            }
                         }
                     }
                 }
