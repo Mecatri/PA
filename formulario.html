@@ -154,11 +154,7 @@
                 });
         }
 
-        function logout() {
-            auth.signOut().catch((error) => alert('Erro ao sair: ' + error.message));
-        }
-
-        function enviarRecuperacaoSenha() {  // Adicione esta função
+                function enviarRecuperacaoSenha() {  // Adicione esta função
         const email = document.getElementById('emailLogin').value;  // Ou 'emailCadastro' se preferir
         auth.sendPasswordResetEmail(email)
             .then(() => {
@@ -168,6 +164,11 @@
                 console.error('Erro ao enviar e-mail de recuperação:', error);
                 alert('Erro ao enviar e-mail de recuperação de senha: ' + error.message);
             });
+        }
+
+        function logout() {
+            auth.signOut().catch((error) => alert('Erro ao sair: ' + error.message));
+        }
 
         function getQueryParams() {
             const params = new URLSearchParams(window.location.search);
