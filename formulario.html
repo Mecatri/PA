@@ -158,6 +158,17 @@
             auth.signOut().catch((error) => alert('Erro ao sair: ' + error.message));
         }
 
+        function enviarRecuperacaoSenha() {  // Adicione esta função
+        const email = document.getElementById('emailLogin').value;  // Ou 'emailCadastro' se preferir
+        auth.sendPasswordResetEmail(email)
+            .then(() => {
+                alert('Um e-mail de recuperação de senha foi enviado para ' + email);
+            })
+            .catch((error) => {
+                console.error('Erro ao enviar e-mail de recuperação:', error);
+                alert('Erro ao enviar e-mail de recuperação de senha: ' + error.message);
+            });
+
         function getQueryParams() {
             const params = new URLSearchParams(window.location.search);
             return {
