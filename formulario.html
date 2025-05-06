@@ -382,7 +382,44 @@
                         }
                     }
                 });
+                
+        const comparacaoCtx = document.getElementById('comparacaoAtividadesChart').getContext('2d');
+        const contadorDoc = await db.collection('contadores').doc('contador_qrcode').get();
+        const totalAtividadesQRCode = contadorDoc.exists ? contadorDoc.data().total : 0;
+        const totalFormularios = todosFormularios.length;
 
+        const comparacaoAtividadesChart = new Chart(comparacaoCtx, {
+            type: 'bar', // Ou 'pie'
+            data: {
+                labels: ['QR Code', 'Formulário'],
+                datasets: [{
+                    label: 'Total de Atividades',
+                    data: [totalAtividadesQRCode, totalFormularios],
+                    backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)'],
+                    borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Comparação Atividades QR Code vs. Formulário',
+                        font: {
+                            size: 16
+                        }
+                    }
+                }
+            }
+        });
+                
             } catch (error) {
                 historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
             }
@@ -537,8 +574,10 @@
         <div id="graficos-container">
             <h3>Status das Atividades</h3>
             <canvas id="statusAtividadesChart" width="300" height="600"></canvas>
+            <h3>Comparação Atividades</h3>
+            <canvas id="comparacaoAtividadesChart" width="400" height="400"></canvas>
         </div>
-
+            
         <div id="historico"></div>
     </div>
 </body>
