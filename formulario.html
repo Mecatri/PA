@@ -74,6 +74,13 @@
             height: 400px !important;
             margin: 0 auto;
         }
+        #resetPassword {
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            display: none;
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -81,12 +88,12 @@
      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
-            authDomain: "pa-pg-a7abc.firebaseapp.com",
-            projectId: "pa-pg-a7abc",
-            storageBucket: "pa-pg-a7abc.appspot.com",
-            messagingSenderId: "102164980919",
-            appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
+            apiKey: "YOUR_API_KEY", // Substitua com sua chave de API real
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // Substitua com seu ID de projeto
+            projectId: "YOUR_PROJECT_ID",                 // Substitua com seu ID de projeto
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",  // Substitua com seu ID de projeto
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",  // Substitua com seu ID de remetente
+            appId: "YOUR_APP_ID"                      // Substitua com seu ID do aplicativo
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -100,6 +107,8 @@
                 document.getElementById('login').style.display = 'none';
                 document.getElementById('form-container').style.display = 'block';
                 document.getElementById('email').value = user.email;
+                document.getElementById('resetPassword').style.display = 'none';
+
 
                 const tokenResult = await user.getIdTokenResult();
                 isAdmin = tokenResult.claims.admin === true;
@@ -109,7 +118,8 @@
             } else {
                 document.getElementById('login').style.display = 'block';
                 document.getElementById('form-container').style.display = 'none';
-                 isAdmin = false;
+                document.getElementById('resetPassword').style.display = 'none';
+                isAdmin = false;
             }
         });
 
@@ -129,6 +139,8 @@
                 .then((userCredential) => {
                     console.log('Usuário logado com e-mail:', userCredential.user);
                      errorLabel.textContent = '';
+                     document.getElementById('resetPassword').style.display = 'none';
+
                 })
                 .catch((error) => {
                     console.error('Erro ao fazer login com e-mail:', error.code, error.message);
@@ -151,6 +163,23 @@
                 .catch((error) => {
                     console.error('Erro ao cadastrar usuário:', error.code, error.message);
                     errorLabel.textContent = 'Erro ao cadastrar: ' + error.message;
+                });
+        }
+
+         function resetPassword() {
+            const email = document.getElementById('emailReset').value;
+            const errorLabel = document.getElementById('resetPasswordError');
+
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    alert('Email de recuperação de senha enviado! Verifique sua caixa de entrada.');
+                    errorLabel.textContent = '';
+                    document.getElementById('resetPassword').style.display = 'none';
+
+                })
+                .catch((error) => {
+                    console.error('Erro ao enviar email de recuperação:', error.code, error.message);
+                    errorLabel.textContent = 'Erro ao enviar email de recuperação: ' + error.message;
                 });
         }
 
@@ -430,6 +459,8 @@
             <input type="password" id="passwordLogin" />
             <button onclick="loginComEmail()">Entrar</button>
             <p id="loginEmailErro" class="error"></p>
+             <button onclick="mostrarRecuperarSenha()">Recuperar Senha</button>
+
         </div>
 
         <hr>
@@ -447,6 +478,16 @@
             <button onclick="cadastrarNovoUsuario()">Cadastrar</button>
             <p id="cadastroEmailErro" class="error"></p>
         </div>
+    </div>
+
+     <div id="resetPassword" style="display: none;">
+        <h2>Recuperar Senha</h2>
+        <p>Informe seu email para recuperar a senha.</p>
+        <label for="emailReset">Email:</label>
+        <input type="email" id="emailReset" />
+        <button onclick="resetPassword()">Enviar Email de Recuperação</button>
+        <p id="resetPasswordError" class="error"></p>
+        <button onclick="mostrarLogin()">Cancelar</button>
     </div>
 
     <div id="form-container" style="display: none;">
@@ -494,5 +535,19 @@
 
         <div id="historico"></div>
     </div>
+
+    <script>
+        function mostrarRecuperarSenha() {
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('form-container').style.display = 'none';
+            document.getElementById('resetPassword').style.display = 'block';
+        }
+
+        function mostrarLogin() {
+            document.getElementById('login').style.display = 'block';
+            document.getElementById('form-container').style.display = 'none';
+            document.getElementById('resetPassword').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
