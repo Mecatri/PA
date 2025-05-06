@@ -417,6 +417,32 @@
         }
     </script>
 </head>
+    <script>
+    // Coloque a função enviarRecuperacaoSenha() aqui, antes de ser chamada no HTML
+    function enviarRecuperacaoSenha() {
+        const email = document.getElementById('emailLogin').value;
+        auth.sendPasswordResetEmail(email)
+            .then(() => {
+                alert('Um e-mail de recuperação de senha foi enviado para ' + email);
+            })
+            .catch((error) => {
+                console.error('Erro ao enviar e-mail de recuperação:', error);
+                alert('Erro ao enviar e-mail de recuperação de senha: ' + error.message);
+            });
+    }
+
+    // Outras funções...
+    function loginComEmail() { ... }
+    function cadastrarNovoUsuario() { ... }
+    function logout() { ... }
+
+    // Seu código de inicialização e lógica principal
+    const firebaseConfig = { ... };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    ...
+</script>
 <body>
     <div id="login" style="display: none;">
     <h2>Login Necessário</h2>
