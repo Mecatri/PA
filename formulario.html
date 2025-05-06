@@ -63,18 +63,32 @@
         .atrasado { border: 2px solid red !important; }
         .admin-actions button { background-color: #007bff; color: white; }
         #graficos-container {
-            margin-top: 30px;
-            display: flex;
-            background-color: white;
-            justify-content: cover;
-            width: 100%; /* Garante que ocupe a largura total */
+        background-color: white;
+        display: flex;
+        flex-direction: column; /* Alterado de row para column */
+        align-items: center;      /* Centraliza os itens horizontalmente */
+        justify-content: flex-start; /* Alinha os itens ao topo */
+        width: 100%;
+        padding: 20px;           /* Adicione padding para o espaço interno */
+        box-sizing: border-box;  /* Garante que o padding não aumente o tamanho total */
+        margin-top: 30px;
+        border-radius: 10px;     /* Opcional: para bordas arredondadas */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Opcional: para uma sombra sutil */
         }
+
         #statusAtividadesChart {
-            width: 100%;
-            max-width: 800px; /* Limita a largura do gráfico */
-            height: 400px !important;
-            margin: 0 auto;
-        }
+        width: 100%;
+        max-width: 800px;
+        height: 400px !important;
+        margin-bottom: 20px; /* Adicione margem abaixo do primeiro gráfico */
+    }
+
+#comparacaoAtividadesChart {
+    width: 100%;
+    max-width: 800px;
+    height: 400px !important;
+    margin-bottom: 20px;
+}
       
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
