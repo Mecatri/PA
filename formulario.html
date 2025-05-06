@@ -38,55 +38,6 @@
             max-width: 600px; /* Limita a largura máxima do formulário */
             margin: 0 auto; /* Centraliza o formulário */
         }
-        #login-container {
-            width: 300px; /* Largura do container */
-            margin: 100px auto; /* Centraliza na página */
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        #login-container h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        #login-container input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box; /* Importante para o padding não aumentar o tamanho */
-        }
-
-        #login-container button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        #login-container button:hover {
-            background-color: #0056b3;
-        }
-
-        #login-container a {
-            display: block;
-            text-align: center;
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        #login-container a:hover {
-            text-decoration: underline;
-        }
 
         label { display: block; margin-top: 10px; }
         input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
@@ -563,70 +514,7 @@
         }
     </script>
 </head>
-    <body>
-    <div id="login-container">
-        <h1>Login</h1>
-        <input type="email" id="emailLogin" placeholder="Email">
-        <p id="emailLoginErro" class="error"></p>
-        <input type="password" id="senhaLogin" placeholder="Senha">
-        <p id="senhaLoginErro" class="error"></p>
-        <button onclick="loginComEmail()">Entrar</button>
-        <button onclick="enviarRecuperacaoSenha()">Esqueci minha senha</button>
-        <a href="#" onclick="mostrarCadastro()">Cadastre-se</a>
-    </div>
-
-    <div id="form-container" style="display: none;">
-        <h1>Formulário da Atividade</h1>
-        <form id="formulario" onsubmit="validarFormulario(event)">
-            <label for="descricao">Descrição da Atividade:</label>
-            <textarea id="descricao" class="readonly" readonly></textarea>
-
-            <label for="inicioPrevisto">Início Previsto:</label>
-            <input type="datetime-local" id="inicioPrevisto" class="readonly" readonly>
-
-            <label for="fimPrevisto">Término Previsto:</label>
-            <input type="datetime-local" id="fimPrevisto" class="readonly" readonly>
-
-            <label for="inicioReal">Início Real:</label>
-            <input type="datetime-local" id="inicioReal" required>
-            <p id="inicioRealErro" class="error"></p>
-
-            <label for="fimReal">Término Real:</label>
-            <input type="datetime-local" id="fimReal">
-
-            <label for="email">Email do Operador:</label>
-            <input type="email" id="email" class="readonly" readonly>
-
-            <label for="operador">Nome do Operador Liberador:</label>
-            <input type="text" id="operador" required>
-            <p id="operadorErro" class="error"></p>
-
-            <label for="ordem">Número da Ordem de Serviço:</label>
-            <input type="text" id="ordem" required>
-            <p id="ordemErro" class="error"></p>
-
-            <label for="pt">Número da PT:</label>
-            <input type="text" id="pt" required>
-            <p id="ptErro" class="error"></p>
-
-            <button type="submit">Salvar</button>
-            <button type="button" onclick="logout()">Sair</button>
-        </form>
-
-        <div id="graficos-container">
-            <h3>Status das Atividades</h3>
-            <canvas id="statusAtividadesChart" width="300" height="600"></canvas>
-            <h3>Comparação Atividades</h3>
-            <canvas id="comparacaoAtividadesChart" width="400" height="400"></canvas>
-        </div>
-
-        <div id="historico"></div>
-    </div>
-
-    <script>
-        // Seu código JavaScript aqui...
-    </script>
-</body>
+   
     <script>
     // Coloque a função enviarRecuperacaoSenha() aqui, antes de ser chamada no HTML
     function enviarRecuperacaoSenha() {
