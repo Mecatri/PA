@@ -1,79 +1,116 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <style>
-        body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-image: url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg'); /* Caminho da imagem */
-    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg'); /* Adiciona transparência diretamente na imagem */
-    background-size: cover;  /* Ajusta a imagem ao tamanho dela */
-    background-position: center; /* Centraliza a imagem */
-    background-attachment: fixed;
-    background-repeat: no-repeat; /* Impede a repetição da imagem */
-    background-color: rgba(255, 255, 255, 0.5); /* Adiciona uma camada semitransparente branca sobre a imagem */
-    height: 100vh; /* Define que o fundo ocupe toda a altura da tela */
-    }
     <title>Formulário da Atividade com Modificação</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0; /* Alterado de auto para 0 */
+            margin: 0;
             padding: 20px;
-            display: flex; /* Adicionado para centralizar o conteúdo */
+            display: flex;
             flex-direction: column;
-            align-items: center; /* Centraliza horizontalmente */
+            align-items: center;
+            background-image: url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg');
+            background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-color: rgba(255, 255, 255, 0.5);
+            height: 100vh;
         }
 
         #form-container {
             display: none;
-            width: 100%; /* Garante que ocupe a largura total do body */
-            max-width: 600px; /* Limita a largura máxima do formulário */
-            margin: 0 auto; /* Centraliza o formulário */
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        label { display: block; margin-top: 10px; }
-        input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-        button { margin-top: 15px; padding: 10px 15px; }
-        .error { color: red; font-size: 0.9em; margin-top: 5px; }
-        .readonly { background-color: #f0f0f0; }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 15px;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .readonly {
+            background-color: #f0f0f0;
+        }
+
         #login {
             text-align: center;
-            width: 100%; /* Garante que ocupe a largura total do body */
-            max-width: 400px; /* Limita a largura máxima do login */
-            margin: 0 auto; /* Centraliza o login */
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
         }
+
         #historico {
             margin-top: 30px;
-            width: 100%; /* Garante que ocupe a largura total */
-            max-width: 600px; /* Limita a largura do histórico */
-            margin: 0 auto; /* Centraliza o histórico */
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-        .registro-actions { margin-top: 10px; }
-        .registro-actions button { margin-right: 10px; }
-        .pendente { border: 2px solid yellow !important; }
-        .atrasado { border: 2px solid red !important; }
-        .admin-actions button { background-color: #007bff; color: white; }
+
+        .registro {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .registro-actions {
+            margin-top: 10px;
+        }
+
+        .registro-actions button {
+            margin-right: 10px;
+        }
+
+        .pendente {
+            border: 2px solid yellow !important;
+        }
+
+        .atrasado {
+            border: 2px solid red !important;
+        }
+
+        .admin-actions button {
+            background-color: #007bff;
+            color: white;
+        }
+
         #graficos-container {
             margin-top: 30px;
             display: flex;
             justify-content: center;
-            width: 100%; /* Garante que ocupe a largura total */
+            width: 100%;
         }
+
         #statusAtividadesChart {
             width: 100%;
-            max-width: 800px; /* Limita a largura do gráfico */
+            max-width: 800px;
             height: 400px !important;
             margin: 0 auto;
         }
+
         #resetPassword {
             text-align: center;
             width: 100%;
@@ -81,11 +118,12 @@
             margin: 0 auto;
             display: none;
         }
+
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY", // Substitua com sua chave de API real
@@ -109,7 +147,6 @@
                 document.getElementById('email').value = user.email;
                 document.getElementById('resetPassword').style.display = 'none';
 
-
                 const tokenResult = await user.getIdTokenResult();
                 isAdmin = tokenResult.claims.admin === true;
 
@@ -127,7 +164,14 @@
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
             auth.signInWithPopup(provider)
-                .catch((error) => alert('Erro no login com Gmail: ' + error.message));
+                .then((userCredential) => {
+                    console.log('Usuário logado com Gmail:', userCredential.user);
+                    // Não precisa esconder o formulário aqui, o auth.onAuthStateChanged() já faz isso
+                })
+                .catch((error) => {
+                    console.error('Erro no login com Gmail:', error.code, error.message);
+                    alert('Erro no login com Gmail: ' + error.message); // Melhore o feedback ao usuário
+                });
         }
 
         function loginComEmail() {
@@ -138,48 +182,46 @@
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     console.log('Usuário logado com e-mail:', userCredential.user);
-                     errorLabel.textContent = '';
-                     document.getElementById('resetPassword').style.display = 'none';
-
+                    errorLabel.textContent = ''; // Limpa a mensagem de erro
+                    // Não precisa esconder o formulário aqui, o auth.onAuthStateChanged() já faz isso
                 })
                 .catch((error) => {
                     console.error('Erro ao fazer login com e-mail:', error.code, error.message);
-                    errorLabel.textContent = 'Erro ao fazer login: ' + error.message;
+                    errorLabel.textContent = 'Erro ao fazer login: ' + error.message; // Exibe a mensagem de erro
                 });
         }
 
         function cadastrarNovoUsuario() {
             const email = document.getElementById('emailCadastro').value;
             const password = document.getElementById('passwordCadastro').value;
-             const errorLabel = document.getElementById('cadastroEmailErro');
+            const errorLabel = document.getElementById('cadastroEmailErro');
 
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     console.log('Novo usuário cadastrado:', userCredential.user);
-                    errorLabel.textContent = '';
+                    errorLabel.textContent = ''; // Limpa a mensagem de erro
                     // Opcional: Enviar e-mail de verificação
                     // userCredential.user.sendEmailVerification();
                 })
                 .catch((error) => {
                     console.error('Erro ao cadastrar usuário:', error.code, error.message);
-                    errorLabel.textContent = 'Erro ao cadastrar: ' + error.message;
+                    errorLabel.textContent = 'Erro ao cadastrar: ' + error.message; // Exibe a mensagem de erro
                 });
         }
 
-         function resetPassword() {
+        function resetPassword() {
             const email = document.getElementById('emailReset').value;
             const errorLabel = document.getElementById('resetPasswordError');
 
             auth.sendPasswordResetEmail(email)
                 .then(() => {
                     alert('Email de recuperação de senha enviado! Verifique sua caixa de entrada.');
-                    errorLabel.textContent = '';
+                    errorLabel.textContent = ''; // Limpa a mensagem de erro
                     document.getElementById('resetPassword').style.display = 'none';
-
                 })
                 .catch((error) => {
                     console.error('Erro ao enviar email de recuperação:', error.code, error.message);
-                    errorLabel.textContent = 'Erro ao enviar email de recuperação: ' + error.message;
+                    errorLabel.textContent = 'Erro ao enviar email de recuperação: ' + error.message; // Exibe a mensagem de erro
                 });
         }
 
@@ -304,7 +346,7 @@
                 const todosFormularios = [];
                 querySnapshot.forEach((doc) => {
                     const f = doc.data();
-                     todosFormularios.push(f);
+                    todosFormularios.push(f);
                     const registro = document.createElement('div');
                     registro.className = 'registro';
 
@@ -312,7 +354,7 @@
                         registro.classList.add('pendente');
                     }
 
-                     if (f.fimPrevisto) {
+                    if (f.fimPrevisto) {
                         const fimPrevistoDate = new Date(f.fimPrevisto);
                         fimPrevistoDate.setHours(0, 0, 0, 0);
                         if (fimPrevistoDate < hoje) {
@@ -328,7 +370,7 @@
                     `;
 
                     if (isAdmin) {
-                         actionsHTML = `
+                        actionsHTML = `
                             <div class="registro-actions admin-actions">
                                 <button onclick="editarFormulario('${doc.id}')">Editar</button>
                                 <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
@@ -411,7 +453,7 @@
                     document.getElementById('ordem').value = data.ordem || '';
                     document.getElementById('pt').value = data.pt || '';
 
-                     // Remove a classe readonly dos campos ao carregar para edição
+                    // Remove a classe readonly dos campos ao carregar para edição
                     document.getElementById('descricao').classList.remove('readonly');
                     document.getElementById('inicioPrevisto').classList.remove('readonly');
                     document.getElementById('fimPrevisto').classList.remove('readonly');
