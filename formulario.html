@@ -382,24 +382,25 @@
                         }
                     }
                 });
-                
         const comparacaoCtx = document.getElementById('comparacaoAtividadesChart').getContext('2d');
         const contadorDoc = await db.collection('contadores').doc('contador_qrcode').get();
         const totalAtividadesQRCode = contadorDoc.exists ? contadorDoc.data().total : 0;
         const totalFormularios = todosFormularios.length;
+        const totalFormulariosFinalizados = todosFormularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
+        const totalFormulariosAbertos = totalFormularios - totalFormulariosFinalizados;
 
         const comparacaoAtividadesChart = new Chart(comparacaoCtx, {
-            type: 'bar', // Ou 'pie'
+            type: 'bar',
             data: {
-                labels: ['QR Code', 'Formulário'],
+                labels: ['QR Code', 'Formulários (Total)', 'Formulários (Finalizados)', 'Formulários (Abertos)'],
                 datasets: [{
                     label: 'Total de Atividades',
-                    data: [totalAtividadesQRCode, totalFormularios],
-                    backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)'],
-                    borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+                    data: [totalAtividadesQRCode, totalFormularios, totalFormulariosFinalizados, totalFormulariosAbertos],
+                    backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)', 'rgba(75, 192, 192, 0.7)', 'rgba(255, 159, 64, 0.7)'],
+                    borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
                     borderWidth: 1
                 }]
-            }, 
+            },
             options: {
                 responsive: false,
                 maintainAspectRatio: false,
@@ -411,7 +412,7 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Comparação Atividades QR Code vs. Formulário',
+                        text: 'Comparação Atividades: QR Code vs. Formulários',
                         font: {
                             size: 16
                         }
@@ -581,10 +582,4 @@
         <div id="historico"></div>
     </div>
 </body>
-
-
-
-
-
-    
 </html>
