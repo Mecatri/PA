@@ -119,9 +119,8 @@
   const canvas = document.createElement("canvas");
   qrcodeContainer.appendChild(canvas);
 
-  if (!descricao || !inicio || !fim || !ordemServico) { // Valida se o campo OS está preenchido
+  if (!descricao || !inicio || !fim || !ordemServico) { 
   mensagem.textContent = "Por favor, preencha todos os campos, incluindo o número da Ordem de Serviço.";
-  return;
   }
   if (new Date(inicio) >= new Date(fim)) {
   mensagem.textContent = "A data de início deve ser anterior à data de término.";
