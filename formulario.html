@@ -249,21 +249,23 @@
                 descricao: params.get('descricao'),
                 inicioPrevisto: params.get('inicio'),
                 fimPrevisto: params.get('fim'),
-                ordemServico: params.get('ordemServico') // Adicione a OS
+                ordem: params.get('ordemServico')
             };
         }
 
         function preencherFormulario() {
-            const { descricao, inicioPrevisto, fimPrevisto,ordemServico } = getQueryParams();
+            const { descricao, inicioPrevisto, fimPrevisto,ordemServico,ordem } = getQueryParams();
             if (descricao) document.getElementById('descricao').value = descricao;
             if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
             if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
-            if (ordemServico) document.getElementById('Ordem de serviçoO').value = OS;{
-                const ordemServicoInput = document.getElementById('ordemServico');
-                OSInput.value = ordemServico;
-                OSInput.readOnly = true;  // Impede a edição
+            if (ordem) {
+                const ordemInput = document.getElementById('ordem');
+                ordemInput.value = ordem;
+                ordemInput.readOnly = true;
+                ordemInput.classList.add('readonly');  // Impede a edição
                 }
             }
+        window.onload = preencherFormulario;
 
         function validarFormulario(event) {
             event.preventDefault();
