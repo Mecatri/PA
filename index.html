@@ -26,7 +26,7 @@
   function login() {
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ client_id: firebaseConfig.clientId });
-   
+  }
   async function carregarContador() {
   try {
   const doc = await db.collection('contadores').doc(CONTADOR_DOC_ID).get();
@@ -121,6 +121,7 @@
 
   if (!descricao || !inicio || !fim || !ordemServico) { 
   mensagem.textContent = "Por favor, preencha todos os campos, incluindo o número da Ordem de Serviço.";
+  return;
   }
   if (new Date(inicio) >= new Date(fim)) {
   mensagem.textContent = "A data de início deve ser anterior à data de término.";
