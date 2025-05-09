@@ -249,18 +249,18 @@
                 descricao: params.get('descricao'),
                 inicioPrevisto: params.get('inicio'),
                 fimPrevisto: params.get('fim'),
-                Ordem: params.get('Ordem') // Adicione a OS
+                ordemServico: params.get('ordemServico') // Adicione a OS
             };
         }
 
         function preencherFormulario() {
-            const { descricao, inicioPrevisto, fimPrevisto,Ordem } = getQueryParams();
+            const { descricao, inicioPrevisto, fimPrevisto,ordemServico } = getQueryParams();
             if (descricao) document.getElementById('descricao').value = descricao;
             if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
             if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
-            if (Ordem) document.getElementById('Ordem de serviçoO').value = OS;{
-                const ordemInput = document.getElementById('ordem');
-                OSInput.value = ordem;
+            if (ordemServico) document.getElementById('Ordem de serviçoO').value = OS;{
+                const ordemServicoInput = document.getElementById('ordemServico');
+                OSInput.value = ordemServico;
                 OSInput.readOnly = true;  // Impede a edição
                 }
             }
