@@ -665,36 +665,8 @@
                 }
             }
         }
-    </script>
-</head>
-   
-    <script>
-    // Coloque a função enviarRecuperacaoSenha() aqui, antes de ser chamada no HTML
-    function enviarRecuperacaoSenha() {
-        const email = document.getElementById('emailLogin').value;
-        auth.sendPasswordResetEmail(email)
-            .then(() => {
-                alert('Um e-mail de recuperação de senha foi enviado para ' + email);
-            })
-            .catch((error) => {
-                console.error('Erro ao enviar e-mail de recuperação:', error);
-                alert('Erro ao enviar e-mail de recuperação de senha: ' + error.message);
-            });
-    }
 
-    // Outras funções...
-    function loginComEmail() { ... }
-    function cadastrarNovoUsuario() { ... }
-    function logout() { ... }
-
-    // Seu código de inicialização e lógica principal
-    const firebaseConfig = { ... };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    ...
-</script>
-<body>
+    <body>
     <div id="login">
         <h2>Bem-vindo</h2>
         <div class="login-form">
@@ -724,9 +696,7 @@
             <button onclick="cadastrarNovoUsuario()">Cadastrar</button>
             <p id="cadastroEmailErro" class="error"></p>
         </div>
-        
     </div>
-
     <div id="form-container" style="display: none;">
         <h1>Formulário da Atividade</h1>
         <form id="formulario" onsubmit="validarFormulario(event)">
@@ -773,6 +743,7 @@
         </div>
             
         <div id="historico"></div>
-    </div>
-</body>
+        </div>
+        </body>
+    </script>
 </html>
