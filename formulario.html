@@ -256,11 +256,11 @@
         function preencherFormulario() {
             const { descricao, inicioPrevisto, fimPrevisto,ordemServico,ordem } = getQueryParams();
             if (descricao) document.getElementById('descricao').value = descricao;{
-                ordemInput.readOnly = true;}
+                descricaoInput.readOnly = true;}
             if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;{
-                ordemInput.readOnly = true;}
+                inicioPrevisto.readOnly = true;}
             if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;{
-                ordemInput.readOnly = true;}
+                fimPrevistoInput.readOnly = true;}
             if (ordem) {
                 const ordemInput = document.getElementById('ordem');
                 ordemInput.value = ordem;
