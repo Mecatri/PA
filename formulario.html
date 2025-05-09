@@ -258,6 +258,7 @@
             if (descricao) document.getElementById('descricao').value = descricao;
             if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
             if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
+            if (OS) document.getElementById('Ordem de serviço').value = OS;
         }
 
         function validarFormulario(event) {
@@ -266,7 +267,6 @@
 
             const camposObrigatorios = [
                 { id: 'operador', erro: 'operadorErro', msg: 'Preencha o Nome do Operador.' },
-                { id: 'ordem', erro: 'ordemErro', msg: 'Preencha o Número da Ordem de Serviço.' },
                 { id: 'pt', erro: 'ptErro', msg: 'Preencha o Número da PT.' },
                 { id: 'inicioReal', erro: 'inicioRealErro', msg: 'Preencha a Data e Hora de Início Real.' }
             ];
