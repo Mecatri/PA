@@ -1,5 +1,42 @@
 <!DOCTYPE html>
  <html lang="pt-BR">
+  <body>
+  <div id="contador-qrcode">Contador: 0</div>
+  <h2>Gerador de QR Code - Atividade</h2>
+
+  <div id="login">
+  <h3>Login</h3>
+  <button onclick="login()">Entrar com Gmail</button>
+  <p id="loginMessage"></p>
+  </div>
+
+  <div id="app" style="display: none;">
+  <label for="descricao">Descrição da Atividade</label>
+  <textarea id="descricao" rows="3" placeholder="Ex: Troca da válvula CV-210"></textarea>
+
+  <label for="inicio">Data e Hora de Início Prevista</label>
+  <input type="datetime-local" id="inicio">
+
+  <label for="fim">Data e Hora de Término Prevista</label>
+  <input type="datetime-local" id="fim">
+
+  <label for="ordemServico">Número da Ordem de Serviço</label>
+  <input type="text" id="ordemServico" placeholder="Digite o número da OS">
+
+  <button onclick="gerarQRCode()">Gerar QR Code</button>
+
+  <div id="qrcode"></div>
+  <p id="mensagem" class="error"></p>
+
+  <div id="historico">
+  <h3>📂 Histórico de Atividades Geradas</h3>
+  <div id="listaAtividades"></div>
+  </div>
+
+  <button onclick="logout()">Sair</button>
+  </div>
+  
+ </body>
  <head>
     <script>
   // Configuração do Firebase
@@ -338,41 +375,5 @@
   }
   </style>
  </head>
- <body>
-  <div id="contador-qrcode">Contador: 0</div>
-  <h2>Gerador de QR Code - Atividade</h2>
-
-  <div id="login">
-  <h3>Login</h3>
-  <button onclick="login()">Entrar com Gmail</button>
-  <p id="loginMessage"></p>
-  </div>
-
-  <div id="app" style="display: none;">
-  <label for="descricao">Descrição da Atividade</label>
-  <textarea id="descricao" rows="3" placeholder="Ex: Troca da válvula CV-210"></textarea>
-
-  <label for="inicio">Data e Hora de Início Prevista</label>
-  <input type="datetime-local" id="inicio">
-
-  <label for="fim">Data e Hora de Término Prevista</label>
-  <input type="datetime-local" id="fim">
-
-  <label for="ordemServico">Número da Ordem de Serviço</label>
-  <input type="text" id="ordemServico" placeholder="Digite o número da OS">
-
-  <button onclick="gerarQRCode()">Gerar QR Code</button>
-
-  <div id="qrcode"></div>
-  <p id="mensagem" class="error"></p>
-
-  <div id="historico">
-  <h3>📂 Histórico de Atividades Geradas</h3>
-  <div id="listaAtividades"></div>
-  </div>
-
-  <button onclick="logout()">Sair</button>
-  </div>
-  
- </body>
+ 
  </html>
