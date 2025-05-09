@@ -249,16 +249,16 @@
                 descricao: params.get('descricao'),
                 inicioPrevisto: params.get('inicio'),
                 fimPrevisto: params.get('fim'),
-                OS: params.get('OS') // Adicione a OS
+                Ordem: params.get('Ordem') // Adicione a OS
             };
         }
 
         function preencherFormulario() {
-            const { descricao, inicioPrevisto, fimPrevisto,OS } = getQueryParams();
+            const { descricao, inicioPrevisto, fimPrevisto,Ordem } = getQueryParams();
             if (descricao) document.getElementById('descricao').value = descricao;
             if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
             if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
-            if (OS) document.getElementById('Ordem de serviçoO').value = OS;{
+            if (Ordem) document.getElementById('Ordem de serviçoO').value = OS;{
                 const ordemInput = document.getElementById('ordem');
                 OSInput.value = ordem;
                 OSInput.readOnly = true;  // Impede a edição
