@@ -1,386 +1,391 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de QR Code - Atividades</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative; /* Para posicionar o contador */
-        }
-        h2, h3 {
-            text-align: center;
-        }
-        #login {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        #contador-qrcode {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 8px;
-            border-radius: 4px;
-            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-            font-size: 0.9em;
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-            width: 100%;
-        }
-        input, textarea {
-            width: calc(100% - 16px);
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            margin-top: 15px;
-            padding: 10px 15px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #qrcode {
-            margin-top: 20px;
-            text-align: center;
-        }
-        #historico {
-            margin-top: 30px;
-            width: 100%;
-        }
-        #listaAtividades {
-            margin-top: 10px;
-        }
-        .atividade {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            text-align: left;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .atividade a {
-            word-break: break-word;
-        }
-        .error {
-            color: red;
-            margin-top: 10px;
-            text-align: center;
-        }
-        .success {
-            color: green;
-            margin-top: 10px;
-            text-align: center;
-        }
-        .delete-btn {
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-            margin-top: 5px;
-        }
-        .delete-btn:hover {
-            background-color: #c82333;
-        }
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            button {
-                width: 100%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div id="contador-qrcode">Contador: 0</div>
-    <h2>Gerador de QR Code - Atividade</h2>
+ <html lang="pt-BR">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de QR Code - Atividades</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+  body {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* Para posicionar o contador */
+  }
+  h2, h3 {
+  text-align: center;
+  }
+  #login {
+  text-align: center;
+  margin-bottom: 20px;
+  }
+  #contador-qrcode {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  font-size: 0.9em;
+  }
+  label {
+  display: block;
+  margin-top: 10px;
+  width: 100%;
+  }
+  input, textarea {
+  width: calc(100% - 16px);
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  }
+  button {
+  margin-top: 15px;
+  padding: 10px 15px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  }
+  button:hover {
+  background-color: #0056b3;
+  }
+  #qrcode {
+  margin-top: 20px;
+  text-align: center;
+  }
+  #historico {
+  margin-top: 30px;
+  width: 100%;
+  }
+  #listaAtividades {
+  margin-top: 10px;
+  }
+  .atividade {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+  }
+  .atividade a {
+  word-break: break-word;
+  }
+  .error {
+  color: red;
+  margin-top: 10px;
+  text-align: center;
+  }
+  .success {
+  color: green;
+  margin-top: 10px;
+  text-align: center;
+  }
+  .delete-btn {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-top: 5px;
+  }
+  .delete-btn:hover {
+  background-color: #c82333;
+  }
+  @media (max-width: 600px) {
+  body {
+  padding: 10px;
+  }
+  button {
+  width: 100%;
+  }
+  }
+  </style>
+ </head>
+ <body>
+  <div id="contador-qrcode">Contador: 0</div>
+  <h2>Gerador de QR Code - Atividade</h2>
 
-    <div id="login">
-        <h3>Login</h3>
-        <button onclick="login()">Entrar com Gmail</button>
-        <p id="loginMessage"></p>
-    </div>
+  <div id="login">
+  <h3>Login</h3>
+  <button onclick="login()">Entrar com Gmail</button>
+  <p id="loginMessage"></p>
+  </div>
 
-    <div id="app" style="display: none;">
-        <label for="descricao">Descrição da Atividade</label>
-        <textarea id="descricao" rows="3" placeholder="Ex: Troca da válvula CV-210"></textarea>
+  <div id="app" style="display: none;">
+  <label for="descricao">Descrição da Atividade</label>
+  <textarea id="descricao" rows="3" placeholder="Ex: Troca da válvula CV-210"></textarea>
 
-        <label for="inicio">Data e Hora de Início Prevista</label>
-        <input type="datetime-local" id="inicio">
+  <label for="inicio">Data e Hora de Início Prevista</label>
+  <input type="datetime-local" id="inicio">
 
-        <label for="fim">Data e Hora de Término Prevista</label>
-        <input type="datetime-local" id="fim">
+  <label for="fim">Data e Hora de Término Prevista</label>
+  <input type="datetime-local" id="fim">
 
-        <button onclick="gerarQRCode()">Gerar QR Code</button>
+  <label for="ordemServico">Número da Ordem de Serviço</label>
+  <input type="text" id="ordemServico" placeholder="Digite o número da OS">
 
-        <div id="qrcode"></div>
-        <p id="mensagem" class="error"></p>
+  <button onclick="gerarQRCode()">Gerar QR Code</button>
 
-        <div id="historico">
-            <h3>📂 Histórico de Atividades Geradas</h3>
-            <div id="listaAtividades"></div>
-        </div>
+  <div id="qrcode"></div>
+  <p id="mensagem" class="error"></p>
 
-        <button onclick="logout()">Sair</button>
-    </div>
+  <div id="historico">
+  <h3>📂 Histórico de Atividades Geradas</h3>
+  <div id="listaAtividades"></div>
+  </div>
 
-    <script>
-        // Configuração do Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
-            authDomain: "pa-pg-a7abc.firebaseapp.com",
-            projectId: "pa-pg-a7abc",
-            storageBucket: "pa-pg-a7abc.firebasestorage.app",
-            messagingSenderId: "102164980919",
-            appId: "1:102164980919:web:72220a8b2ed478a2cdd932",
-            clientId: "460190166657-18jbdvae4cemj3n38ivsnol1r975nkee.apps.googleusercontent.com"
-        };
+  <button onclick="logout()">Sair</button>
+  </div>
 
-        // Inicialize o Firebase
-        firebase.initializeApp(firebaseConfig);
+  <script>
+  // Configuração do Firebase
+  const firebaseConfig = {
+  apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
+  authDomain: "pa-pg-a7abc.firebaseapp.com",
+  projectId: "pa-pg-a7abc",
+  storageBucket: "pa-pg-a7abc.firebasestorage.app",
+  messagingSenderId: "102164980919",
+  appId: "1:102164980919:web:72220a8b2ed478a2cdd932",
+  clientId: "460190166657-18jbdvae4cemj3n38ivsnol1r975nkee.apps.googleusercontent.com"
+  };
 
-        // Inicialize os serviços do Firebase
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const contadorQrcodeElement = document.getElementById('contador-qrcode');
-        let contadorQrcode = 0;
-        const CONTADOR_DOC_ID = 'contador_qrcode'; // ID do documento no Firestore
+  // Inicialize o Firebase
+  firebase.initializeApp(firebaseConfig);
 
-        // Função para carregar o contador do Firestore
-        async function carregarContador() {
-            try {
-                const doc = await db.collection('contadores').doc(CONTADOR_DOC_ID).get();
-                if (doc.exists) {
-                    contadorQrcode = doc.data().total || 0;
-                } else {
-                    // Se o documento não existir, cria com o contador inicial
-                    await db.collection('contadores').doc(CONTADOR_DOC_ID).set({ total: 0 });
-                }
-                atualizarContadorDisplay();
-            } catch (error) {
-                console.error("Erro ao carregar contador:", error);
-            }
-        }
+  // Inicialize os serviços do Firebase
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const contadorQrcodeElement = document.getElementById('contador-qrcode');
+  let contadorQrcode = 0;
+  const CONTADOR_DOC_ID = 'contador_qrcode'; // ID do documento no Firestore
 
-        // Função para atualizar o contador no Firestore
-        async function atualizarContadorFirestore() {
-            try {
-                await db.collection('contadores').doc(CONTADOR_DOC_ID).update({ total: contadorQrcode });
-            } catch (error) {
-                console.error("Erro ao atualizar contador:", error);
-            }
-        }
+  // Função para carregar o contador do Firestore
+  async function carregarContador() {
+  try {
+  const doc = await db.collection('contadores').doc(CONTADOR_DOC_ID).get();
+  if (doc.exists) {
+  contadorQrcode = doc.data().total || 0;
+  } else {
+  // Se o documento não existir, cria com o contador inicial
+  await db.collection('contadores').doc(CONTADOR_DOC_ID).set({ total: 0 });
+  }
+  atualizarContadorDisplay();
+  } catch (error) {
+  console.error("Erro ao carregar contador:", error);
+  }
+  }
 
-        // Função para atualizar a exibição do contador
-        function atualizarContadorDisplay() {
-            contadorQrcodeElement.textContent = `Contador: ${contadorQrcode}`;
-        }
+  // Função para atualizar o contador no Firestore
+  async function atualizarContadorFirestore() {
+  try {
+  await db.collection('contadores').doc(CONTADOR_DOC_ID).update({ total: contadorQrcode });
+  } catch (error) {
+  console.error("Erro ao atualizar contador:", error);
+  }
+  }
 
-        // Função de login com Gmail
-        function login() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ client_id: firebaseConfig.clientId });
+  // Função para atualizar a exibição do contador
+  function atualizarContadorDisplay() {
+  contadorQrcodeElement.textContent = `Contador: ${contadorQrcode}`;
+  }
 
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    console.log("Usuário logado:", result.user);
-                    document.getElementById("login").style.display = "none";
-                    document.getElementById("app").style.display = "block";
-                    document.getElementById("loginMessage").textContent = "";
-                    carregarContador(); // Carrega o contador ao logar
-                    mostrarHistorico();
-                })
-                .catch((error) => {
-                    console.error("Erro no login:", error);
-                    document.getElementById("loginMessage").textContent = "Erro no login: " + error.message;
-                });
-        }
+  // Função de login com Gmail
+  function login() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ client_id: firebaseConfig.clientId });
 
-        // Função de logout
-        function logout() {
-            auth.signOut()
-                .then(() => {
-                    console.log("Usuário deslogado");
-                    document.getElementById("login").style.display = "block";
-                    document.getElementById("app").style.display = "none";
-                })
-                .catch((error) => {
-                    console.error("Erro ao sair:", error);
-                });
-        }
+  auth.signInWithPopup(provider)
+  .then((result) => {
+  console.log("Usuário logado:", result.user);
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("loginMessage").textContent = "";
+  carregarContador(); // Carrega o contador ao logar
+  mostrarHistorico();
+  })
+  .catch((error) => {
+  console.error("Erro no login:", error);
+  document.getElementById("loginMessage").textContent = "Erro no login: " + error.message;
+  });
+  }
 
-        // Verificar estado de autenticação
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                console.log("Usuário autenticado:", user);
-                document.getElementById("login").style.display = "none";
-                document.getElementById("app").style.display = "block";
-                carregarContador(); // Carrega o contador ao autenticar
-                mostrarHistorico();
-            } else {
-                console.log("Nenhum usuário autenticado");
-                document.getElementById("login").style.display = "block";
-                document.getElementById("app").style.display = "none";
-            }
-        });
+  // Função de logout
+  function logout() {
+  auth.signOut()
+  .then(() => {
+  console.log("Usuário deslogado");
+  document.getElementById("login").style.display = "block";
+  document.getElementById("app").style.display = "none";
+  })
+  .catch((error) => {
+  console.error("Erro ao sair:", error);
+  });
+  }
 
-        // Função para gerar QR Code
-        async function gerarQRCode() {
-            if (!auth.currentUser) {
-                alert("Você precisa estar logado para realizar esta ação.");
-                return;
-            }
+  // Verificar estado de autenticação
+  auth.onAuthStateChanged((user) => {
+  if (user) {
+  console.log("Usuário autenticado:", user);
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  carregarContador(); // Carrega o contador ao autenticar
+  mostrarHistorico();
+  } else {
+  console.log("Nenhum usuário autenticado");
+  document.getElementById("login").style.display = "block";
+  document.getElementById("app").style.display = "none";
+  }
+  });
 
-            const descricao = document.getElementById("descricao").value.trim();
-            const inicio = document.getElementById("inicio").value;
-            const fim = document.getElementById("fim").value;
-            const mensagem = document.getElementById("mensagem");
-            const qrcodeContainer = document.getElementById("qrcode");
-            qrcodeContainer.innerHTML = "";
-            const canvas = document.createElement("canvas");
-            qrcodeContainer.appendChild(canvas);
+  // Função para gerar QR Code
+  async function gerarQRCode() {
+  if (!auth.currentUser) {
+  alert("Você precisa estar logado para realizar esta ação.");
+  return;
+  }
 
-            if (!descricao || !inicio || !fim) {
-                mensagem.textContent = "Por favor, preencha todos os campos.";
-                return;
-            }
+  const descricao = document.getElementById("descricao").value.trim();
+  const inicio = document.getElementById("inicio").value;
+  const fim = document.getElementById("fim").value;
+  const ordemServico = document.getElementById("ordemServico").value; // Captura o valor do campo OS
+  const mensagem = document.getElementById("mensagem");
+  const qrcodeContainer = document.getElementById("qrcode");
+  qrcodeContainer.innerHTML = "";
+  const canvas = document.createElement("canvas");
+  qrcodeContainer.appendChild(canvas);
 
-            if (new Date(inicio) >= new Date(fim)) {
-                mensagem.textContent = "A data de início deve ser anterior à data de término.";
-                return;
-            }
+  if (!descricao || !inicio || !fim || !ordemServico) { // Valida se o campo OS está preenchido
+  mensagem.textContent = "Por favor, preencha todos os campos, incluindo o número da Ordem de Serviço.";
+  return;
+  }
 
-            mensagem.textContent = "";
+  if (new Date(inicio) >= new Date(fim)) {
+  mensagem.textContent = "A data de início deve ser anterior à data de término.";
+  return;
+  }
 
-            // URL da página do formulário com parâmetros
-            const url = `https://mecatri.github.io/PA/formulario.html?descricao=${encodeURIComponent(descricao)}&inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`;
+  mensagem.textContent = "";
 
-            try {
-                // Gerar QR Code como Data URL
-                QRCode.toDataURL(url, async function (error, dataUrl) {
-                    if (error) {
-                        console.error(error);
-                        qrcodeContainer.innerHTML = "<p>Erro ao gerar QR Code</p>";
-                        return;
-                    }
+  // URL da página do formulário com parâmetros
+  const url = `https://mecatri.github.io/PA/formulario.html?descricao=${encodeURIComponent(descricao)}&inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}&ordemServico=${encodeURIComponent(ordemServico)}`; // Inclui ordemServico na URL
 
-                    const link = document.createElement("p");
-                    link.innerHTML = `Link gerado: <a href="${url}" target="_blank">${url}</a><br><strong>${descricao}</strong>`;
-                    qrcodeContainer.appendChild(link);
+  try {
+  // Gerar QR Code como Data URL
+  QRCode.toDataURL(url, async function (error, dataUrl) {
+  if (error) {
+  console.error(error);
+  qrcodeContainer.innerHTML = "<p>Erro ao gerar QR Code</p>";
+  return;
+  }
 
-                    const img = document.createElement("img");
-                    img.src = dataUrl;
-                    img.style.maxWidth = "200px";
-                    qrcodeContainer.appendChild(img);
+  const link = document.createElement("p");
+  link.innerHTML = `Link gerado: <a href="${url}" target="_blank">${url}</a><br><strong>${descricao}</strong> - OS: ${ordemServico}`; // Inclui OS no link
+  qrcodeContainer.appendChild(link);
 
-                    // Salvar no Firestore (incluindo a dataUrl do QR Code)
-                    const atividade = { descricao, inicio, fim, url, qrCodeUrl: dataUrl, userId: auth.currentUser.uid };
-                    try {
-                        const docRef = await db.collection("historico").add(atividade);
-                        console.log("Atividade salva no Firebase com ID:", docRef.id);
-                        contadorQrcode++; // Incrementa o contador
-                        atualizarContadorDisplay();
-                        atualizarContadorFirestore();
-                        mostrarHistorico();
-                    } catch (error) {
-                        console.error("Erro ao salvar atividade:", error);
-                    }
-                });
-            } catch (error) {
-                console.error("Erro ao gerar QR Code:", error);
-                qrcodeContainer.innerHTML = "<p>Erro ao gerar QR Code</p>";
-            }
-        }
+  const img = document.createElement("img");
+  img.src = dataUrl;
+  img.style.maxWidth = "200px";
+  qrcodeContainer.appendChild(img);
 
-        // Função para mostrar histórico
-        async function mostrarHistorico() {
-            const lista = document.getElementById("listaAtividades");
-            lista.innerHTML = "";
+  // Salvar no Firestore (incluindo a dataUrl do QR Code e a ordem de serviço)
+  const atividade = { descricao, inicio, fim, ordemServico, url, qrCodeUrl: dataUrl, userId: auth.currentUser.uid };
+  try {
+  const docRef = await db.collection("historico").add(atividade);
+  console.log("Atividade salva no Firebase com ID:", docRef.id);
+  contadorQrcode++; // Incrementa o contador
+  atualizarContadorDisplay();
+  atualizarContadorFirestore();
+  mostrarHistorico();
+  } catch (error) {
+  console.error("Erro ao salvar atividade:", error);
+  }
+  });
+  } catch (error) {
+  console.error("Erro ao gerar QR Code:", error);
+  qrcodeContainer.innerHTML = "<p>Erro ao gerar QR Code</p>";
+  }
+  }
 
-            if (!auth.currentUser) {
-                alert("Você precisa estar logado para acessar o histórico.");
-                return;
-            }
+  // Função para mostrar histórico
+  async function mostrarHistorico() {
+  const lista = document.getElementById("listaAtividades");
+  lista.innerHTML = "";
 
-            try {
-                const querySnapshot = await db.collection("historico").where("userId", "==", auth.currentUser.uid).get();
-                if (querySnapshot.empty) {
-                    lista.innerHTML = "<p>Nenhuma atividade encontrada.</p>";
-                    return;
-                }
+  if (!auth.currentUser) {
+  alert("Você precisa estar logado para acessar o histórico.");
+  return;
+  }
 
-                // Atualiza o contador com o número de itens no histórico (pode ser útil se itens forem excluídos)
-                contadorQrcode = querySnapshot.size;
-                atualizarContadorDisplay();
+  try {
+  const querySnapshot = await db.collection("historico").where("userId", "==", auth.currentUser.uid).get();
+  if (querySnapshot.empty) {
+  lista.innerHTML = "<p>Nenhuma atividade encontrada.</p>";
+  return;
+  }
 
-                querySnapshot.forEach((doc) => {
-                    const atv = doc.data();
-                    const div = document.createElement("div");
-                    div.className = "atividade";
-                    div.innerHTML = `
-                        <strong>Descrição:</strong> ${atv.descricao}<br>
-                        <strong>Início:</strong> ${new Date(atv.inicio).toLocaleString()}<br>
-                        <strong>Fim:</strong> ${new Date(atv.fim).toLocaleString()}<br>
-                        <a href="${atv.url}" target="_blank">Abrir Formulário</a><br>
-                        <strong>QR Code:</strong><br>
-                        <img src="${atv.qrCodeUrl}" alt="QR Code da Atividade" style="max-width: 150px;">
-                        <button class="delete-btn" onclick="confirmarExclusao('${doc.id}')">Excluir</button>
-                    `;
-                    lista.appendChild(div);
-                });
-            } catch (error) {
-                console.error("Erro ao carregar histórico:", error);
-                lista.innerHTML = `<p class="error">Erro ao carregar histórico: ${error.message}</p>`;
-            }
-        }
+  // Atualiza o contador com o número de itens no histórico (pode ser útil se itens forem excluídos)
+  contadorQrcode = querySnapshot.size;
+  atualizarContadorDisplay();
 
-        // Função para confirmar e excluir uma atividade
-        async function confirmarExclusao(docId) {
-            const confirmar = confirm("Tem certeza de que deseja excluir esta atividade?");
-            if (confirmar) {
-                try {
-                    await db.collection("historico").doc(docId).delete();
-                    console.log("Atividade excluída com sucesso:", docId);
-                    contadorQrcode--; // Decrementa o contador ao excluir
-                    atualizarContadorDisplay();
-                    atualizarContadorFirestore();
-                    mostrarHistorico(); // Atualiza o histórico após exclusão
-                } catch (error) {
-                    console.error("Erro ao excluir atividade:", error);
-                    alert("Erro ao excluir atividade: " + error.message);
-                }
-            }
-        }
+  querySnapshot.forEach((doc) => {
+  const atv = doc.data();
+  const div = document.createElement("div");
+  div.className = "atividade";
+  div.innerHTML = `
+  <strong>Descrição:</strong> ${atv.descricao}<br>
+  <strong>Início:</strong> ${new Date(atv.inicio).toLocaleString()}<br>
+  <strong>Fim:</strong> ${new Date(atv.fim).toLocaleString()}<br>
+  <strong>OS:</strong> ${atv.ordemServico}<br>
+  <a href="${atv.url}" target="_blank">Abrir Formulário</a><br>
+  <strong>QR Code:</strong><br>
+  <img src="${atv.qrCodeUrl}" alt="QR Code da Atividade" style="max-width: 150px;">
+  <button class="delete-btn" onclick="confirmarExclusao('${doc.id}')">Excluir</button>
+  `;
+  lista.appendChild(div);
+  });
+  } catch (error) {
+  console.error("Erro ao carregar histórico:", error);
+  lista.innerHTML = `<p class="error">Erro ao carregar histórico: ${error.message}</p>`;
+  }
+  }
 
-        // Carregar o contador inicial ao carregar a página
-        if (auth.currentUser) {
-            carregarContador();
-        }
-    </script>
-</body>
-</html>
+  // Função para confirmar e excluir uma atividade
+  async function confirmarExclusao(docId) {
+  const confirmar = confirm("Tem certeza de que deseja excluir esta atividade?");
+  if (confirmar) {
+  try {
+  await db.collection("historico").doc(docId).delete();
+  console.log("Atividade excluída com sucesso:", docId);
+  contadorQrcode--; // Decrementa o contador ao excluir
+  atualizarContadorDisplay();
+  atualizarContadorFirestore();
+  mostrarHistorico(); // Atualiza o histórico após exclusão
+  } catch (error) {
+  console.error("Erro ao excluir atividade:", error);
+  alert("Erro ao excluir atividade: " + error.message);
+  }
+  }
+  }
+
+  // Carregar o contador inicial ao carregar a página
+  if (auth.currentUser) {
+  carregarContador();
+  }
+  </script>
+ </body>
+ </html>
