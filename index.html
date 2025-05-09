@@ -257,6 +257,9 @@
   if (!auth.currentUser) {
   alert("Você precisa estar logado para realizar esta ação.");
   return;
+  const ordemServico = document.getElementById("ordemServico").value;  // Obtenha o valor do input
+  const url = `https://seu-site/formulario.html?descricao=<span class="math-inline">\{encodeURIComponent\(descricao\)\}&inicio\=</span>{encodeURIComponent(inicio)}&fim=<span class="math-inline">\{encodeURIComponent\(fim\)\}&ordemServico\=</span>{encodeURIComponent(ordemServico)}`;
+}
   }
 
   const descricao = document.getElementById("descricao").value.trim();
