@@ -248,12 +248,13 @@
             return {
                 descricao: params.get('descricao'),
                 inicioPrevisto: params.get('inicio'),
-                fimPrevisto: params.get('fim')
+                fimPrevisto: params.get('fim'),
+                OS: params.get('os') // Adicione a OS
             };
         }
 
         function preencherFormulario() {
-            const { descricao, inicioPrevisto, fimPrevisto } = getQueryParams();
+            const { descricao, inicioPrevisto, fimPrevisto,OS } = getQueryParams();
             if (descricao) document.getElementById('descricao').value = descricao;
             if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
             if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
