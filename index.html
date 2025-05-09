@@ -173,8 +173,11 @@
   const contadorQrcodeElement = document.getElementById('contador-qrcode');
   let contadorQrcode = 0;
   const CONTADOR_DOC_ID = 'contador_qrcode'; // ID do documento no Firestore
-
-  // Função para carregar o contador do Firestore
+   
+  function login() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ client_id: firebaseConfig.clientId });
+   
   async function carregarContador() {
   try {
   const doc = await db.collection('contadores').doc(CONTADOR_DOC_ID).get();
@@ -203,11 +206,6 @@
   function atualizarContadorDisplay() {
   contadorQrcodeElement.textContent = `Contador: ${contadorQrcode}`;
   }
-
-  // Função de login com Gmail
-  function login() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ client_id: firebaseConfig.clientId });
 
   auth.signInWithPopup(provider)
   .then((result) => {
@@ -276,7 +274,6 @@
   mensagem.textContent = "Por favor, preencha todos os campos, incluindo o número da Ordem de Serviço.";
   return;
   }
-
   if (new Date(inicio) >= new Date(fim)) {
   mensagem.textContent = "A data de início deve ser anterior à data de término.";
   return;
