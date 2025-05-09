@@ -258,8 +258,12 @@
             if (descricao) document.getElementById('descricao').value = descricao;
             if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
             if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
-            if (OS) document.getElementById('Ordem de serviçoO').value = OS;
-        }
+            if (OS) document.getElementById('Ordem de serviçoO').value = OS;{
+                const ordemInput = document.getElementById('ordem');
+                OSInput.value = ordem;
+                OSInput.readOnly = true;  // Impede a edição
+                }
+            }
 
         function validarFormulario(event) {
             event.preventDefault();
