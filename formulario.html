@@ -252,18 +252,116 @@
                 ordem: params.get('ordemServico')
             };
         }
+        
+        function verificarAtividadeExistente(ordemServico) {
+            return db.collection('formularios')
+                .where('ordem', '==', ordemServico)
+                .get()
+                .then(querySnapshot => {
+                    if (!querySnapshot.empty) {
+                        return querySnapshot.docs[0].data();
+                    } else {
+                        return null;
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao verificar atividade:", error);
+                    return null;
+                });
+        }
+
+        function exibirOpcoesAtividadeExistente(atividade) {
+            const formContainer = document.getElementById('form-container');
+            formContainer.innerHTML = `
+                <h2>Atividade Existente</h2>
+                <p><strong>Descrição:</strong> ${atividade.descricao}</p>
+                // ... (outros dados da atividade)
+                <button onclick="mostrarRevalidarPT()">Revalidar PT</button>
+                <button onclick="mostrarAdicionarNovaPT()">Adicionar Nova PT</button>
+                <div id="revalidar-pt-form" style="display:none;"> ... </div>
+                <div id="nova-pt-form" style="display:none;"> ... </div>
+            `;
+            formContainer.style.display = 'block';
+        }
+
+                function mostrarRevalidarPT() {
+            document.getElementById('revalidar-pt-form').style.display = 'block';
+            document.getElementById('nova-pt-form').style.display = 'none';
+        }
+        
+         function mostrarAdicionarNovaPT() {
+            document.getElementById('revalidar-pt-form').style.display = 'none';
+            document.getElementById('nova-pt-form').style.display = 'block';
+        }
+        
+        function revalidarPT() {
+            const dataReavaliacao = document.getElementById('dataReavaliacao').value;
+            const { descricao, inicioPrevisto, fimPrevisto, ordem } = getQueryParams();
+            db.collection('formularios').add({
+                descricao: descricao,
+                inicioPrevisto: inicioPrevisto,
+                fimPrevisto: fimPrevisto,
+                ordem: ordem,
+                dataReavaliacao: dataReavaliacao
+            })
+            .then(() => {
+                alert('PT Revalidada com sucesso!');
+            })
+            .catch(error => {
+                console.error("Erro ao revalidar PT:", error);
+                alert('Erro ao revalidar PT: ' + error.message);
+            });
+        }
+
+        function adicionarNovaPT() {
+            const numeroPtNova = document.getElementById('numeroPtNova').value;
+            const inicioPtNova = document.getElementById('inicioPtNova').value;
+            const fimPtNova = document.getElementById('fimPtNova').value;
+            const { descricao, inicioPrevisto, fimPrevisto, ordem } = getQueryParams();
+            db.collection('formularios').add({
+                descricao: descricao,
+                inicioPrevisto: inicioPrevisto,
+                fimPrevisto: fimPrevisto,
+                ordem: ordem,
+                numeroPtNova: numeroPtNova,
+                inicioPtNova: inicioPtNova,
+                fimPtNova: fimPtNova
+            })
+            .then(() => {
+                alert('Nova PT adicionada com sucesso!');
+            })
+            .catch(error => {
+                console.error("Erro ao adicionar nova PT:", error);
+                alert('Erro ao adicionar nova PT: ' + error.message);
+            });
+        }
+        
+
 
         function preencherFormulario() {
-            const { descricao, inicioPrevisto, fimPrevisto,ordemServico,ordem } = getQueryParams();
-            if (descricao) document.getElementById('descricao').value = descricao;
-            if (inicioPrevisto) document.getElementById('inicioPrevisto').value = inicioPrevisto;
-            if (fimPrevisto) document.getElementById('fimPrevisto').value = fimPrevisto;
-            if (ordem) {
-                const ordemInput = document.getElementById('ordem');
-                ordemInput.value = ordem;
-                ordemInput.readOnly = true;
-                ordemInput.classList.add('readonly');  // Impede a edição
-                }
+            const { descricao, inicioPrevisto, fimPrevisto, ordem } = getQueryParams();
+            const ordemServico = ordem; // Usando 'ordem' como OS
+            const formContainer = document.getElementById('form-container');
+        
+            verificarAtividadeExistente(ordemServico)
+                .then(atividadeExistente => {
+                    if (atividadeExistente) {
+                        exibirOpcoesAtividadeExistente(atividadeExistente);
+                    } else {
+                        // Se não existir, preencha o formulário para novo cadastro
+                        document.getElementById('descricao').value = descricao || '';
+                        document.getElementById('inicioPrevisto').value = inicioPrevisto || '';
+                        document.getElementById('fimPrevisto').value = fimPrevisto || '';
+                        document.getElementById('ordem').value = ordem || '';
+        
+                        formContainer.style.display = 'block'; // Mostra o formulário
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao verificar atividade:", error);
+                    alert("Erro ao verificar atividade: " + error.message);
+                });
+        }
             }
         window.onload = preencherFormulario;
 
