@@ -343,7 +343,7 @@
                     qrcodeContainer.appendChild(img);
 
                     // Salvar no Firestore (incluindo a dataUrl do QR Code)
-                    const atividade = { descricao, inicio, fim, url, qrCodeUrl: dataUrl, userId: auth.currentUser.uid };
+                    const atividade = { descricao, inicio, fim, ordemServico, url, qrCodeUrl: dataUrl, userId: auth.currentUser.uid };
                     try {
                         const docRef = await db.collection("historico").add(atividade);
                         console.log("Atividade salva no Firebase com ID:", docRef.id);
