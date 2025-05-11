@@ -138,6 +138,9 @@
         <label for="descricao">Descrição da Atividade</label>
         <textarea id="descricao" rows="3" placeholder="Ex: Troca da válvula CV-210"></textarea>
 
+        <label for="observacoes">Observações</label>
+        <textarea id="observacoes" rows="3" placeholder="Detalhes adicionais sobre a atividade"></textarea>
+
         <label for="inicio">Data e Hora de Início Prevista</label>
         <input type="datetime-local" id="inicio">
 
@@ -300,6 +303,7 @@
             }
 
             const descricao = document.getElementById("descricao").value.trim();
+            const observacoes = document.getElementById("observacoes").value.trim();
             const inicio = document.getElementById("inicio").value;
             const fim = document.getElementById("fim").value;
             const ordemServico = document.getElementById("ordemServico").value;  // Obtenha o valor do input
@@ -356,7 +360,7 @@
                     qrcodeContainer.appendChild(img);
 
                     // Salvar no Firestore (incluindo a dataUrl do QR Code)
-                    const atividade = { descricao, inicio, fim, ordemServico, url, qrCodeUrl: dataUrl, userId: auth.currentUser.uid };
+                    const atividade = { descricao, observacoes, inicio, fim, ordemServico, url, qrCodeUrl: dataUrl, userId: auth.currentUser.uid };
                     try {
                         const docRef = await db.collection("historico").add(atividade);
                         console.log("Atividade salva no Firebase com ID:", docRef.id);
@@ -401,6 +405,7 @@
                     div.className = "atividade";
                     div.innerHTML = `
                         <strong>Descrição:</strong> ${atv.descricao}<br>
+                        <strong>Observações:</strong> ${atv.observacoes}<br> 
                         <strong>Início:</strong> ${new Date(atv.inicio).toLocaleString()}<br>
                         <strong>Fim:</strong> ${new Date(atv.fim).toLocaleString()}<br>
                         <strong>OS:</strong> ${atv.ordemServico}<br>
