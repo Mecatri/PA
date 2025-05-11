@@ -247,11 +247,13 @@
             const params = new URLSearchParams(window.location.search);
             return {
                 descricao: params.get('descricao'),
+                observacoes: params.get('observacoes'),
                 inicioPrevisto: params.get('inicio'),
                 fimPrevisto: params.get('fim'),
-                ordem: params.get('ordemServico'),
-                observacoes: params.get('observacoes')
+                ordem: params.get('ordemServico')
             };
+            console.log("Valores da URL:", queryParams); // Adicionado
+            return queryParams;
         }
         
         function verificarAtividadeExistente(ordemServico) {
