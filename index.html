@@ -319,7 +319,21 @@
             }
 
             mensagem.textContent = "";
+            try {
+                    const querySnapshot = await db.collection("historico")
+                        .where("userId", "==", auth.currentUser.uid)
+                        .where("ordemServico", "==", ordemServico)
+                        .get();
 
+            if (!querySnapshot.empty) {
+                    alert("Já existe uma atividade cadastrada com a mesma Ordem de Serviço.");
+                    return; // Impede o salvamento
+                    }
+            } catch (error) {
+                console.error("Erro ao verificar OS:", error);
+                mensagem.textContent = "Erro ao verificar Ordem de Serviço.";
+                return;
+            }
             // URL da página do formulário com parâmetros
             const url = `https://mecatri.github.io/PA/formulario.html?descricao=${encodeURIComponent(descricao)}&inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}&ordemServico=${encodeURIComponent(ordemServico)}`;
 
