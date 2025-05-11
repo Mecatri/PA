@@ -306,8 +306,7 @@
             const mensagem = document.getElementById("mensagem");
             const qrcodeContainer = document.getElementById("qrcode");
             qrcodeContainer.innerHTML = "";
-            const canvas = document.createElement("canvas");
-            qrcodeContainer.appendChild(canvas);
+
 
             if (!descricao || !inicio || !fim) {
                 mensagem.textContent = "Por favor, preencha todos os campos.";
