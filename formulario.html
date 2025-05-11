@@ -353,6 +353,7 @@
                         document.getElementById('inicioPrevisto').value = inicioPrevisto || '';
                         document.getElementById('fimPrevisto').value = fimPrevisto || '';
                         document.getElementById('ordem').value = ordem || '';
+                        document.getElementById('observacoes').value = decodeURIComponent(observacoes) || '';
         
                         formContainer.style.display = 'block'; // Mostra o formulário
                     }
@@ -361,7 +362,6 @@
                     console.error("Erro ao verificar atividade:", error);
                     alert("Erro ao verificar atividade: " + error.message);
                 });
-            if (observacoes) document.getElementById('observacoes').value = decodeURIComponent(observacoes);
         }
         window.onload = preencherFormulario;
 
