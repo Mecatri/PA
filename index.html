@@ -118,6 +118,25 @@
 </head>
 <body>
     <div id="contador-qrcode">Contador: 0</div>
+        <style>
+        /* ... Seu CSS existente ... */
+
+        #excluir-tudo-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545; /* Vermelho */
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #excluir-tudo-btn:hover {
+            background-color: #c82333;
+        }
+        </style>
     <h2>Gerador de QR Code - Atividade</h2>
 
   <div id="login">
@@ -295,6 +314,38 @@
             }
         });
 
+
+async function confirmarExclusaoTudo() {
+    const confirmar = confirm("Tem certeza de que deseja excluir TODOS os QR Codes gerados?");
+    if (confirmar) {
+        try {
+            const querySnapshot = await db.collection("historico")
+                .where("userId", "==", auth.currentUser.uid)
+                .get();
+
+            const batch = db.batch(); // Use um batch para operações em lote
+
+            querySnapshot.forEach((doc) => {
+                batch.delete(db.collection("historico").doc(doc.id));
+            });
+
+            await batch.commit();
+
+            console.log("Todos os QR Codes excluídos com sucesso!");
+            alert("Todos os QR Codes foram excluídos.");
+
+            contadorQrcode = 0; // Reseta o contador
+            atualizarContadorDisplay();
+            atualizarContadorFirestore();
+            mostrarHistorico(); // Atualiza o histórico na tela
+
+        } catch (error) {
+            console.error("Erro ao excluir todos os QR Codes:", error);
+            alert("Erro ao excluir os QR Codes: " + error.message);
+        }
+    }
+}
+        
         // Função para gerar QR Code
         async function gerarQRCode() {
             if (!auth.currentUser) {
