@@ -392,7 +392,7 @@ async function confirmarExclusaoTudo() {
                 return;
             }
             // URL da página do formulário com parâmetros
-            const url = `https://mecatri.github.io/PA/formulario.html?descricao=${encodeURIComponent(descricao)}&inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}&ordemServico=${encodeURIComponent(ordemServico)}`;
+           const url = `https://mecatri.github.io/PA/formulario.html?descricao=${encodeURIComponent(descricao)}&observacoes=${encodeURIComponent(observacoes)}&inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}&ordemServico=${encodeURIComponent(ordemServico)}`;
 
             try {
                 // Gerar QR Code como Data URL
