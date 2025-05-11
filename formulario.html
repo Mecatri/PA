@@ -249,7 +249,8 @@
                 descricao: params.get('descricao'),
                 inicioPrevisto: params.get('inicio'),
                 fimPrevisto: params.get('fim'),
-                ordem: params.get('ordemServico')
+                ordem: params.get('ordemServico'),
+                observacoes: params.get('observacoes')
             };
         }
         
@@ -338,7 +339,7 @@
 
 
         function preencherFormulario() {
-            const { descricao, inicioPrevisto, fimPrevisto, ordem } = getQueryParams();
+            const { descricao, inicioPrevisto, fimPrevisto, ordem, observacoes } = getQueryParams();
             const ordemServico = ordem; // Usando 'ordem' como OS
             const formContainer = document.getElementById('form-container');
         
@@ -360,6 +361,7 @@
                     console.error("Erro ao verificar atividade:", error);
                     alert("Erro ao verificar atividade: " + error.message);
                 });
+            if (observacoes) document.getElementById('observacoes').value = decodeURIComponent(observacoes);
         }
         window.onload = preencherFormulario;
 
@@ -434,7 +436,8 @@
                 pt: document.getElementById('pt').value,
                 email: user.email,
                 userId: user.uid,
-                timestamp: new Date()
+                timestamp: new Date(),
+                observacoes: document.getElementById('observacoes').value
             };
         }
 
@@ -703,6 +706,9 @@
         <form id="formulario" onsubmit="validarFormulario(event)">
             <label for="descricao">Descrição da Atividade:</label>
             <textarea id="descricao" class="readonly" readonly></textarea>
+
+            <label for="observacoes">Observações:</label>
+            <textarea id="observacoes" rows="4"></textarea>
 
             <label for="inicioPrevisto">Início Previsto:</label>
             <input type="datetime-local" id="inicioPrevisto" class="readonly" readonly>
