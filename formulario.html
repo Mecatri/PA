@@ -252,8 +252,6 @@
                 fimPrevisto: params.get('fim'),
                 ordem: params.get('ordemServico')
             };
-            console.log("Valores da URL:", queryParams); // Adicionado
-            return queryParams;
         }
         
         function verificarAtividadeExistente(ordemServico) {
@@ -355,7 +353,7 @@
                         document.getElementById('inicioPrevisto').value = inicioPrevisto || '';
                         document.getElementById('fimPrevisto').value = fimPrevisto || '';
                         document.getElementById('ordem').value = ordem || '';
-                        document.getElementById('observacoes').value = decodeURIComponent(observacoes) || '';
+                        document.getElementById('observacoes').value = observacoes || '';
         
                         formContainer.style.display = 'block'; // Mostra o formulário
                     }
