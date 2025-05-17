@@ -294,26 +294,28 @@
               .get()
               .then(querySnapshot => {
                 if (!querySnapshot.empty) {
-                  const docRef = querySnapshot.docs[0].ref;
-                  const docData = querySnapshot.docs[0].data();
-                  const operadoresRevalidacao = Array.isArray(docData.operadoresRevalidacao) ? docData.operadoresRevalidacao : [];
-                  operadoresRevalidacao.push({
-                    nome: operadorRevalidacao,
-                    dataRevalidacao: dataReavaliacao,
-                    uid: user.uid
-                  });
-                  let uidsParticipantes = docData.uidsParticipantes;
-                  if (!Array.isArray(uidsParticipantes)) {
-                    uidsParticipantes = [];
-                    if (docData.userId) uidsParticipantes.push(docData.userId);
-                  }
-                  if (!uidsParticipantes.includes(user.uid)) {
-                    uidsParticipantes.push(user.uid);
-                  }
-                  return docRef.update({
-                    operadoresRevalidacao,
-                    uidsParticipantes
-                  });
+                    const docRef = querySnapshot.docs[0].ref;
+                    const docData = querySnapshot.docs[0].data();
+                    const operadoresRevalidacao = Array.isArray(docData.operadoresRevalidacao) ? docData.operadoresRevalidacao : [];
+                    operadoresRevalidacao.push({
+                        nome: operadorRevalidacao,
+                        dataRevalidacao: dataReavaliacao,
+                        uid: user.uid
+                    });
+                    let uidsParticipantes = docData.uidsParticipantes;
+                    if (!Array.isArray(uidsParticipantes)) {
+                        uidsParticipantes = [];
+                        if (docData.userId) uidsParticipantes.push(docData.userId);
+                    }
+                    if (!uidsParticipantes.includes(user.uid)) {
+                        uidsParticipantes.push(user.uid);
+                    }
+                    return docRef.update({
+                        operadoresRevalidacao,
+                        uidsParticipantes
+                    });
+                } else {
+                    alert('Documento não encontrado para revalidar.');
                 }
               })
               .then(() => {
