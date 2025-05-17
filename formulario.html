@@ -465,8 +465,23 @@
         async function salvarFormulario() {
             const user = auth.currentUser;
             if (!user) return alert('Você precisa estar logado.');
-
-            const dados = coletarDados(user);
+        
+            const dados = {
+                descricao: document.getElementById('descricao').value,
+                inicioPrevisto: document.getElementById('inicioPrevisto').value,
+                fimPrevisto: document.getElementById('fimPrevisto').value,
+                inicioReal: document.getElementById('inicioReal').value,
+                fimReal: document.getElementById('fimReal').value,
+                operador: document.getElementById('operador').value,
+                ordem: document.getElementById('ordem').value,
+                pt: document.getElementById('pt').value,
+                email: user.email,
+                userId: user.uid, // Garante que o UID está salvo corretamente
+                uidsParticipantes: [user.uid], // Já inclui o próprio usuário como participante
+                timestamp: new Date(),
+                observacoes: document.getElementById('observacoes').value
+            };
+        
             try {
                 await db.collection('formularios').add(dados);
                 alert('Formulário enviado!');
@@ -475,6 +490,7 @@
                 carregarHistorico();
             } catch (error) {
                 alert('Erro ao salvar: ' + error.message);
+                console.error(error);
             }
         }
 
