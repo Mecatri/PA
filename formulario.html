@@ -278,10 +278,14 @@
                 <p><strong>Descrição:</strong> ${atividade.descricao}</p>
                 <button onclick="mostrarRevalidarPT()">Revalidar PT</button>
                 <button onclick="mostrarAdicionarNovaPT()">Adicionar Nova PT</button>
+                <button onclick="voltarAoFormulario()">Voltar ao Formulário</button> 
                 <div id="revalidar-pt-form" style="display:none;"> ... </div>
                 <div id="nova-pt-form" style="display:none;"> ... </div>
             `;
             formContainer.style.display = 'block';
+        }
+       function voltarAoFormulario() {
+            preencherFormulario(); // Recarrega o formulário
         }
 
          function mostrarRevalidarPT() {
