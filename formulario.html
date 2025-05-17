@@ -272,35 +272,17 @@
         }
 
         function exibirOpcoesAtividadeExistente(atividade) {
-            // Esconde o formulário original para não haver confusão
-            document.getElementById('formulario').style.display = 'none';
             const formContainer = document.getElementById('form-container');
             formContainer.innerHTML = `
-                <h2>Atividade Já Registrada</h2>
+                <h2>Atividade Existente</h2>
                 <p><strong>Descrição:</strong> ${atividade.descricao}</p>
-                <p><strong>OS:</strong> ${atividade.ordem}</p>
                 <button onclick="mostrarRevalidarPT()">Revalidar PT</button>
-                <button onclick="mostrarAdicionarNovaPT()">Nova PT</button>
-        
-                <div id="revalidar-pt-form" style="display:none;">
-                    <label for="dataReavaliacao">Data de Reavaliação:</label>
-                    <input type="datetime-local" id="dataReavaliacao">
-                    <button onclick="revalidarPT()">Confirmar Revalidação</button>
-                </div>
-        
-                <div id="nova-pt-form" style="display:none;">
-                    <label for="numeroPtNova">Número da Nova PT:</label>
-                    <input type="text" id="numeroPtNova">
-                    <label for="inicioPtNova">Início:</label>
-                    <input type="datetime-local" id="inicioPtNova">
-                    <label for="fimPtNova">Fim:</label>
-                    <input type="datetime-local" id="fimPtNova">
-                    <button onclick="adicionarNovaPT()">Confirmar Nova PT</button>
-                </div>
+                <button onclick="mostrarAdicionarNovaPT()">Adicionar Nova PT</button>
+                <div id="revalidar-pt-form" style="display:none;"> ... </div>
+                <div id="nova-pt-form" style="display:none;"> ... </div>
             `;
             formContainer.style.display = 'block';
         }
-
 
          function mostrarRevalidarPT() {
             document.getElementById('revalidar-pt-form').style.display = 'block';
@@ -361,27 +343,29 @@
             const ordemServico = ordem; // Usando 'ordem' como OS
             const formContainer = document.getElementById('form-container');
         
-            verificarAtividadeExistente(ordemServico)
-                .then(atividadeExistente => {
-                    if (atividadeExistente) {
-                        formContainer.style.display = 'none';
-                        exibirOpcoesAtividadeExistente(atividadeExistente);
-                    } else {
-                        // Se não existir, preencha o formulário para novo cadastro
-                        document.getElementById('descricao').value = descricao || '';
-                        document.getElementById('inicioPrevisto').value = inicioPrevisto || '';
-                        document.getElementById('fimPrevisto').value = fimPrevisto || '';
-                        document.getElementById('ordem').value = ordem || '';
-                        document.getElementById('observacoes').value = observacoes || '';
+        function preencherFormulario() {
+            const { descricao, inicioPrevisto, fimPrevisto, ordem, observacoes } = getQueryParams();
+            const existe = new URLSearchParams(window.location.search).get("existe");
         
-                        formContainer.style.display = 'block'; // Mostra o formulário
-                    }
-                })
-                .catch(error => {
-                    console.error("Erro ao verificar atividade:", error);
-                    alert("Erro ao verificar atividade: " + error.message);
-                });
+            const formContainer = document.getElementById('form-container');
+        
+            if (existe === "true") {
+                // Se a OS já existir (definido pela URL), mostra opções de revalidar ou nova PT
+                exibirOpcoesAtividadeExistente({ descricao, ordem });
+                return;
+            }
+        
+            // Se não existir, preenche o formulário normalmente
+            document.getElementById('descricao').value = descricao || '';
+            document.getElementById('inicioPrevisto').value = inicioPrevisto || '';
+            document.getElementById('fimPrevisto').value = fimPrevisto || '';
+            document.getElementById('ordem').value = ordem || '';
+            document.getElementById('observacoes').value = observacoes || '';
+        
+            document.getElementById('formulario').style.display = 'block';
+            formContainer.style.display = 'block';
         }
+
         window.onload = preencherFormulario;
 
         function validarFormulario(event) {
