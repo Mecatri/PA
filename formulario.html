@@ -284,7 +284,7 @@
             formContainer.style.display = 'block';
         }
 
-                function mostrarRevalidarPT() {
+         function mostrarRevalidarPT() {
             document.getElementById('revalidar-pt-form').style.display = 'block';
             document.getElementById('nova-pt-form').style.display = 'none';
         }
@@ -346,6 +346,7 @@
             verificarAtividadeExistente(ordemServico)
                 .then(atividadeExistente => {
                     if (atividadeExistente) {
+                        formContainer.style.display = 'none';
                         exibirOpcoesAtividadeExistente(atividadeExistente);
                     } else {
                         // Se não existir, preencha o formulário para novo cadastro
