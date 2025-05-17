@@ -302,6 +302,16 @@
                         dataRevalidacao: dataReavaliacao,
                         uid: user.uid
                     });
+                    // Rode este código uma vez no console do seu app para corrigir o banco:
+                    const snapshot = await db.collection('formularios').get();
+                    snapshot.forEach(async doc => {
+                      const data = doc.data();
+                      if (!Array.isArray(data.uidsParticipantes)) {
+                        const uids = data.userId ? [data.userId] : [];
+                        await doc.ref.update({ uidsParticipantes: uids });
+                      }
+                    });
+                    
                     let uidsParticipantes = docData.uidsParticipantes;
                     if (!Array.isArray(uidsParticipantes)) {
                         uidsParticipantes = [];
@@ -439,7 +449,8 @@
                 email: user.email,
                 userId: user.uid,
                 timestamp: new Date(),
-                observacoes: document.getElementById('observacoes').value
+                observacoes: document.getElementById('observacoes').value,
+                uidsParticipantes: [user.uid]
             };
         }
 
