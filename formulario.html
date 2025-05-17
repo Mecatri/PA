@@ -326,7 +326,7 @@
             document.getElementById('nova-pt-form').style.display = 'block';
         }
         
-       function revalidarPT() {
+        function revalidarPT() {
             const operadorRevalidacao = document.getElementById('operadorRevalidacao').value;
             const dataReavaliacao = document.getElementById('dataReavaliacao').value;
             const { ordem } = getQueryParams();
@@ -353,8 +353,13 @@
                         uid: user.uid
                     });
         
-                    // Atualiza ou cria o array de participantes
-                    const uidsParticipantes = Array.isArray(docData.uidsParticipantes) ? docData.uidsParticipantes : [];
+                    // Atualiza ou cria o array de participantes corretamente
+                    let uidsParticipantes = docData.uidsParticipantes;
+                    if (!Array.isArray(uidsParticipantes)) {
+                        // Para compatibilidade com formulários antigos
+                        uidsParticipantes = [];
+                        if (docData.userId) uidsParticipantes.push(docData.userId);
+                    }
                     if (!uidsParticipantes.includes(user.uid)) {
                         uidsParticipantes.push(user.uid);
                     }
@@ -370,6 +375,7 @@
               .then(() => {
                 alert('PT Revalidada com sucesso!');
                 preencherFormulario();
+                carregarHistorico(); // <- Adicione isso para atualizar o histórico imediatamente
               })
               .catch(error => {
                 console.error("Erro ao revalidar PT:", error);
