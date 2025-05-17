@@ -272,17 +272,35 @@
         }
 
         function exibirOpcoesAtividadeExistente(atividade) {
+            // Esconde o formulário original para não haver confusão
+            document.getElementById('formulario').style.display = 'none';
             const formContainer = document.getElementById('form-container');
             formContainer.innerHTML = `
-                <h2>Atividade Existente</h2>
+                <h2>Atividade Já Registrada</h2>
                 <p><strong>Descrição:</strong> ${atividade.descricao}</p>
+                <p><strong>OS:</strong> ${atividade.ordem}</p>
                 <button onclick="mostrarRevalidarPT()">Revalidar PT</button>
-                <button onclick="mostrarAdicionarNovaPT()">Adicionar Nova PT</button>
-                <div id="revalidar-pt-form" style="display:none;"> ... </div>
-                <div id="nova-pt-form" style="display:none;"> ... </div>
+                <button onclick="mostrarAdicionarNovaPT()">Nova PT</button>
+        
+                <div id="revalidar-pt-form" style="display:none;">
+                    <label for="dataReavaliacao">Data de Reavaliação:</label>
+                    <input type="datetime-local" id="dataReavaliacao">
+                    <button onclick="revalidarPT()">Confirmar Revalidação</button>
+                </div>
+        
+                <div id="nova-pt-form" style="display:none;">
+                    <label for="numeroPtNova">Número da Nova PT:</label>
+                    <input type="text" id="numeroPtNova">
+                    <label for="inicioPtNova">Início:</label>
+                    <input type="datetime-local" id="inicioPtNova">
+                    <label for="fimPtNova">Fim:</label>
+                    <input type="datetime-local" id="fimPtNova">
+                    <button onclick="adicionarNovaPT()">Confirmar Nova PT</button>
+                </div>
             `;
             formContainer.style.display = 'block';
         }
+
 
          function mostrarRevalidarPT() {
             document.getElementById('revalidar-pt-form').style.display = 'block';
