@@ -513,214 +513,212 @@
         }
 
         async function carregarHistorico() {
-            const user = auth.currentUser;
-            if (!user) return;
-        
-            const historicoContainer = document.getElementById('historico');
-            historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
-        
-            try {
-                let formularios = [];
-        
-                if (isAdmin) {
-                    // Admin vê todos os formulários
-                    const snapshot = await db.collection('formularios').orderBy('timestamp', 'desc').get();
-                    snapshot.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
-                } else {
-                    // Formulários criados pelo usuário
-                    const criados = await db.collection('formularios')
-                        .where('userId', '==', user.uid)
-                        .orderBy('timestamp', 'desc')
-                        .get();
-        
-                    criados.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
-        
-                    // Formulários em que participou como revalidador (uidsParticipantes)
-                    const revalidados = await db.collection('formularios')
-                        .where('uidsParticipantes', 'array-contains', user.uid)
-                        .orderBy('timestamp', 'desc')
-                        .get();
-        
-                    // Evita duplicidade pelo id do documento
-                    const idsExistentes = new Set(formularios.map(f => f.id));
-                    revalidados.forEach(doc => {
-                        if (!idsExistentes.has(doc.id)) {
-                            formularios.push({ id: doc.id, ...doc.data() });
-                        }
-                    });
-                }
-        
-                if (formularios.length === 0) {
-                    historicoContainer.innerHTML += '<p>Nenhum formulário encontrado.</p>';
-                    return;
-                }
-        
-                // Exibição dos registros
-                const hoje = new Date();
-                hoje.setHours(0, 0, 0, 0);
-        
-                formularios.forEach((f) => {
-                    const registro = document.createElement('div');
-                    registro.className = 'registro';
-        
-                    if (!f.fimReal || f.fimReal.trim() === '') {
-                        registro.classList.add('pendente');
-                    }
-        
-                    if (f.fimPrevisto) {
-                        const fimPrevistoDate = new Date(f.fimPrevisto);
-                        fimPrevistoDate.setHours(0, 0, 0, 0);
-                        if (fimPrevistoDate < hoje) {
-                            registro.classList.add('atrasado');
-                        }
-                    }
-        
-                    let actionsHTML = `
-                        <div class="registro-actions">
-                            <button onclick="editarFormulario('${f.id}')">Editar</button>
-                            <button onclick="excluirFormulario('${f.id}')">Excluir</button>
-                        </div>
-                    `;
-        
-                    if (isAdmin) {
-                        actionsHTML = `
-                            <div class="registro-actions admin-actions">
-                                <button onclick="editarFormulario('${f.id}')">Editar</button>
-                                <button onclick="excluirFormulario('${f.id}')">Excluir</button>
-                            </div>
-                        `;
-                    }
-        
-                    registro.innerHTML = `
-                        <p><strong>Descrição:</strong> ${f.descricao}</p>
-                        <p><strong>Início Previsto:</strong> ${f.inicioPrevisto}</p>
-                        <p><strong>Término Previsto:</strong> ${f.fimPrevisto}</p>
-                        <p><strong>Início Real:</strong> ${f.inicioReal || '-'}</p>
-                        <p><strong>Término Real:</strong> ${f.fimReal || '-'}</p>
-                        <p><strong>Operador:</strong> ${f.operador}</p>
-                        ${
-                            f.operadoresRevalidacao && Array.isArray(f.operadoresRevalidacao)
-                                ? f.operadoresRevalidacao.map((op, idx) =>
-                                    `<p><strong>Operador ${idx + 2} (Revalidação):</strong> ${op.nome} — Data/Hora: ${op.dataRevalidacao}</p>`
-                                ).join('')
-                                : ''
-                        }
-                        <p><strong>OS:</strong> ${f.ordem}</p>
-                        <p><strong>PT:</strong> ${f.pt}</p>
-                        <p><strong>Email:</strong> ${f.email}</p>
-                        ${actionsHTML}
-                    `;
-                    historicoContainer.appendChild(registro);
-                });
+    const user = auth.currentUser;
+    if (!user) return;
 
-// Ajuste para criar os gráficos com base no novo array 'formularios'
-const atividadesPendentes = formularios.filter(f => !f.fimReal || f.fimReal.trim() === '').length;
-const atividadesConcluidas = formularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
+    const historicoContainer = document.getElementById('historico');
+    historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
 
-// Gráfico de status
-const statusCtx = document.getElementById('statusAtividadesChart').getContext('2d');
-const statusChart = new Chart(statusCtx, {
-    type: 'pie',
-    data: {
-        labels: ['Pendentes', 'Concluídas'],
-        datasets: [{
-            label: 'Status das Atividades',
-            data: [atividadesPendentes, atividadesConcluidas],
-            backgroundColor: [
-                'rgba(255, 206, 86, 0.8)',
-                'rgba(75, 192, 192, 0.8)'
-            ],
-            borderColor: [
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: false,
-        maintainAspectRatio: false,
-        backgroundColor: 'white',
-        plugins: {
-            legend: {
-                position: 'bottom',
-            },
-            title: {
-                display: true,
-                text: 'Status das Atividades',
-                font: {
-                    size: 16
-                }
-            }
-        }
-    }
-});
+    try {
+        let formularios = [];
 
-            // Gráfico de comparação
-            const comparacaoCtx = document.getElementById('comparacaoAtividadesChart').getContext('2d');
-            const contadorDoc = await db.collection('contadores').doc('contador_qrcode').get();
-            const totalAtividadesQRCode = contadorDoc.exists ? contadorDoc.data().total : 0;
-            const totalFormularios = formularios.length;
-            const totalFormulariosFinalizados = formularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
-            const totalFormulariosAbertos = totalFormularios - totalFormulariosFinalizados;
-            
-            const comparacaoAtividadesChart = new Chart(comparacaoCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['QR Code', 'Formulários (Total)', 'Formulários (Finalizados)', 'Formulários (Abertos)'],
-                    datasets: [{
-                        label: 'Total de Atividades',
-                        data: [totalAtividadesQRCode, totalFormularios, totalFormulariosFinalizados, totalFormulariosAbertos],
-                        backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)', 'rgba(75, 192, 192, 0.7)', 'rgba(255, 159, 64, 0.7)'],
-                        borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: false,
-                    maintainAspectRatio: false,
-                    backgroundColor: 'white',
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Comparação Atividades: QR Code vs. Formulários',
-                            font: {
-                                size: 16
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y;
-                                    }
-                                    if (context.label !== 'QR Code') {
-                                        const total = totalAtividadesQRCode;
-                                        const value = context.parsed.y;
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(2) + '%' : '0%';
-                                        label += ' (' + percentage + ')';
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
+        if (isAdmin) {
+            // Admin vê tudo
+            const snapshot = await db.collection('formularios').orderBy('timestamp', 'desc').get();
+            snapshot.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
+        } else {
+            // Busca formulários criados pelo usuário
+            const criados = await db.collection('formularios')
+                .where('userId', '==', user.uid)
+                .orderBy('timestamp', 'desc')
+                .get();
+
+            criados.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
+
+            // Busca formulários onde é revalidador
+            const revalidados = await db.collection('formularios')
+                .where('uidsParticipantes', 'array-contains', user.uid)
+                .orderBy('timestamp', 'desc')
+                .get();
+
+            // Evita duplicidade
+            const idsExistentes = new Set(formularios.map(f => f.id));
+            revalidados.forEach(doc => {
+                if (!idsExistentes.has(doc.id)) {
+                    formularios.push({ id: doc.id, ...doc.data() });
                 }
             });
-                
-            } catch (error) {
-                historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
-            }
         }
+
+        if (formularios.length === 0) {
+            historicoContainer.innerHTML += '<p>Nenhum formulário encontrado.</p>';
+            return;
+        }
+
+        // Exibição dos registros
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        formularios.forEach((f) => {
+            const registro = document.createElement('div');
+            registro.className = 'registro';
+
+            if (!f.fimReal || f.fimReal.trim() === '') {
+                registro.classList.add('pendente');
+            }
+
+            if (f.fimPrevisto) {
+                const fimPrevistoDate = new Date(f.fimPrevisto);
+                fimPrevistoDate.setHours(0, 0, 0, 0);
+                if (fimPrevistoDate < hoje) {
+                    registro.classList.add('atrasado');
+                }
+            }
+
+            let actionsHTML = `
+                <div class="registro-actions">
+                    <button onclick="editarFormulario('${f.id}')">Editar</button>
+                    <button onclick="excluirFormulario('${f.id}')">Excluir</button>
+                </div>
+            `;
+
+            if (isAdmin) {
+                actionsHTML = `
+                    <div class="registro-actions admin-actions">
+                        <button onclick="editarFormulario('${f.id}')">Editar</button>
+                        <button onclick="excluirFormulario('${f.id}')">Excluir</button>
+                    </div>
+                `;
+            }
+
+            registro.innerHTML = `
+                <p><strong>Descrição:</strong> ${f.descricao}</p>
+                <p><strong>Início Previsto:</strong> ${f.inicioPrevisto}</p>
+                <p><strong>Término Previsto:</strong> ${f.fimPrevisto}</p>
+                <p><strong>Início Real:</strong> ${f.inicioReal || '-'}</p>
+                <p><strong>Término Real:</strong> ${f.fimReal || '-'}</p>
+                <p><strong>Operador:</strong> ${f.operador}</p>
+                ${
+                    f.operadoresRevalidacao && Array.isArray(f.operadoresRevalidacao)
+                        ? f.operadoresRevalidacao.map((op, idx) =>
+                            `<p><strong>Operador ${idx + 2} (Revalidação):</strong> ${op.nome} — Data/Hora: ${op.dataRevalidacao}</p>`
+                        ).join('')
+                        : ''
+                }
+                <p><strong>OS:</strong> ${f.ordem}</p>
+                <p><strong>PT:</strong> ${f.pt}</p>
+                <p><strong>Email:</strong> ${f.email}</p>
+                ${actionsHTML}
+            `;
+            historicoContainer.appendChild(registro);
+        });
+
+        // GRÁFICOS USANDO formularios
+        const atividadesPendentes = formularios.filter(f => !f.fimReal || f.fimReal.trim() === '').length;
+        const atividadesConcluidas = formularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
+
+        const statusCtx = document.getElementById('statusAtividadesChart').getContext('2d');
+        const statusChart = new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Pendentes', 'Concluídas'],
+                datasets: [{
+                    label: 'Status das Atividades',
+                    data: [atividadesPendentes, atividadesConcluidas],
+                    backgroundColor: [
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                backgroundColor: 'white',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Status das Atividades',
+                        font: {
+                            size: 16
+                        }
+                    }
+                }
+            }
+        });
+
+        const comparacaoCtx = document.getElementById('comparacaoAtividadesChart').getContext('2d');
+        const contadorDoc = await db.collection('contadores').doc('contador_qrcode').get();
+        const totalAtividadesQRCode = contadorDoc.exists ? contadorDoc.data().total : 0;
+        const totalFormularios = formularios.length;
+        const totalFormulariosFinalizados = formularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
+        const totalFormulariosAbertos = totalFormularios - totalFormulariosFinalizados;
+
+        const comparacaoAtividadesChart = new Chart(comparacaoCtx, {
+            type: 'bar',
+            data: {
+                labels: ['QR Code', 'Formulários (Total)', 'Formulários (Finalizados)', 'Formulários (Abertos)'],
+                datasets: [{
+                    label: 'Total de Atividades',
+                    data: [totalAtividadesQRCode, totalFormularios, totalFormulariosFinalizados, totalFormulariosAbertos],
+                    backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)', 'rgba(75, 192, 192, 0.7)', 'rgba(255, 159, 64, 0.7)'],
+                    borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                backgroundColor: 'white',
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Comparação Atividades: QR Code vs. Formulários',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y;
+                                }
+                                if (context.label !== 'QR Code') {
+                                    const total = totalAtividadesQRCode;
+                                    const value = context.parsed.y;
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(2) + '%' : '0%';
+                                    label += ' (' + percentage + ')';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    } catch (error) {
+        historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
+    }
+}
 
         async function editarFormulario(id) {
             formularioIdEmEdicao = id;
