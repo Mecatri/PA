@@ -285,7 +285,9 @@
             formContainer.style.display = 'block';
         }
        function voltarAoFormulario() {
-            preencherFormulario(); // Recarrega o formulário
+            const formContainer = document.getElementById('form-container');
+            formContainer.innerHTML = ''; // Limpa o conteúdo do formContainer
+                preencherFormulario(); // Recarrega o formulário
         }
 
          function mostrarRevalidarPT() {
