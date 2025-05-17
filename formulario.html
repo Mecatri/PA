@@ -549,7 +549,10 @@
                 }
             });
         }
-
+        
+            console.log("Meu UID:", user.uid);
+            console.log("Formularios encontrados:", formularios);
+        
         if (formularios.length === 0) {
             historicoContainer.innerHTML += '<p>Nenhum formulário encontrado.</p>';
             return;
