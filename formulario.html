@@ -525,6 +525,25 @@
                     if (!isAdmin) {
                         query = query.where('userId', '==', user.uid);
                     }
+                    else {
+                        // Formulários lançados e revalidados pelo usuário
+                        const criados = await db.collection('formularios')
+                            .where('userId', '==', user.uid)
+                            .orderBy('timestamp', 'desc')
+                            .get();
+                        criados.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
+                    
+                        const revalidados = await db.collection('formularios')
+                            .where('uidsParticipantes', 'array-contains', user.uid)
+                            .orderBy('timestamp', 'desc')
+                            .get();
+                        const idsExistentes = new Set(formularios.map(f => f.id));
+                        revalidados.forEach(doc => {
+                            if (!idsExistentes.has(doc.id)) {
+                                formularios.push({ id: doc.id, ...doc.data() });
+                            }
+                        });
+                    }
                    const querySnapshot = await query.get();
 
             
