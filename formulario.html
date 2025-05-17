@@ -286,13 +286,27 @@
         }
         function exibirOpcoesAtividadeExistente(atividade) {
             const formContainer = document.getElementById('form-container');
+            let operadoresHTML = `<p><strong>Operador:</strong> ${atividade.operador}</p>`;
+            if (atividade.operadoresRevalidacao && Array.isArray(atividade.operadoresRevalidacao)) {
+                atividade.operadoresRevalidacao.forEach((op, idx) => {
+                    operadoresHTML += `<p><strong>Operador ${idx + 2} (Revalidação):</strong> ${op.nome} — Data/Hora: ${op.dataRevalidacao}</p>`;
+                });
+            }
+        
             formContainer.innerHTML = `
                 <h2>Atividade Existente</h2>
                 <p><strong>Descrição:</strong> ${atividade.descricao}</p>
+                ${operadoresHTML}
                 <button onclick="mostrarRevalidarPT()">Revalidar PT</button>
                 <button onclick="mostrarAdicionarNovaPT()">Adicionar Nova PT</button>
                 <button type="button" onclick="voltarAoFormulario()">Voltar ao Formulário</button>
-                <div id="revalidar-pt-form" style="display:none;"> ... </div>
+                <div id="revalidar-pt-form" style="display:none;">
+                    <label for="operadorRevalidacao">Nome do novo operador (revalidação):</label>
+                    <input type="text" id="operadorRevalidacao" required>
+                    <label for="dataReavaliacao">Data/Hora da revalidação:</label>
+                    <input type="datetime-local" id="dataReavaliacao" required>
+                    <button onclick="revalidarPT()">Salvar Revalidação</button>
+                </div>
                 <div id="nova-pt-form" style="display:none;"> ... </div>
             `;
             formContainer.style.display = 'block';
@@ -313,22 +327,44 @@
         }
         
         function revalidarPT() {
+            const operadorRevalidacao = document.getElementById('operadorRevalidacao').value;
             const dataReavaliacao = document.getElementById('dataReavaliacao').value;
-            const { descricao, inicioPrevisto, fimPrevisto, ordem } = getQueryParams();
-            db.collection('formularios').add({
-                descricao: descricao,
-                inicioPrevisto: inicioPrevisto,
-                fimPrevisto: fimPrevisto,
-                ordem: ordem,
-                dataReavaliacao: dataReavaliacao
-            })
-            .then(() => {
+            const { ordem } = getQueryParams();
+        
+            if (!operadorRevalidacao || !dataReavaliacao) {
+                alert('Preencha o nome do operador e a data/hora da revalidação.');
+                return;
+            }
+        
+            db.collection('formularios')
+              .where('ordem', '==', ordem)
+              .get()
+              .then(querySnapshot => {
+                if (!querySnapshot.empty) {
+                  const docRef = querySnapshot.docs[0].ref;
+                  const docData = querySnapshot.docs[0].data();
+                  const operadoresRevalidacao = Array.isArray(docData.operadoresRevalidacao) ? docData.operadoresRevalidacao : [];
+        
+                  operadoresRevalidacao.push({
+                      nome: operadorRevalidacao,
+                      dataRevalidacao: dataReavaliacao
+                  });
+        
+                  return docRef.update({
+                    operadoresRevalidacao
+                  });
+                } else {
+                  alert('Documento não encontrado para revalidar.');
+                }
+              })
+              .then(() => {
                 alert('PT Revalidada com sucesso!');
-            })
-            .catch(error => {
+                preencherFormulario();
+              })
+              .catch(error => {
                 console.error("Erro ao revalidar PT:", error);
                 alert('Erro ao revalidar PT: ' + error.message);
-            });
+              });
         }
 
         function adicionarNovaPT() {
