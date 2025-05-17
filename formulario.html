@@ -255,25 +255,35 @@
         }
         
        function verificarAtividadeExistente(ordemServico) {
-                console.log("Verificando atividade para ordemServico:", ordemServico);
-                return db.collection('formularios')
-                    .where('ordem', '==', ordemServico)
-                    .get()
-                    .then(querySnapshot => {
-                        console.log("querySnapshot.size:", querySnapshot.size);
-                        if (!querySnapshot.empty) {
-                            console.log("Atividade encontrada:", querySnapshot.docs[0].data());
-                            return querySnapshot.docs[0].data();
-                        } else {
-                            console.log("Nenhuma atividade encontrada");
-                            return null;
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Erro ao verificar atividade:", error);
-                        return null;
-                    });
+            // Padroniza valor e previne consulta inválida
+            if (!ordemServico || typeof ordemServico !== "string" || ordemServico.trim() === "") {
+                console.warn("ordemServico está vazio ou inválido!", ordemServico);
+                return Promise.resolve(null);
             }
+            const ordemPadronizada = ordemServico.trim();
+        
+            // Log para debug
+            console.log("Verificando atividade existente para ordem:", ordemPadronizada);
+        
+            return db.collection('formularios')
+                .where('ordem', '==', ordemPadronizada)
+                .get()
+                .then(querySnapshot => {
+                    console.log("Quantidade de resultados:", querySnapshot.size);
+                    if (!querySnapshot.empty) {
+                        // Log do primeiro resultado para análise
+                        console.log("Primeira atividade encontrada:", querySnapshot.docs[0].data());
+                        return querySnapshot.docs[0].data();
+                    } else {
+                        console.log("Nenhuma atividade encontrada para a ordem:", ordemPadronizada);
+                        return null;
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao verificar atividade:", error);
+                    return null;
+                });
+        }
         function exibirOpcoesAtividadeExistente(atividade) {
             const formContainer = document.getElementById('form-container');
             formContainer.innerHTML = `
