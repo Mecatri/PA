@@ -520,46 +520,25 @@
                 historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
             
                 try {
-                    let formularios = [];
-            
-                    if (isAdmin) {
-                        // Admin vê todos os formulários
-                        const snapshot = await db.collection('formularios').orderBy('timestamp', 'desc').get();
-                        snapshot.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
-                    } else {
-                        // Formulários criados pelo usuário
-                        const criados = await db.collection('formularios')
-                            .where('userId', '==', user.uid)
-                            .orderBy('timestamp', 'desc')
-                            .get();
-            
-                        criados.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
-            
-                        // Formulários em que participou como revalidador (uidsParticipantes)
-                        const revalidados = await db.collection('formularios')
-                            .where('uidsParticipantes', 'array-contains', user.uid)
-                            .orderBy('timestamp', 'desc')
-                            .get();
-            
-                        // Evita duplicidade pelo id do documento
-                        const idsExistentes = new Set(formularios.map(f => f.id));
-                        revalidados.forEach(doc => {
-                            if (!idsExistentes.has(doc.id)) {
-                                formularios.push({ id: doc.id, ...doc.data() });
-                            }
-                        });
+                    let query = db.collection('formularios').orderBy('timestamp', 'desc');
+                    if (!isAdmin) {
+                        query = query.where('userId', '==', user.uid);
                     }
+                   const querySnapshot = await query.get();
+
             
-                    if (formularios.length === 0) {
+                    if (querySnapshot.empty) {
                         historicoContainer.innerHTML += '<p>Nenhum formulário encontrado.</p>';
                         return;
                     }
             
-                    // Exibição dos registros
                     const hoje = new Date();
                     hoje.setHours(0, 0, 0, 0);
             
-                    formularios.forEach((f) => {
+                    const todosFormularios = [];
+                    querySnapshot.forEach((doc) => {
+                        const f = doc.data();
+                        todosFormularios.push(f);
                         const registro = document.createElement('div');
                         registro.className = 'registro';
             
@@ -577,16 +556,16 @@
             
                         let actionsHTML = `
                             <div class="registro-actions">
-                                <button onclick="editarFormulario('${f.id}')">Editar</button>
-                                <button onclick="excluirFormulario('${f.id}')">Excluir</button>
+                                <button onclick="editarFormulario('${doc.id}')">Editar</button>
+                                <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
                             </div>
                         `;
             
                         if (isAdmin) {
                             actionsHTML = `
                                 <div class="registro-actions admin-actions">
-                                    <button onclick="editarFormulario('${f.id}')">Editar</button>
-                                    <button onclick="excluirFormulario('${f.id}')">Excluir</button>
+                                    <button onclick="editarFormulario('${doc.id}')">Editar</button>
+                                    <button onclick="excluirFormulario('${doc.id}')">Excluir</button>
                                 </div>
                             `;
                         }
