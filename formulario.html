@@ -326,10 +326,11 @@
             document.getElementById('nova-pt-form').style.display = 'block';
         }
         
-       function revalidarPT() {
+      function revalidarPT() {
             const operadorRevalidacao = document.getElementById('operadorRevalidacao').value;
             const dataReavaliacao = document.getElementById('dataReavaliacao').value;
             const { ordem } = getQueryParams();
+            const user = auth.currentUser;
         
             if (!operadorRevalidacao || !dataReavaliacao) {
                 alert('Preencha o nome do operador e a data/hora da revalidação.');
@@ -341,20 +342,29 @@
               .get()
               .then(querySnapshot => {
                 if (!querySnapshot.empty) {
-                  const docRef = querySnapshot.docs[0].ref;
-                  const docData = querySnapshot.docs[0].data();
-                  const operadoresRevalidacao = Array.isArray(docData.operadoresRevalidacao) ? docData.operadoresRevalidacao : [];
+                    const docRef = querySnapshot.docs[0].ref;
+                    const docData = querySnapshot.docs[0].data();
+                    const operadoresRevalidacao = Array.isArray(docData.operadoresRevalidacao) ? docData.operadoresRevalidacao : [];
         
-                  operadoresRevalidacao.push({
-                      nome: operadorRevalidacao,
-                      dataRevalidacao: dataReavaliacao
-                  });
+                    // Adiciona o novo operador revalidador com UID e data/hora
+                    operadoresRevalidacao.push({
+                        nome: operadorRevalidacao,
+                        dataRevalidacao: dataReavaliacao,
+                        uid: user.uid
+                    });
         
-                  return docRef.update({
-                    operadoresRevalidacao
-                  });
+                    // Atualiza ou cria o array de participantes
+                    const uidsParticipantes = Array.isArray(docData.uidsParticipantes) ? docData.uidsParticipantes : [];
+                    if (!uidsParticipantes.includes(user.uid)) {
+                        uidsParticipantes.push(user.uid);
+                    }
+        
+                    return docRef.update({
+                        operadoresRevalidacao,
+                        uidsParticipantes
+                    });
                 } else {
-                  alert('Documento não encontrado para revalidar.');
+                    alert('Documento não encontrado para revalidar.');
                 }
               })
               .then(() => {
@@ -459,6 +469,7 @@
                 carregarHistorico();
             } catch (error) {
                 alert('Erro ao salvar: ' + error.message);
+                
             }
         }
 
@@ -508,8 +519,11 @@
                 if (!isAdmin) {
                     query = query.where('userId', '==', user.uid);
                 }
-                const querySnapshot = await query.get();
-        
+                const querySnapshot = await db.collection('formularios')
+                .where('uidsParticipantes', 'array-contains', user.uid)
+                  .orderBy('timestamp', 'desc')
+                .get();
+                
                 if (querySnapshot.empty) {
                     historicoContainer.innerHTML += '<p>Nenhum formulário encontrado.</p>';
                     return;
