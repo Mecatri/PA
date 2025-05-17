@@ -1,51 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <style>
         body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-image: url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg'); /* Caminho da imagem */
-    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg'); /* Adiciona transparência diretamente na imagem */
-    background-size: cover;  /* Ajusta a imagem ao tamanho dela */
-    background-position: center; /* Centraliza a imagem */
-    background-attachment: fixed;
-    background-repeat: no-repeat; /* Impede a repetição da imagem */
-    background-color: rgba(255, 255, 255, 0.5); /* Adiciona uma camada semitransparente branca sobre a imagem */
-    height: 100vh; /* Define que o fundo ocupe toda a altura da tela */
-    }
-    <title>Formulário da Atividade com Modificação</title>
-    <style>
-        body {
             font-family: Arial, sans-serif;
-            margin: 0; /* Alterado de auto para 0 */
+            margin: 0;
             padding: 20px;
-            display: flex; /* Adicionado para centralizar o conteúdo */
+            display: flex;
             flex-direction: column;
-            align-items: center; /* Centraliza horizontalmente */
+            align-items: center;
+            background-image: url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg');
+            background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('https://institucional-dexco-assets-prd-bucket.s3.amazonaws.com/wp-content/uploads/2022/12/DSC4511_-1-1536x1024.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-color: rgba(255, 255, 255, 0.5);
+            height: 100vh;
         }
-
-        #form-container {
-            display: none;
-            width: 100%; /* Garante que ocupe a largura total do body */
-            max-width: 600px; /* Limita a largura máxima do formulário */
-            margin: 0 auto; /* Centraliza o formulário */
-        }
-
-        label { display: block; margin-top: 10px; }
-        input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-        button { margin-top: 15px; padding: 10px 15px; }
-        .error { color: red; font-size: 0.9em; margin-top: 5px; }
-        .readonly { background-color: #f0f0f0; }
-        <style>
-       #login {
+        #login {
             width: 100%;
             max-width: 400px;
             margin: 0 auto;
@@ -98,11 +73,21 @@
             font-size: 0.9em;
             margin-top: 5px;
         }
+        #form-container {
+            display: none;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        label { display: block; margin-top: 10px; }
+        input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+        button { margin-top: 15px; padding: 10px 15px; }
+        .readonly { background-color: #f0f0f0; }
         #historico {
             margin-top: 30px;
-            width: 100%; /* Garante que ocupe a largura total */
-            max-width: 600px; /* Limita a largura do histórico */
-            margin: 0 auto; /* Centraliza o histórico */
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
         }
         .registro { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; background-color: white; }
         .registro-actions { margin-top: 10px; }
@@ -111,38 +96,35 @@
         .atrasado { border: 2px solid red !important; }
         .admin-actions button { background-color: #007bff; color: white; }
         #graficos-container {
-        background-color: white;
-        display: flex;
-        flex-direction: column; /* Alterado de row para column */
-        align-items: center;      /* Centraliza os itens horizontalmente */
-        justify-content: flex-start; /* Alinha os itens ao topo */
-        width: 100%;
-        padding: 20px;           /* Adicione padding para o espaço interno */
-        box-sizing: border-box;  /* Garante que o padding não aumente o tamanho total */
-        margin-top: 30px;
-        border-radius: 10px;     /* Opcional: para bordas arredondadas */
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Opcional: para uma sombra sutil */
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            margin-top: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
         #statusAtividadesChart {
-        width: 100%;
-        max-width: 800px;
-        height: 400px !important;
-        margin-bottom: 20px; /* Adicione margem abaixo do primeiro gráfico */
-    }
-
-#comparacaoAtividadesChart {
-    width: 100%;
-    max-width: 800px;
-    height: 400px !important;
-    margin-bottom: 20px;
-}
-      
+            width: 100%;
+            max-width: 800px;
+            height: 400px !important;
+            margin-bottom: 20px;
+        }
+        #comparacaoAtividadesChart {
+            width: 100%;
+            max-width: 800px;
+            height: 400px !important;
+            margin-bottom: 20px;
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
@@ -173,29 +155,19 @@
             } else {
                 document.getElementById('login').style.display = 'block';
                 document.getElementById('form-container').style.display = 'none';
-                 isAdmin = false;
+                isAdmin = false;
             }
         });
-
-        function login() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
-            auth.signInWithPopup(provider)
-                .catch((error) => alert('Erro no login com Gmail: ' + error.message));
-        }
 
         function loginComEmail() {
             const email = document.getElementById('emailLogin').value;
             const password = document.getElementById('passwordLogin').value;
             const errorLabel = document.getElementById('loginEmailErro');
-
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    console.log('Usuário logado com e-mail:', userCredential.user);
-                     errorLabel.textContent = '';
+                    errorLabel.textContent = '';
                 })
                 .catch((error) => {
-                    console.error('Erro ao fazer login com e-mail:', error.code, error.message);
                     errorLabel.textContent = 'Erro ao fazer login: ' + error.message;
                 });
         }
@@ -203,40 +175,25 @@
         function cadastrarNovoUsuario() {
             const email = document.getElementById('emailCadastro').value;
             const password = document.getElementById('passwordCadastro').value;
-             const errorLabel = document.getElementById('cadastroEmailErro');
-
+            const errorLabel = document.getElementById('cadastroEmailErro');
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    console.log('Novo usuário cadastrado:', userCredential.user);
                     errorLabel.textContent = '';
-                    // Opcional: Enviar e-mail de verificação
-                    // userCredential.user.sendEmailVerification();
                 })
                 .catch((error) => {
-                    console.error('Erro ao cadastrar usuário:', error.code, error.message);
                     errorLabel.textContent = 'Erro ao cadastrar: ' + error.message;
                 });
         }
 
         function enviarRecuperacaoSenha() {
-    const email = document.getElementById('emailLogin').value;
-    auth.sendPasswordResetEmail(email)
-        .then(() => {
-            alert('Um e-mail de recuperação de senha foi enviado para ' + email);
-        })
-        .catch((error) => {
-            console.error('Erro ao enviar e-mail de recuperação:', error);
-            console.error('Código do erro:', error.code);  // Adicione esta linha
-            console.error('Mensagem do erro:', error.message); // Adicione esta linha
-            alert('Erro ao enviar e-mail de recuperação de senha: ' + error.message);
-            if (error.code === 'auth/user-not-found') {
-                alert('Usuário não encontrado. Verifique o e-mail digitado.');
-            } else if (error.code === 'auth/invalid-email') {
-                alert('E-mail inválido. Digite um e-mail válido.');
-            } else {
-                alert('Ocorreu um erro ao enviar o e-mail de recuperação. Tente novamente.');
-            }
-        });
+            const email = document.getElementById('emailLogin').value;
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    alert('Um e-mail de recuperação de senha foi enviado para ' + email);
+                })
+                .catch((error) => {
+                    alert('Erro ao enviar e-mail de recuperação de senha: ' + error.message);
+                });
         }
 
         function logout() {
@@ -253,37 +210,27 @@
                 ordem: params.get('ordemServico')
             };
         }
-        
-       function verificarAtividadeExistente(ordemServico) {
-            // Padroniza valor e previne consulta inválida
+
+        function verificarAtividadeExistente(ordemServico) {
             if (!ordemServico || typeof ordemServico !== "string" || ordemServico.trim() === "") {
-                console.warn("ordemServico está vazio ou inválido!", ordemServico);
                 return Promise.resolve(null);
             }
             const ordemPadronizada = ordemServico.trim();
-        
-            // Log para debug
-            console.log("Verificando atividade existente para ordem:", ordemPadronizada);
-        
             return db.collection('formularios')
                 .where('ordem', '==', ordemPadronizada)
                 .get()
                 .then(querySnapshot => {
-                    console.log("Quantidade de resultados:", querySnapshot.size);
                     if (!querySnapshot.empty) {
-                        // Log do primeiro resultado para análise
-                        console.log("Primeira atividade encontrada:", querySnapshot.docs[0].data());
                         return querySnapshot.docs[0].data();
                     } else {
-                        console.log("Nenhuma atividade encontrada para a ordem:", ordemPadronizada);
                         return null;
                     }
                 })
                 .catch(error => {
-                    console.error("Erro ao verificar atividade:", error);
                     return null;
                 });
         }
+
         function exibirOpcoesAtividadeExistente(atividade) {
             const formContainer = document.getElementById('form-container');
             let operadoresHTML = `<p><strong>Operador:</strong> ${atividade.operador}</p>`;
@@ -292,7 +239,6 @@
                     operadoresHTML += `<p><strong>Operador ${idx + 2} (Revalidação):</strong> ${op.nome} — Data/Hora: ${op.dataRevalidacao}</p>`;
                 });
             }
-        
             formContainer.innerHTML = `
                 <h2>Atividade Existente</h2>
                 <p><strong>Descrição:</strong> ${atividade.descricao}</p>
@@ -307,36 +253,42 @@
                     <input type="datetime-local" id="dataReavaliacao" required>
                     <button onclick="revalidarPT()">Salvar Revalidação</button>
                 </div>
-                <div id="nova-pt-form" style="display:none;"> ... </div>
+                <div id="nova-pt-form" style="display:none;">
+                    <label for="numeroPtNova">Número da Nova PT:</label>
+                    <input type="text" id="numeroPtNova">
+                    <label for="inicioPtNova">Início da Nova PT:</label>
+                    <input type="datetime-local" id="inicioPtNova">
+                    <label for="fimPtNova">Fim da Nova PT:</label>
+                    <input type="datetime-local" id="fimPtNova">
+                    <button onclick="adicionarNovaPT()">Salvar Nova PT</button>
+                </div>
             `;
             formContainer.style.display = 'block';
         }
-        
-       function voltarAoFormulario() {
-                window.location.href = "https://mecatri.github.io/PA/formulario";
+
+        function voltarAoFormulario() {
+            window.location.href = "https://mecatri.github.io/PA/formulario";
         }
 
-         function mostrarRevalidarPT() {
+        function mostrarRevalidarPT() {
             document.getElementById('revalidar-pt-form').style.display = 'block';
             document.getElementById('nova-pt-form').style.display = 'none';
         }
-        
-         function mostrarAdicionarNovaPT() {
+
+        function mostrarAdicionarNovaPT() {
             document.getElementById('revalidar-pt-form').style.display = 'none';
             document.getElementById('nova-pt-form').style.display = 'block';
         }
-        
+
         function revalidarPT() {
             const operadorRevalidacao = document.getElementById('operadorRevalidacao').value;
             const dataReavaliacao = document.getElementById('dataReavaliacao').value;
             const { ordem } = getQueryParams();
             const user = auth.currentUser;
-        
             if (!operadorRevalidacao || !dataReavaliacao) {
                 alert('Preencha o nome do operador e a data/hora da revalidação.');
                 return;
             }
-        
             db.collection('formularios')
               .where('ordem', '==', ordem)
               .get()
@@ -345,25 +297,19 @@
                     const docRef = querySnapshot.docs[0].ref;
                     const docData = querySnapshot.docs[0].data();
                     const operadoresRevalidacao = Array.isArray(docData.operadoresRevalidacao) ? docData.operadoresRevalidacao : [];
-        
-                    // Adiciona o novo operador revalidador com UID e data/hora
                     operadoresRevalidacao.push({
                         nome: operadorRevalidacao,
                         dataRevalidacao: dataReavaliacao,
                         uid: user.uid
                     });
-        
-                    // Atualiza ou cria o array de participantes corretamente
                     let uidsParticipantes = docData.uidsParticipantes;
                     if (!Array.isArray(uidsParticipantes)) {
-                        // Para compatibilidade com formulários antigos
                         uidsParticipantes = [];
                         if (docData.userId) uidsParticipantes.push(docData.userId);
                     }
                     if (!uidsParticipantes.includes(user.uid)) {
                         uidsParticipantes.push(user.uid);
                     }
-        
                     return docRef.update({
                         operadoresRevalidacao,
                         uidsParticipantes
@@ -375,10 +321,9 @@
               .then(() => {
                 alert('PT Revalidada com sucesso!');
                 preencherFormulario();
-                carregarHistorico(); // <- Adicione isso para atualizar o histórico imediatamente
+                carregarHistorico();
               })
               .catch(error => {
-                console.error("Erro ao revalidar PT:", error);
                 alert('Erro ao revalidar PT: ' + error.message);
               });
         }
@@ -401,50 +346,40 @@
                 alert('Nova PT adicionada com sucesso!');
             })
             .catch(error => {
-                console.error("Erro ao adicionar nova PT:", error);
                 alert('Erro ao adicionar nova PT: ' + error.message);
             });
         }
-        
-
 
         function preencherFormulario() {
             const { descricao, inicioPrevisto, fimPrevisto, ordem, observacoes } = getQueryParams();
-            const ordemServico = ordem; // Usando 'ordem' como OS
+            const ordemServico = ordem;
             const formContainer = document.getElementById('form-container');
-        
             verificarAtividadeExistente(ordemServico)
                 .then(atividadeExistente => {
                     if (atividadeExistente) {
                         exibirOpcoesAtividadeExistente(atividadeExistente);
                     } else {
-                        // Se não existir, preencha o formulário para novo cadastro
                         document.getElementById('descricao').value = descricao || '';
                         document.getElementById('inicioPrevisto').value = inicioPrevisto || '';
                         document.getElementById('fimPrevisto').value = fimPrevisto || '';
                         document.getElementById('ordem').value = ordem || '';
                         document.getElementById('observacoes').value = observacoes || '';
-        
-                        formContainer.style.display = 'block'; // Mostra o formulário
+                        formContainer.style.display = 'block';
                     }
                 })
                 .catch(error => {
-                    console.error("Erro ao verificar atividade:", error);
                     alert("Erro ao verificar atividade: " + error.message);
                 });
-            console.log('preencherFormulario finalizado');
         }
 
         function validarFormulario(event) {
             event.preventDefault();
             let isValid = true;
-
             const camposObrigatorios = [
                 { id: 'operador', erro: 'operadorErro', msg: 'Preencha o Nome do Operador.' },
                 { id: 'pt', erro: 'ptErro', msg: 'Preencha o Número da PT.' },
                 { id: 'inicioReal', erro: 'inicioRealErro', msg: 'Preencha a Data e Hora de Início Real.' }
             ];
-
             camposObrigatorios.forEach(({ id, erro, msg }) => {
                 const input = document.getElementById(id);
                 const errorLabel = document.getElementById(erro);
@@ -455,17 +390,14 @@
                     errorLabel.textContent = '';
                 }
             });
-
             if (isValid) {
                 formularioIdEmEdicao ? salvarEdicao() : salvarFormulario();
             }
-            console.log('voltarAoFormulario finalizado');
         }
 
         async function salvarFormulario() {
             const user = auth.currentUser;
             if (!user) return alert('Você precisa estar logado.');
-
             const dados = coletarDados(user);
             try {
                 await db.collection('formularios').add(dados);
@@ -481,7 +413,6 @@
         async function salvarEdicao() {
             const user = auth.currentUser;
             if (!user || !formularioIdEmEdicao) return;
-
             const dados = coletarDados(user);
             try {
                 await db.collection('formularios').doc(formularioIdEmEdicao).update(dados);
@@ -515,15 +446,11 @@
         async function carregarHistorico() {
             const user = auth.currentUser;
             if (!user) return;
-        
             const historicoContainer = document.getElementById('historico');
             historicoContainer.innerHTML = '<h3>Histórico de Formulários Enviados</h3>';
-        
             try {
                 let formularios = [];
-        
                 if (isAdmin) {
-                    // Admin vê todos os formulários
                     const snapshot = await db.collection('formularios').orderBy('timestamp', 'desc').get();
                     snapshot.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
                 } else {
@@ -532,15 +459,12 @@
                         .where('userId', '==', user.uid)
                         .orderBy('timestamp', 'desc')
                         .get();
-        
                     criados.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
-        
                     // Formulários em que participou como revalidador (uidsParticipantes)
                     const revalidados = await db.collection('formularios')
                         .where('uidsParticipantes', 'array-contains', user.uid)
                         .orderBy('timestamp', 'desc')
                         .get();
-        
                     // Evita duplicidade pelo id do documento
                     const idsExistentes = new Set(formularios.map(f => f.id));
                     revalidados.forEach(doc => {
@@ -549,24 +473,19 @@
                         }
                     });
                 }
-        
                 if (formularios.length === 0) {
                     historicoContainer.innerHTML += '<p>Nenhum formulário encontrado.</p>';
                     return;
                 }
-        
                 // Exibição dos registros
                 const hoje = new Date();
                 hoje.setHours(0, 0, 0, 0);
-        
                 formularios.forEach((f) => {
                     const registro = document.createElement('div');
                     registro.className = 'registro';
-        
                     if (!f.fimReal || f.fimReal.trim() === '') {
                         registro.classList.add('pendente');
                     }
-        
                     if (f.fimPrevisto) {
                         const fimPrevistoDate = new Date(f.fimPrevisto);
                         fimPrevistoDate.setHours(0, 0, 0, 0);
@@ -574,14 +493,12 @@
                             registro.classList.add('atrasado');
                         }
                     }
-        
                     let actionsHTML = `
                         <div class="registro-actions">
                             <button onclick="editarFormulario('${f.id}')">Editar</button>
                             <button onclick="excluirFormulario('${f.id}')">Excluir</button>
                         </div>
                     `;
-        
                     if (isAdmin) {
                         actionsHTML = `
                             <div class="registro-actions admin-actions">
@@ -590,7 +507,6 @@
                             </div>
                         `;
                     }
-        
                     registro.innerHTML = `
                         <p><strong>Descrição:</strong> ${f.descricao}</p>
                         <p><strong>Início Previsto:</strong> ${f.inicioPrevisto}</p>
@@ -613,110 +529,107 @@
                     historicoContainer.appendChild(registro);
                 });
 
-// Ajuste para criar os gráficos com base no novo array 'formularios'
-const atividadesPendentes = formularios.filter(f => !f.fimReal || f.fimReal.trim() === '').length;
-const atividadesConcluidas = formularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
-
-// Gráfico de status
-const statusCtx = document.getElementById('statusAtividadesChart').getContext('2d');
-const statusChart = new Chart(statusCtx, {
-    type: 'pie',
-    data: {
-        labels: ['Pendentes', 'Concluídas'],
-        datasets: [{
-            label: 'Status das Atividades',
-            data: [atividadesPendentes, atividadesConcluidas],
-            backgroundColor: [
-                'rgba(255, 206, 86, 0.8)',
-                'rgba(75, 192, 192, 0.8)'
-            ],
-            borderColor: [
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: false,
-        maintainAspectRatio: false,
-        backgroundColor: 'white',
-        plugins: {
-            legend: {
-                position: 'bottom',
-            },
-            title: {
-                display: true,
-                text: 'Status das Atividades',
-                font: {
-                    size: 16
-                }
-            }
-        }
-    }
-});
-
-            // Gráfico de comparação
-            const comparacaoCtx = document.getElementById('comparacaoAtividadesChart').getContext('2d');
-            const contadorDoc = await db.collection('contadores').doc('contador_qrcode').get();
-            const totalAtividadesQRCode = contadorDoc.exists ? contadorDoc.data().total : 0;
-            const totalFormularios = formularios.length;
-            const totalFormulariosFinalizados = formularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
-            const totalFormulariosAbertos = totalFormularios - totalFormulariosFinalizados;
-            
-            const comparacaoAtividadesChart = new Chart(comparacaoCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['QR Code', 'Formulários (Total)', 'Formulários (Finalizados)', 'Formulários (Abertos)'],
-                    datasets: [{
-                        label: 'Total de Atividades',
-                        data: [totalAtividadesQRCode, totalFormularios, totalFormulariosFinalizados, totalFormulariosAbertos],
-                        backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)', 'rgba(75, 192, 192, 0.7)', 'rgba(255, 159, 64, 0.7)'],
-                        borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: false,
-                    maintainAspectRatio: false,
-                    backgroundColor: 'white',
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                // Gráficos
+                const atividadesPendentes = formularios.filter(f => !f.fimReal || f.fimReal.trim() === '').length;
+                const atividadesConcluidas = formularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
+                const statusCtx = document.getElementById('statusAtividadesChart').getContext('2d');
+                new Chart(statusCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Pendentes', 'Concluídas'],
+                        datasets: [{
+                            label: 'Status das Atividades',
+                            data: [atividadesPendentes, atividadesConcluidas],
+                            backgroundColor: [
+                                'rgba(255, 206, 86, 0.8)',
+                                'rgba(75, 192, 192, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
                     },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Comparação Atividades: QR Code vs. Formulários',
-                            font: {
-                                size: 16
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y;
-                                    }
-                                    if (context.label !== 'QR Code') {
-                                        const total = totalAtividadesQRCode;
-                                        const value = context.parsed.y;
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(2) + '%' : '0%';
-                                        label += ' (' + percentage + ')';
-                                    }
-                                    return label;
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        backgroundColor: 'white',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Status das Atividades',
+                                font: {
+                                    size: 16
                                 }
                             }
                         }
                     }
-                }
-            });
-                
+                });
+
+                // Gráfico de comparação
+                const comparacaoCtx = document.getElementById('comparacaoAtividadesChart').getContext('2d');
+                const contadorDoc = await db.collection('contadores').doc('contador_qrcode').get();
+                const totalAtividadesQRCode = contadorDoc.exists ? contadorDoc.data().total : 0;
+                const totalFormularios = formularios.length;
+                const totalFormulariosFinalizados = formularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
+                const totalFormulariosAbertos = totalFormularios - totalFormulariosFinalizados;
+                new Chart(comparacaoCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['QR Code', 'Formulários (Total)', 'Formulários (Finalizados)', 'Formulários (Abertos)'],
+                        datasets: [{
+                            label: 'Total de Atividades',
+                            data: [totalAtividadesQRCode, totalFormularios, totalFormulariosFinalizados, totalFormulariosAbertos],
+                            backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)', 'rgba(75, 192, 192, 0.7)', 'rgba(255, 159, 64, 0.7)'],
+                            borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        backgroundColor: 'white',
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Comparação Atividades: QR Code vs. Formulários',
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y;
+                                        }
+                                        if (context.label !== 'QR Code') {
+                                            const total = totalAtividadesQRCode;
+                                            const value = context.parsed.y;
+                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(2) + '%' : '0%';
+                                            label += ' (' + percentage + ')';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
             } catch (error) {
                 historicoContainer.innerHTML += '<p>Erro ao carregar o histórico.</p>';
             }
@@ -736,8 +649,6 @@ const statusChart = new Chart(statusCtx, {
                     document.getElementById('operador').value = data.operador || '';
                     document.getElementById('ordem').value = data.ordem || '';
                     document.getElementById('pt').value = data.pt || '';
-
-                     // Remove a classe readonly dos campos ao carregar para edição
                     document.getElementById('descricao').classList.remove('readonly');
                     document.getElementById('inicioPrevisto').classList.remove('readonly');
                     document.getElementById('fimPrevisto').classList.remove('readonly');
@@ -746,11 +657,7 @@ const statusChart = new Chart(statusCtx, {
                     document.getElementById('operador').classList.remove('readonly');
                     document.getElementById('ordem').classList.remove('readonly');
                     document.getElementById('pt').classList.remove('readonly');
-
-                    // Atualiza o texto do botão para "Salvar Edição"
                     document.querySelector('button[type="submit"]').textContent = 'Salvar Edição';
-
-
                 } else {
                     alert('Formulário não encontrado.');
                 }
@@ -802,7 +709,6 @@ const statusChart = new Chart(statusCtx, {
             <button onclick="cadastrarNovoUsuario()">Cadastrar</button>
             <p id="cadastroEmailErro" class="error"></p>
         </div>
-        
     </div>
 
     <div id="form-container" style="display: none;">
@@ -855,5 +761,5 @@ const statusChart = new Chart(statusCtx, {
             
         <div id="historico"></div>
     </div>
-    </body>
+</body>
 </html>
