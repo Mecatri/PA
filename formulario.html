@@ -518,10 +518,7 @@
                     if (!isAdmin) {
                         query = query.where('userId', '==', user.uid);
                     }
-                    const querySnapshot = await db.collection('formularios')
-                        .where('uidsParticipantes', 'array-contains', user.uid)
-                        .orderBy('timestamp', 'desc')
-                        .get();
+                   const querySnapshot = await query.get();
 
             
                     if (querySnapshot.empty) {
