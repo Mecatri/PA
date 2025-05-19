@@ -476,30 +476,26 @@
             try {
                 let formularios = [];
                 if (isAdmin) {
+                    // Admin vê todos os formulários
                     const snapshot = await db.collection('formularios').orderBy('timestamp', 'desc').get();
                     snapshot.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
                 } else {
-                    // Formulários criados pelo usuário
-                    const snapshot = await db.collection('formularios').orderBy('timestamp', 'desc').get();
+                    // Para operadores comuns: busca todos e filtra em memória quem ele criou ou participou
+                    const snapshot = await db.collection('formularios').get();
                     snapshot.forEach(doc => {
                         const data = doc.data();
-                        if (data.userId === user.uid ||
-                            (Array.isArray(data.uidsParticipantes) && data.uidsParticipantes.includes(user.uid))) {
+                        if (
+                            data.userId === user.uid ||
+                            (Array.isArray(data.uidsParticipantes) && data.uidsParticipantes.includes(user.uid))
+                        ) {
                             formularios.push({ id: doc.id, ...data });
                         }
                     });
-                    criados.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
-                    // Formulários em que participou como revalidador (uidsParticipantes)
-                    const revalidados = await db.collection('formularios')
-                        .where('uidsParticipantes', 'array-contains', user.uid)
-                        .orderBy('timestamp', 'desc')
-                        .get();
-                    // Evita duplicidade pelo id do documento
-                    const idsExistentes = new Set(formularios.map(f => f.id));
-                    revalidados.forEach(doc => {
-                        if (!idsExistentes.has(doc.id)) {
-                            formularios.push({ id: doc.id, ...doc.data() });
-                        }
+                    // Ordena pelo timestamp decrescente, caso exista
+                    formularios.sort((a, b) => {
+                        const aTime = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : new Date(a.timestamp).getTime();
+                        const bTime = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : new Date(b.timestamp).getTime();
+                        return bTime - aTime;
                     });
                 }
                 if (formularios.length === 0) {
