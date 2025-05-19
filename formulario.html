@@ -480,10 +480,14 @@
                     snapshot.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
                 } else {
                     // Formulários criados pelo usuário
-                    const criados = await db.collection('formularios')
-                        .where('userId', '==', user.uid)
-                        .orderBy('timestamp', 'desc')
-                        .get();
+                    const snapshot = await db.collection('formularios').orderBy('timestamp', 'desc').get();
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.userId === user.uid ||
+                            (Array.isArray(data.uidsParticipantes) && data.uidsParticipantes.includes(user.uid))) {
+                            formularios.push({ id: doc.id, ...data });
+                        }
+                    });
                     criados.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
                     // Formulários em que participou como revalidador (uidsParticipantes)
                     const revalidados = await db.collection('formularios')
