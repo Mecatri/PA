@@ -254,12 +254,12 @@
                     <button onclick="revalidarPT()">Salvar Revalidação</button>
                 </div>
                 <div id="nova-pt-form" style="display:none;">
+                    <label for="operadorNovaPT">Nome do Operador:</label>
+                    <input type="text" id="operadorNovaPT" required>
                     <label for="numeroPtNova">Número da Nova PT:</label>
-                    <input type="text" id="numeroPtNova">
-                    <label for="inicioPtNova">Início da Nova PT:</label>
-                    <input type="datetime-local" id="inicioPtNova">
-                    <label for="fimPtNova">Fim da Nova PT:</label>
-                    <input type="datetime-local" id="fimPtNova">
+                    <input type="text" id="numeroPtNova" required>
+                    <label for="inicioPtNova">Data/Hora de Abertura:</label>
+                    <input type="datetime-local" id="inicioPtNova" required>
                     <button onclick="adicionarNovaPT()">Salvar Nova PT</button>
                 </div>
             `;
@@ -329,25 +329,45 @@
         }
 
         function adicionarNovaPT() {
+            const operadorNovaPT = document.getElementById('operadorNovaPT').value;
             const numeroPtNova = document.getElementById('numeroPtNova').value;
             const inicioPtNova = document.getElementById('inicioPtNova').value;
-            const fimPtNova = document.getElementById('fimPtNova').value;
-            const { descricao, inicioPrevisto, fimPrevisto, ordem } = getQueryParams();
-            db.collection('formularios').add({
-                descricao: descricao,
-                inicioPrevisto: inicioPrevisto,
-                fimPrevisto: fimPrevisto,
-                ordem: ordem,
-                numeroPtNova: numeroPtNova,
-                inicioPtNova: inicioPtNova,
-                fimPtNova: fimPtNova
-            })
-            .then(() => {
+            const { ordem } = getQueryParams();
+        
+            if (!operadorNovaPT || !numeroPtNova || !inicioPtNova) {
+                alert('Preencha todos os campos da Nova PT.');
+                return;
+            }
+        
+            db.collection('formularios')
+              .where('ordem', '==', ordem)
+              .get()
+              .then(querySnapshot => {
+                if (!querySnapshot.empty) {
+                    const docRef = querySnapshot.docs[0].ref;
+                    const docData = querySnapshot.docs[0].data();
+        
+                    // Pega o array existente ou inicializa vazio
+                    const ptsAdicionais = Array.isArray(docData.ptsAdicionais) ? docData.ptsAdicionais : [];
+                    ptsAdicionais.push({
+                        operador: operadorNovaPT,
+                        numero: numeroPtNova,
+                        abertura: inicioPtNova
+                    });
+        
+                    return docRef.update({ ptsAdicionais });
+                } else {
+                    alert('Documento não encontrado para adicionar PT.');
+                }
+              })
+              .then(() => {
                 alert('Nova PT adicionada com sucesso!');
-            })
-            .catch(error => {
+                preencherFormulario();
+                carregarHistorico();
+              })
+              .catch(error => {
                 alert('Erro ao adicionar nova PT: ' + error.message);
-            });
+              });
         }
 
         function preencherFormulario() {
@@ -519,6 +539,14 @@
                                 ? f.operadoresRevalidacao.map((op, idx) =>
                                     `<p><strong>Operador ${idx + 2} (Revalidação):</strong> ${op.nome} — Data/Hora: ${op.dataRevalidacao}</p>`
                                 ).join('')
+                                : ''
+                        }
+                        ${
+                            f.ptsAdicionais && Array.isArray(f.ptsAdicionais)
+                                ? f.ptsAdicionais.map(
+                                    (pt, idx) =>
+                                      `<p><strong>Nova PT ${idx + 1}:</strong> Operador: ${pt.operador} | Nº PT: ${pt.numero} | Abertura: ${pt.abertura}</p>`
+                                  ).join('')
                                 : ''
                         }
                         <p><strong>OS:</strong> ${f.ordem}</p>
