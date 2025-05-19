@@ -338,6 +338,7 @@
             const numeroPtNova = document.getElementById('numeroPtNova').value;
             const inicioPtNova = document.getElementById('inicioPtNova').value;
             const { ordem } = getQueryParams();
+            const user = auth.currentUser;
         
             if (!operadorNovaPT || !numeroPtNova || !inicioPtNova) {
                 alert('Preencha todos os campos da Nova PT.');
@@ -352,7 +353,7 @@
                     const docRef = querySnapshot.docs[0].ref;
                     const docData = querySnapshot.docs[0].data();
         
-                    // Pega o array existente ou inicializa vazio
+                    // Atualiza ptsAdicionais
                     const ptsAdicionais = Array.isArray(docData.ptsAdicionais) ? docData.ptsAdicionais : [];
                     ptsAdicionais.push({
                         operador: operadorNovaPT,
@@ -360,7 +361,17 @@
                         abertura: inicioPtNova
                     });
         
-                    return docRef.update({ ptsAdicionais });
+                    // Atualiza uidsParticipantes
+                    let uidsParticipantes = docData.uidsParticipantes;
+                    if (!Array.isArray(uidsParticipantes)) {
+                        uidsParticipantes = [];
+                        if (docData.userId) uidsParticipantes.push(docData.userId);
+                    }
+                    if (user && !uidsParticipantes.includes(user.uid)) {
+                        uidsParticipantes.push(user.uid);
+                    }
+        
+                    return docRef.update({ ptsAdicionais, uidsParticipantes });
                 } else {
                     alert('Documento não encontrado para adicionar PT.');
                 }
