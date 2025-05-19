@@ -239,6 +239,10 @@
                     operadoresHTML += `<p><strong>Operador ${idx + 2} (Revalidação):</strong> ${op.nome} — Data/Hora: ${op.dataRevalidacao}</p>`;
                 });
             }
+            if (atividade.ptsAdicionais && Array.isArray(atividade.ptsAdicionais)) {
+                atividade.ptsAdicionais.forEach((pt, idx) => {
+                    operadoresHTML += `<p><strong>Nova PT ${idx+1}:</strong> Operador: ${pt.operador} | Nº PT: ${pt.numero} | Abertura: ${pt.abertura}</p>`;
+                });
             formContainer.innerHTML = `
                 <h2>Atividade Existente</h2>
                 <p><strong>Descrição:</strong> ${atividade.descricao}</p>
