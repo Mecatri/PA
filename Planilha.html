@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Atividades Siemens+ Login</title>
+  <title>Atividades Firestore + Login</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f6f7fb; }
     table { border-collapse: collapse; width: 90%; margin: 20px auto; }
@@ -25,9 +25,26 @@
     #logoutBtn {
       float: right; margin: 10px 5vw 0 0; background: #c22; color: #fff; border: none; padding: 7px 15px; border-radius: 5px;
     }
+    #totalizador {
+      position: absolute;
+      top: 20px;
+      left: 40px;
+      background: #fffde8;
+      color: #79510d;
+      font-weight: bold;
+      font-size: 18px;
+      border: 1px solid #ffe4a1;
+      border-radius: 8px;
+      padding: 10px 22px;
+      z-index: 100;
+      box-shadow: 0 2px 8px #3332;
+      letter-spacing: 0.5px;
+    }
   </style>
 </head>
 <body>
+  <div id="totalizador" style="display:none;">Total de atividades: 0</div>
+
   <div id="loginBox" style="display:none;">
     <h2>Login</h2>
     <input type="email" id="loginEmail" placeholder="E-mail"><br>
@@ -39,7 +56,7 @@
   <button id="logoutBtn" onclick="logout()" style="display:none;">Sair</button>
 
   <div id="conteudo" style="display:none;">
-    <h2 style="text-align:center;">Cadastro de Atividades (Siemens)</h2>
+    <h2 style="text-align:center;">Cadastro de Atividades (Firestore)</h2>
     <table>
       <tr>
         <th>Nome da Atividade</th>
@@ -59,6 +76,7 @@
             <option value="em_andamento">Em andamento</option>
             <option value="concluida">Concluída</option>
             <option value="atrasada">Atrasada</option>
+            <option value="nao_iniciada">Não iniciada</option>
           </select>
         </td>
         <td><button onclick="salvarAtividade()">Salvar</button></td>
@@ -117,11 +135,13 @@
     document.getElementById('loginBox').style.display = 'block';
     document.getElementById('conteudo').style.display = 'none';
     document.getElementById('logoutBtn').style.display = 'none';
+    document.getElementById('totalizador').style.display = 'none';
   }
   function mostrarConteudo() {
     document.getElementById('loginBox').style.display = 'none';
     document.getElementById('conteudo').style.display = 'block';
     document.getElementById('logoutBtn').style.display = 'block';
+    document.getElementById('totalizador').style.display = 'block';
   }
   function fazerLogin() {
     const email = document.getElementById('loginEmail').value;
@@ -141,6 +161,7 @@
       mostrarLogin();
       limparCampos();
       document.getElementById('historicoBody').innerHTML = '';
+      atualizarTotalizador(0);
     });
   }
   auth.onAuthStateChanged((user) => {
@@ -149,6 +170,7 @@
       carregarHistorico();
     } else {
       mostrarLogin();
+      atualizarTotalizador(0);
     }
   });
 
@@ -216,7 +238,9 @@
     unsubscribeHistorico = db.collection('atividades').orderBy("inicio", "desc").onSnapshot((snapshot) => {
       let tbody = document.getElementById('historicoBody');
       tbody.innerHTML = '';
+      let total = 0;
       snapshot.forEach((doc) => {
+        total++;
         const atividade = doc.data();
         const key = doc.id;
         const tr = document.createElement('tr');
@@ -234,7 +258,13 @@
         `;
         tbody.appendChild(tr);
       });
+      atualizarTotalizador(total);
     });
+  }
+
+  function atualizarTotalizador(total) {
+    const totalizador = document.getElementById('totalizador');
+    totalizador.innerText = `Total de atividades: ${total}`;
   }
 
   function editarAtividade(id) {
@@ -273,6 +303,8 @@
       return '<span style="color:blue;font-weight:bold;">Em andamento</span>';
     if(status === 'atrasada')
       return '<span style="color:red;font-weight:bold;">Atrasada</span>';
+    if(status === 'nao_iniciada')
+      return '<span style="color:#e3b400;font-weight:bold;">Não iniciada</span>';
     return status;
   }
 
@@ -284,6 +316,7 @@
         carregarHistorico();
       } else {
         mostrarLogin();
+        atualizarTotalizador(0);
       }
     });
   }
