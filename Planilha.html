@@ -40,6 +40,32 @@
       box-shadow: 0 2px 8px #3332;
       letter-spacing: 0.5px;
     }
+    #graficosContainer {
+      margin: 40px auto 20px auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 50px;
+      justify-content: center;
+    }
+    .grafico-box {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px #3332;
+      padding: 25px 15px 10px 15px;
+      width: 380px;
+      min-width: 340px;
+      max-width: 95vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .grafico-titulo {
+      font-weight: bold;
+      font-size: 17px;
+      margin-bottom: 15px;
+      color: #333;
+      letter-spacing: 0.5px;
+    }
   </style>
 </head>
 <body>
@@ -118,8 +144,23 @@
         </tbody>
       </table>
     </div>
+
+    <!-- GRAFICOS -->
+    <div id="graficosContainer">
+      <div class="grafico-box">
+        <div class="grafico-titulo">Atividades PG</div>
+        <canvas id="graficoPG" width="320" height="260"></canvas>
+      </div>
+      <div class="grafico-box">
+        <div class="grafico-titulo">Atividades Minor</div>
+        <canvas id="graficoMinor" width="320" height="260"></canvas>
+      </div>
+    </div>
   </div>
 </body>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
@@ -170,6 +211,7 @@
       limparCampos();
       document.getElementById('historicoBody').innerHTML = '';
       atualizarTotalizador(0);
+      atualizarGraficos([], [], graficos);
     });
   }
   auth.onAuthStateChanged((user) => {
@@ -179,6 +221,7 @@
     } else {
       mostrarLogin();
       atualizarTotalizador(0);
+      atualizarGraficos([], [], graficos);
     }
   });
 
@@ -249,10 +292,14 @@
       let tbody = document.getElementById('historicoBody');
       tbody.innerHTML = '';
       let total = 0;
+      const atividadesPG = [];
+      const atividadesMinor = [];
       snapshot.forEach((doc) => {
         total++;
         const atividade = doc.data();
         const key = doc.id;
+        if(atividade.tipo === 'PG') atividadesPG.push(atividade);
+        if(atividade.tipo === 'Minor') atividadesMinor.push(atividade);
         const tr = document.createElement('tr');
         if(editandoId === key) tr.className = "editando";
         tr.innerHTML = `
@@ -270,6 +317,7 @@
         tbody.appendChild(tr);
       });
       atualizarTotalizador(total);
+      atualizarGraficos(atividadesPG, atividadesMinor, graficos);
     });
   }
 
@@ -320,6 +368,129 @@
     return status;
   }
 
+  // Graficos
+  let graficos = {
+    graficoPG: null,
+    graficoMinor: null
+  };
+
+  function atualizarGraficos(atividadesPG, atividadesMinor, graficos) {
+    // Função para calcular os dados dos gráficos
+    function calcularDados(atividades) {
+      const total = atividades.length;
+      const em_andamento = atividades.filter(a => a.status === 'em_andamento').length;
+      const atrasada = atividades.filter(a => a.status === 'atrasada').length;
+      const concluida = atividades.filter(a => a.status === 'concluida').length;
+      // Porcentagem
+      function pct(x) {
+        return total ? Math.round((x/total)*100) : 0;
+      }
+      return {
+        total,
+        em_andamento,
+        em_andamento_pct: pct(em_andamento),
+        atrasada,
+        atrasada_pct: pct(atrasada),
+        concluida,
+        concluida_pct: pct(concluida)
+      };
+    }
+
+    // Dados PG
+    const dadosPG = calcularDados(atividadesPG);
+    const dadosMinor = calcularDados(atividadesMinor);
+
+    // Labels e valores
+    const labels = ["Total", "Em andamento", "Atrasadas", "Finalizadas"];
+    const valoresPG = [
+      dadosPG.total,
+      dadosPG.em_andamento,
+      dadosPG.atrasada,
+      dadosPG.concluida
+    ];
+    const valoresMinor = [
+      dadosMinor.total,
+      dadosMinor.em_andamento,
+      dadosMinor.atrasada,
+      dadosMinor.concluida
+    ];
+
+    // Tooltips com porcentagem
+    function gerarTooltip(tipo, dados) {
+      return function(context) {
+        const idx = context.dataIndex;
+        if(idx === 1) return `${dados.em_andamento} (${dados.em_andamento_pct}%)`;
+        if(idx === 2) return `${dados.atrasada} (${dados.atrasada_pct}%)`;
+        if(idx === 3) return `${dados.concluida} (${dados.concluida_pct}%)`;
+        return `${dados.total}`;
+      }
+    }
+
+    // Cores por barra
+    const coresBarra = [
+      "#8884d8", // total
+      "#1976d2", // em andamento
+      "#e53935", // atrasada
+      "#388e3c"  // finalizada
+    ];
+
+    // GRAFICO PG
+    if(graficos.graficoPG) graficos.graficoPG.destroy();
+    graficos.graficoPG = new Chart(document.getElementById('graficoPG').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'PG',
+          data: valoresPG,
+          backgroundColor: coresBarra
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: gerarTooltip('PG', dadosPG)
+            }
+          }
+        },
+        scales: {
+          y: { beginAtZero: true, precision:0 }
+        }
+      }
+    });
+
+    // GRAFICO MINOR
+    if(graficos.graficoMinor) graficos.graficoMinor.destroy();
+    graficos.graficoMinor = new Chart(document.getElementById('graficoMinor').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Minor',
+          data: valoresMinor,
+          backgroundColor: coresBarra
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: gerarTooltip('Minor', dadosMinor)
+            }
+          }
+        },
+        scales: {
+          y: { beginAtZero: true, precision:0 }
+        }
+      }
+    });
+  }
+
   // No início, mostra login se não autenticado
   window.onload = function() {
     auth.onAuthStateChanged((user) => {
@@ -329,6 +500,7 @@
       } else {
         mostrarLogin();
         atualizarTotalizador(0);
+        atualizarGraficos([], [], graficos);
       }
     });
   }
