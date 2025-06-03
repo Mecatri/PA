@@ -64,6 +64,7 @@
         <th>Início</th>
         <th>Fim</th>
         <th>Status</th>
+        <th>Tipo</th>
         <th>Ação</th>
       </tr>
       <tr>
@@ -77,6 +78,12 @@
             <option value="concluida">Concluída</option>
             <option value="atrasada">Atrasada</option>
             <option value="nao_iniciada">Não iniciada</option>
+          </select>
+        </td>
+        <td>
+          <select id="tipoAtividade">
+            <option value="PG">PG</option>
+            <option value="Minor">Minor</option>
           </select>
         </td>
         <td><button onclick="salvarAtividade()">Salvar</button></td>
@@ -102,6 +109,7 @@
             <th>Início</th>
             <th>Fim</th>
             <th>Status</th>
+            <th>Tipo</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -180,14 +188,15 @@
     const inicio = document.getElementById('inicio').value;
     const fim = document.getElementById('fim').value;
     const status = document.getElementById('status').value;
+    const tipo = document.getElementById('tipoAtividade').value;
 
-    if (!nome || !duracao || !inicio || !fim || !status) {
+    if (!nome || !duracao || !inicio || !fim || !status || !tipo) {
       document.getElementById('mensagem').style.color = 'red';
       document.getElementById('mensagem').innerText = 'Preencha todos os campos!';
       return;
     }
 
-    const novaAtividade = { nome, duracao, inicio, fim, status };
+    const novaAtividade = { nome, duracao, inicio, fim, status, tipo };
 
     if(editandoId) {
       db.collection('atividades').doc(editandoId).set(novaAtividade)
@@ -228,6 +237,7 @@
     document.getElementById('inicio').value = '';
     document.getElementById('fim').value = '';
     document.getElementById('status').value = 'em_andamento';
+    document.getElementById('tipoAtividade').value = 'PG';
     editandoId = null;
     document.querySelectorAll(".editando").forEach(row => row.classList.remove("editando"));
   }
@@ -251,6 +261,7 @@
           <td>${atividade.inicio?.replace('T',' ')}</td>
           <td>${atividade.fim?.replace('T',' ')}</td>
           <td>${formatarStatus(atividade.status)}</td>
+          <td>${atividade.tipo || ''}</td>
           <td>
             <button onclick="editarAtividade('${key}')">Editar</button>
             <button onclick="excluirAtividade('${key}')">Excluir</button>
@@ -276,6 +287,7 @@
         document.getElementById('inicio').value = atividade.inicio;
         document.getElementById('fim').value = atividade.fim;
         document.getElementById('status').value = atividade.status;
+        document.getElementById('tipoAtividade').value = atividade.tipo || 'PG';
         editandoId = id;
         document.getElementById('mensagem').style.color = 'blue';
         document.getElementById('mensagem').innerText = 'Editando atividade. Altere os campos e clique em Salvar.';
