@@ -40,7 +40,7 @@
       box-shadow: 0 2px 8px #3332;
       letter-spacing: 0.5px;
     }
-    #graficosContainer {
+    #graficosContainer, #graficosDuracaoContainer {
       margin: 40px auto 20px auto;
       display: flex;
       flex-wrap: wrap;
@@ -58,6 +58,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin-bottom: 15px;
     }
     .grafico-titulo {
       font-weight: bold;
@@ -65,6 +66,21 @@
       margin-bottom: 15px;
       color: #333;
       letter-spacing: 0.5px;
+    }
+    #legenda-graficos {
+      max-width: 900px;
+      margin: 30px auto 35px auto;
+      padding: 18px 24px;
+      background: #fffbe6;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px #3332;
+      border: 1px solid #ffe080;
+      color: #5c4c17;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    #legenda-graficos strong {
+      color: #ad7900;
     }
   </style>
 </head>
@@ -145,7 +161,7 @@
       </table>
     </div>
 
-    <!-- GRAFICOS -->
+    <!-- GRAFICOS DE QUANTIDADES -->
     <div id="graficosContainer">
       <div class="grafico-box">
         <div class="grafico-titulo">Atividades PG</div>
@@ -154,6 +170,40 @@
       <div class="grafico-box">
         <div class="grafico-titulo">Atividades Minor</div>
         <canvas id="graficoMinor" width="320" height="260"></canvas>
+      </div>
+    </div>
+
+    <!-- GRAFICOS DE DURACAO -->
+    <div id="graficosDuracaoContainer">
+      <div class="grafico-box">
+        <div class="grafico-titulo">Duração das Atividades PG</div>
+        <canvas id="graficoDuracaoPG" width="320" height="260"></canvas>
+      </div>
+      <div class="grafico-box">
+        <div class="grafico-titulo">Duração das Atividades Minor</div>
+        <canvas id="graficoDuracaoMinor" width="320" height="260"></canvas>
+      </div>
+    </div>
+
+    <!-- LEGENDA DOS GRAFICOS DE DURACAO -->
+    <div id="legenda-graficos">
+      <strong>Legenda dos Gráficos de Duração:</strong>
+      <ul>
+        <li>
+          <strong>Total de Duração:</strong> Soma de todas as durações (campo "Duração") das atividades lançadas desse tipo (PG ou Minor).
+        </li>
+        <li>
+          <strong>Em Andamento:</strong> Soma das durações das atividades em andamento, dividida pela metade. A porcentagem mostra o quanto isso representa em relação ao total de duração.
+        </li>
+        <li>
+          <strong>Atrasadas:</strong> Soma das durações das atividades atrasadas. A porcentagem mostra o quanto isso representa em relação ao total de duração.
+        </li>
+        <li>
+          <strong>Finalizadas:</strong> Soma das durações das atividades finalizadas. A porcentagem mostra o quanto isso representa em relação ao total de duração.
+        </li>
+      </ul>
+      <div style="margin-top:8px; font-size:14px;">
+        <strong>Obs:</strong> Atividades marcadas como "Não iniciada" não entram nos cálculos das colunas "Em andamento", "Atrasadas" ou "Finalizadas", mas entram no total.
       </div>
     </div>
   </div>
@@ -212,6 +262,7 @@
       document.getElementById('historicoBody').innerHTML = '';
       atualizarTotalizador(0);
       atualizarGraficos([], [], graficos);
+      atualizarGraficosDuracao([], [], graficosDuracao);
     });
   }
   auth.onAuthStateChanged((user) => {
@@ -222,6 +273,7 @@
       mostrarLogin();
       atualizarTotalizador(0);
       atualizarGraficos([], [], graficos);
+      atualizarGraficosDuracao([], [], graficosDuracao);
     }
   });
 
@@ -318,6 +370,7 @@
       });
       atualizarTotalizador(total);
       atualizarGraficos(atividadesPG, atividadesMinor, graficos);
+      atualizarGraficosDuracao(atividadesPG, atividadesMinor, graficosDuracao);
     });
   }
 
@@ -368,7 +421,7 @@
     return status;
   }
 
-  // Graficos
+  // Graficos de QUANTIDADE
   let graficos = {
     graficoPG: null,
     graficoMinor: null
@@ -491,6 +544,130 @@
     });
   }
 
+  // Graficos de DURACAO
+  let graficosDuracao = {
+    graficoDuracaoPG: null,
+    graficoDuracaoMinor: null
+  };
+  function atualizarGraficosDuracao(atividadesPG, atividadesMinor, graficosDuracao) {
+    // Função para calcular dados de duração
+    function calcularDuracao(atividades) {
+      // Todas as durações são números
+      function somaDuracao(arr) {
+        return arr.reduce((acc, a) => acc + (parseFloat(a.duracao) || 0), 0);
+      }
+      const total = somaDuracao(atividades);
+      const emAndamento = somaDuracao(atividades.filter(a => a.status === 'em_andamento')) / 2;
+      const atrasada = somaDuracao(atividades.filter(a => a.status === 'atrasada'));
+      const finalizada = somaDuracao(atividades.filter(a => a.status === 'concluida'));
+      function pct(x) {
+        return total ? Math.round((x/total)*100) : 0;
+      }
+      return {
+        total,
+        emAndamento,
+        emAndamento_pct: pct(emAndamento),
+        atrasada,
+        atrasada_pct: pct(atrasada),
+        finalizada,
+        finalizada_pct: pct(finalizada)
+      };
+    }
+
+    // Dados PG
+    const dadosPG = calcularDuracao(atividadesPG);
+    const dadosMinor = calcularDuracao(atividadesMinor);
+
+    const labels = ["Total", "Em andamento (metade)", "Atrasadas", "Finalizadas"];
+    const valoresPG = [
+      dadosPG.total,
+      dadosPG.emAndamento,
+      dadosPG.atrasada,
+      dadosPG.finalizada
+    ];
+    const valoresMinor = [
+      dadosMinor.total,
+      dadosMinor.emAndamento,
+      dadosMinor.atrasada,
+      dadosMinor.finalizada
+    ];
+
+    // Tooltips com porcentagem
+    function gerarTooltipDuracao(tipo, dados) {
+      return function(context) {
+        const idx = context.dataIndex;
+        if(idx === 1) return `${dados.emAndamento.toFixed(2)} (${dados.emAndamento_pct}%)`;
+        if(idx === 2) return `${dados.atrasada.toFixed(2)} (${dados.atrasada_pct}%)`;
+        if(idx === 3) return `${dados.finalizada.toFixed(2)} (${dados.finalizada_pct}%)`;
+        return `${dados.total.toFixed(2)}`;
+      }
+    }
+
+    // Cores por barra (as mesmas dos gráficos de quantidade)
+    const coresBarra = [
+      "#8884d8", // total
+      "#1976d2", // em andamento
+      "#e53935", // atrasada
+      "#388e3c"  // finalizada
+    ];
+
+    // GRAFICO DURACAO PG
+    if(graficosDuracao.graficoDuracaoPG) graficosDuracao.graficoDuracaoPG.destroy();
+    graficosDuracao.graficoDuracaoPG = new Chart(document.getElementById('graficoDuracaoPG').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'PG',
+          data: valoresPG,
+          backgroundColor: coresBarra
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: gerarTooltipDuracao('PG', dadosPG)
+            }
+          }
+        },
+        scales: {
+          y: { beginAtZero: true, precision:0 }
+        }
+      }
+    });
+
+    // GRAFICO DURACAO MINOR
+    if(graficosDuracao.graficoDuracaoMinor) graficosDuracao.graficoDuracaoMinor.destroy();
+    graficosDuracao.graficoDuracaoMinor = new Chart(document.getElementById('graficoDuracaoMinor').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Minor',
+          data: valoresMinor,
+          backgroundColor: coresBarra
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: gerarTooltipDuracao('Minor', dadosMinor)
+            }
+          }
+        },
+        scales: {
+          y: { beginAtZero: true, precision:0 }
+        }
+      }
+    });
+  }
+
   // No início, mostra login se não autenticado
   window.onload = function() {
     auth.onAuthStateChanged((user) => {
@@ -501,6 +678,7 @@
         mostrarLogin();
         atualizarTotalizador(0);
         atualizarGraficos([], [], graficos);
+        atualizarGraficosDuracao([], [], graficosDuracao);
       }
     });
   }
