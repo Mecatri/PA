@@ -77,16 +77,16 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <script>
-  // Configuração do Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
-  authDomain: "pa-pg-a7abc.firebaseapp.com",
-  projectId: "pa-pg-a7abc",
-  storageBucket: "pa-pg-a7abc.appspot.com",
-  messagingSenderId: "102164980919",
-  appId: "1:102164980919:web:72220a8b2ed478a2cdd932",
-  databaseURL: "https://pa-pg-a7abc-default-rtdb.firebaseio.com/"
-};
+  // Configuração do Firebase com databaseURL
+  const firebaseConfig = {
+    apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
+    authDomain: "pa-pg-a7abc.firebaseapp.com",
+    databaseURL: "https://pa-pg-a7abc-default-rtdb.firebaseio.com/",
+    projectId: "pa-pg-a7abc",
+    storageBucket: "pa-pg-a7abc.appspot.com",
+    messagingSenderId: "102164980919",
+    appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
+  };
   firebase.initializeApp(firebaseConfig);
 
   let editandoId = null; // Se estiver editando, guarda o ID da atividade
