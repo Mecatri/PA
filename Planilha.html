@@ -6,7 +6,7 @@
   <style>
     table { border-collapse: collapse; width: 60%; margin: 20px auto; }
     th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
-    input { width: 95%; }
+    input, select { width: 95%; }
     button { margin: 10px; }
   </style>
 </head>
@@ -18,6 +18,7 @@
       <th>Duração (horas)</th>
       <th>Início</th>
       <th>Fim</th>
+      <th>Status</th>
       <th>Ação</th>
     </tr>
     <tr>
@@ -25,23 +26,31 @@
       <td><input type="number" id="duracao"></td>
       <td><input type="datetime-local" id="inicio"></td>
       <td><input type="datetime-local" id="fim"></td>
+      <td>
+        <select id="status">
+          <option value="em_andamento">Em andamento</option>
+          <option value="concluida">Concluída</option>
+          <option value="atrasada">Atrasada</option>
+        </select>
+      </td>
       <td><button onclick="salvarAtividade()">Salvar</button></td>
     </tr>
   </table>
   <div id="mensagem" style="text-align:center;color:green;"></div>
 </body>
-<!-- Firebase SDK será adicionado no próximo passo -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
-            authDomain: "pa-pg-a7abc.firebaseapp.com",
-            projectId: "pa-pg-a7abc",
-            storageBucket: "pa-pg-a7abc.appspot.com",
-            messagingSenderId: "102164980919",
-            appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
-        };
+  // Configuração Firebase preenchida conforme seu repositório
+  const firebaseConfig = {
+    apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
+    authDomain: "pa-pg-a7abc.firebaseapp.com",
+    projectId: "pa-pg-a7abc",
+    storageBucket: "pa-pg-a7abc.appspot.com",
+    messagingSenderId: "102164980919",
+    appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
+  };
   firebase.initializeApp(firebaseConfig);
 
   function salvarAtividade() {
@@ -49,8 +58,9 @@
     const duracao = document.getElementById('duracao').value;
     const inicio = document.getElementById('inicio').value;
     const fim = document.getElementById('fim').value;
+    const status = document.getElementById('status').value;
 
-    if (!nome || !duracao || !inicio || !fim) {
+    if (!nome || !duracao || !inicio || !fim || !status) {
       document.getElementById('mensagem').style.color = 'red';
       document.getElementById('mensagem').innerText = 'Preencha todos os campos!';
       return;
@@ -60,10 +70,11 @@
       nome,
       duracao,
       inicio,
-      fim
+      fim,
+      status
     };
 
-    // Salva na coleção/ramo 'atividades', mas pode mudar para outro ramo se quiser
+    // Usando a estrutura de "atividades" no Realtime Database
     firebase.database().ref('atividades').push(novaAtividade, function(error) {
       if (error) {
         document.getElementById('mensagem').style.color = 'red';
@@ -71,11 +82,11 @@
       } else {
         document.getElementById('mensagem').style.color = 'green';
         document.getElementById('mensagem').innerText = 'Atividade salva!';
-        // Limpa campos
         document.getElementById('nomeAtividade').value = '';
         document.getElementById('duracao').value = '';
         document.getElementById('inicio').value = '';
         document.getElementById('fim').value = '';
+        document.getElementById('status').value = 'em_andamento';
       }
     });
   }
