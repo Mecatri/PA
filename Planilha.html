@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Atividades</title>
+  <title>Atividades Firestore</title>
   <style>
     table { border-collapse: collapse; width: 90%; margin: 20px auto; }
     th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
@@ -20,7 +20,7 @@
   </style>
 </head>
 <body>
-  <h2 style="text-align:center;">Cadastro de Atividades</h2>
+  <h2 style="text-align:center;">Cadastro de Atividades (Firestore)</h2>
   <table>
     <tr>
       <th>Nome da Atividade</th>
@@ -74,22 +74,23 @@
     </table>
   </div>
 </body>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<!-- Firebase SDKs para Firestore -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
-  // Configuração do Firebase com databaseURL
+  // Configuração do Firebase (não precisa de databaseURL no Firestore!)
   const firebaseConfig = {
     apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
     authDomain: "pa-pg-a7abc.firebaseapp.com",
-    databaseURL: "https://pa-pg-a7abc-default-rtdb.firebaseio.com/",
     projectId: "pa-pg-a7abc",
     storageBucket: "pa-pg-a7abc.appspot.com",
     messagingSenderId: "102164980919",
     appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
   };
   firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-  let editandoId = null; // Se estiver editando, guarda o ID da atividade
+  let editandoId = null; // Se estiver editando, guarda o ID do documento
 
   function salvarAtividade() {
     const nome = document.getElementById('nomeAtividade').value;
@@ -107,24 +108,24 @@
     const novaAtividade = { nome, duracao, inicio, fim, status };
 
     if(editandoId) {
-      firebase.database().ref('atividades/' + editandoId).set(novaAtividade, function(error) {
-        if (error) {
-          document.getElementById('mensagem').style.color = 'red';
-          document.getElementById('mensagem').innerText = 'Erro ao salvar!';
-        } else {
-          mostrarPopup('Atividade editada com sucesso!');
-          limparCampos();
-        }
+      db.collection('atividades').doc(editandoId).set(novaAtividade)
+      .then(() => {
+        mostrarPopup('Atividade editada com sucesso!');
+        limparCampos();
+      })
+      .catch((error) => {
+        document.getElementById('mensagem').style.color = 'red';
+        document.getElementById('mensagem').innerText = 'Erro ao salvar!';
       });
     } else {
-      firebase.database().ref('atividades').push(novaAtividade, function(error) {
-        if (error) {
-          document.getElementById('mensagem').style.color = 'red';
-          document.getElementById('mensagem').innerText = 'Erro ao salvar!';
-        } else {
-          mostrarPopup('Atividade salva com sucesso!');
-          limparCampos();
-        }
+      db.collection('atividades').add(novaAtividade)
+      .then(() => {
+        mostrarPopup('Atividade salva com sucesso!');
+        limparCampos();
+      })
+      .catch((error) => {
+        document.getElementById('mensagem').style.color = 'red';
+        document.getElementById('mensagem').innerText = 'Erro ao salvar!';
       });
     }
   }
@@ -150,19 +151,19 @@
   }
 
   function carregarHistorico() {
-    firebase.database().ref('atividades').on('value', function(snapshot) {
+    db.collection('atividades').orderBy("inicio", "desc").onSnapshot((snapshot) => {
       let tbody = document.getElementById('historicoBody');
       tbody.innerHTML = '';
-      snapshot.forEach(function(child) {
-        const atividade = child.val();
-        const key = child.key;
+      snapshot.forEach((doc) => {
+        const atividade = doc.data();
+        const key = doc.id;
         const tr = document.createElement('tr');
         if(editandoId === key) tr.className = "editando";
         tr.innerHTML = `
           <td>${atividade.nome}</td>
           <td>${atividade.duracao}</td>
-          <td>${atividade.inicio.replace('T',' ')}</td>
-          <td>${atividade.fim.replace('T',' ')}</td>
+          <td>${atividade.inicio?.replace('T',' ')}</td>
+          <td>${atividade.fim?.replace('T',' ')}</td>
           <td>${formatarStatus(atividade.status)}</td>
           <td>
             <button onclick="editarAtividade('${key}')">Editar</button>
@@ -175,28 +176,30 @@
   }
 
   function editarAtividade(id) {
-    firebase.database().ref('atividades/' + id).once('value').then(function(snapshot) {
-      const atividade = snapshot.val();
-      document.getElementById('nomeAtividade').value = atividade.nome;
-      document.getElementById('duracao').value = atividade.duracao;
-      document.getElementById('inicio').value = atividade.inicio;
-      document.getElementById('fim').value = atividade.fim;
-      document.getElementById('status').value = atividade.status;
-      editandoId = id;
-      document.getElementById('mensagem').style.color = 'blue';
-      document.getElementById('mensagem').innerText = 'Editando atividade. Altere os campos e clique em Salvar.';
-      document.querySelectorAll("#historicoBody tr").forEach(row => row.classList.remove("editando"));
-      // Destaca a linha em edição
-      let linhas = document.querySelectorAll("#historicoBody tr");
-      linhas.forEach((row, idx) => {
-        if(snapshot.ref.key === id) row.classList.add("editando");
-      });
+    db.collection('atividades').doc(id).get().then((doc) => {
+      if (doc.exists) {
+        const atividade = doc.data();
+        document.getElementById('nomeAtividade').value = atividade.nome;
+        document.getElementById('duracao').value = atividade.duracao;
+        document.getElementById('inicio').value = atividade.inicio;
+        document.getElementById('fim').value = atividade.fim;
+        document.getElementById('status').value = atividade.status;
+        editandoId = id;
+        document.getElementById('mensagem').style.color = 'blue';
+        document.getElementById('mensagem').innerText = 'Editando atividade. Altere os campos e clique em Salvar.';
+        document.querySelectorAll("#historicoBody tr").forEach(row => row.classList.remove("editando"));
+        // Destaca a linha em edição
+        let linhas = document.querySelectorAll("#historicoBody tr");
+        linhas.forEach((row, idx) => {
+          if(editandoId === id) row.classList.add("editando");
+        });
+      }
     });
   }
 
   function excluirAtividade(id) {
     if(confirm('Tem certeza que deseja excluir esta atividade?')) {
-      firebase.database().ref('atividades/' + id).remove();
+      db.collection('atividades').doc(id).delete();
       if(editandoId === id) limparCampos();
     }
   }
