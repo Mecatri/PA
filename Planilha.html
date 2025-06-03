@@ -4,15 +4,24 @@
   <meta charset="UTF-8">
   <title>Atividades</title>
   <style>
-    table { border-collapse: collapse; width: 60%; margin: 20px auto; }
+    table { border-collapse: collapse; width: 90%; margin: 20px auto; }
     th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
     input, select { width: 95%; }
-    button { margin: 10px; }
+    button { margin: 2px 5px; }
+    .popup {
+      display: none; position: fixed; z-index: 9; left: 0; top: 0; width: 100vw;
+      height: 100vh; background: rgba(0,0,0,0.4); justify-content: center; align-items: center;
+    }
+    .popup-content {
+      background: #fff; padding: 30px 50px; border-radius: 10px; text-align: center; font-size: 18px;
+      box-shadow: 0 2px 10px #3336;
+    }
+    .editando { background: #ffffe0; }
   </style>
 </head>
 <body>
   <h2 style="text-align:center;">Cadastro de Atividades</h2>
-  <table id="atividadesTable">
+  <table>
     <tr>
       <th>Nome da Atividade</th>
       <th>Duração (horas)</th>
@@ -37,12 +46,38 @@
     </tr>
   </table>
   <div id="mensagem" style="text-align:center;color:green;"></div>
+  
+  <!-- POPUP de Confirmação -->
+  <div id="popup" class="popup" onclick="fecharPopup()">
+    <div class="popup-content" onclick="event.stopPropagation();">
+      <span id="popupMsg">Atividade salva com sucesso!</span><br>
+      <button onclick="fecharPopup()">OK</button>
+    </div>
+  </div>
+
+  <h3 style="text-align:center;">Histórico de Atividades</h3>
+  <div id="historicoContainer" style="display: flex; justify-content: center;">
+    <table id="historicoTable" style="width:90%;">
+      <thead>
+        <tr>
+          <th>Nome da Atividade</th>
+          <th>Duração</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="historicoBody">
+        <!-- Linhas do histórico -->
+      </tbody>
+    </table>
+  </div>
 </body>
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <script>
-  // Configuração Firebase preenchida conforme seu repositório
+  // Configuração do Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
     authDomain: "pa-pg-a7abc.firebaseapp.com",
@@ -52,6 +87,8 @@
     appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
   };
   firebase.initializeApp(firebaseConfig);
+
+  let editandoId = null; // Se estiver editando, guarda o ID da atividade
 
   function salvarAtividade() {
     const nome = document.getElementById('nomeAtividade').value;
@@ -66,29 +103,114 @@
       return;
     }
 
-    const novaAtividade = {
-      nome,
-      duracao,
-      inicio,
-      fim,
-      status
-    };
+    const novaAtividade = { nome, duracao, inicio, fim, status };
 
-    // Usando a estrutura de "atividades" no Realtime Database
-    firebase.database().ref('atividades').push(novaAtividade, function(error) {
-      if (error) {
-        document.getElementById('mensagem').style.color = 'red';
-        document.getElementById('mensagem').innerText = 'Erro ao salvar!';
-      } else {
-        document.getElementById('mensagem').style.color = 'green';
-        document.getElementById('mensagem').innerText = 'Atividade salva!';
-        document.getElementById('nomeAtividade').value = '';
-        document.getElementById('duracao').value = '';
-        document.getElementById('inicio').value = '';
-        document.getElementById('fim').value = '';
-        document.getElementById('status').value = 'em_andamento';
-      }
+    if(editandoId) {
+      firebase.database().ref('atividades/' + editandoId).set(novaAtividade, function(error) {
+        if (error) {
+          document.getElementById('mensagem').style.color = 'red';
+          document.getElementById('mensagem').innerText = 'Erro ao salvar!';
+        } else {
+          mostrarPopup('Atividade editada com sucesso!');
+          limparCampos();
+        }
+      });
+    } else {
+      firebase.database().ref('atividades').push(novaAtividade, function(error) {
+        if (error) {
+          document.getElementById('mensagem').style.color = 'red';
+          document.getElementById('mensagem').innerText = 'Erro ao salvar!';
+        } else {
+          mostrarPopup('Atividade salva com sucesso!');
+          limparCampos();
+        }
+      });
+    }
+  }
+
+  function mostrarPopup(msg) {
+    document.getElementById('popupMsg').innerText = msg;
+    document.getElementById('popup').style.display = 'flex';
+  }
+
+  function fecharPopup() {
+    document.getElementById('popup').style.display = 'none';
+    document.getElementById('mensagem').innerText = '';
+  }
+
+  function limparCampos() {
+    document.getElementById('nomeAtividade').value = '';
+    document.getElementById('duracao').value = '';
+    document.getElementById('inicio').value = '';
+    document.getElementById('fim').value = '';
+    document.getElementById('status').value = 'em_andamento';
+    editandoId = null;
+    document.querySelectorAll(".editando").forEach(row => row.classList.remove("editando"));
+  }
+
+  function carregarHistorico() {
+    firebase.database().ref('atividades').on('value', function(snapshot) {
+      let tbody = document.getElementById('historicoBody');
+      tbody.innerHTML = '';
+      snapshot.forEach(function(child) {
+        const atividade = child.val();
+        const key = child.key;
+        const tr = document.createElement('tr');
+        if(editandoId === key) tr.className = "editando";
+        tr.innerHTML = `
+          <td>${atividade.nome}</td>
+          <td>${atividade.duracao}</td>
+          <td>${atividade.inicio.replace('T',' ')}</td>
+          <td>${atividade.fim.replace('T',' ')}</td>
+          <td>${formatarStatus(atividade.status)}</td>
+          <td>
+            <button onclick="editarAtividade('${key}')">Editar</button>
+            <button onclick="excluirAtividade('${key}')">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
     });
   }
+
+  function editarAtividade(id) {
+    firebase.database().ref('atividades/' + id).once('value').then(function(snapshot) {
+      const atividade = snapshot.val();
+      document.getElementById('nomeAtividade').value = atividade.nome;
+      document.getElementById('duracao').value = atividade.duracao;
+      document.getElementById('inicio').value = atividade.inicio;
+      document.getElementById('fim').value = atividade.fim;
+      document.getElementById('status').value = atividade.status;
+      editandoId = id;
+      document.getElementById('mensagem').style.color = 'blue';
+      document.getElementById('mensagem').innerText = 'Editando atividade. Altere os campos e clique em Salvar.';
+      document.querySelectorAll("#historicoBody tr").forEach(row => row.classList.remove("editando"));
+      // Destaca a linha em edição
+      let linhas = document.querySelectorAll("#historicoBody tr");
+      linhas.forEach((row, idx) => {
+        if(snapshot.ref.key === id) row.classList.add("editando");
+      });
+    });
+  }
+
+  function excluirAtividade(id) {
+    if(confirm('Tem certeza que deseja excluir esta atividade?')) {
+      firebase.database().ref('atividades/' + id).remove();
+      if(editandoId === id) limparCampos();
+    }
+  }
+
+  function formatarStatus(status) {
+    if(status === 'concluida')
+      return '<span style="color:green;font-weight:bold;">Concluída</span>';
+    if(status === 'em_andamento')
+      return '<span style="color:blue;font-weight:bold;">Em andamento</span>';
+    if(status === 'atrasada')
+      return '<span style="color:red;font-weight:bold;">Atrasada</span>';
+    return status;
+  }
+
+  // Carrega histórico ao abrir a página
+  window.onload = carregarHistorico;
 </script>
 </html>
