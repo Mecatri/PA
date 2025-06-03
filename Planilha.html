@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Atividades Firestore + Login</title>
+  <title>Atividades Firestore + Login + Comentário</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f6f7fb; }
     table { border-collapse: collapse; width: 90%; margin: 20px auto; }
@@ -15,7 +15,7 @@
     }
     .popup-content {
       background: #fff; padding: 30px 50px; border-radius: 10px; text-align: center; font-size: 18px;
-      box-shadow: 0 2px 10px #3336;
+      box-shadow: 0 2px 10px #3336; min-width: 320px;
     }
     .editando { background: #ffffe0; }
     #loginBox {
@@ -82,6 +82,34 @@
     #legenda-graficos strong {
       color: #ad7900;
     }
+    .btn-comentario {
+      background: #ececec;
+      color: #555;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 4px 11px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-comentario.comentado {
+      background: #ffe564 !important;
+      color: #533e00;
+      border-color: #ffe564;
+      font-weight: bold;
+      animation: pulseYellow 1.2s 1;
+    }
+    @keyframes pulseYellow {
+      0% { box-shadow: 0 0 0px #ffe564;}
+      70% { box-shadow: 0 0 14px 5px #ffe564b0;}
+      100% { box-shadow: 0 0 0px #ffe564;}
+    }
+    #comentarioPopup textarea {
+      width: 98%; min-height: 80px; resize: vertical; margin-top: 10px; font-size: 15px;
+      padding: 8px; border-radius: 8px; border: 1px solid #ccc;
+    }
+    #comentarioPopup button {
+      margin: 12px 6px 0 6px;
+    }
   </style>
 </head>
 <body>
@@ -94,9 +122,7 @@
     <button onclick="fazerLogin()">Entrar</button>
     <div id="loginMsg" style="color: red; margin-top: 8px;"></div>
   </div>
-
   <button id="logoutBtn" onclick="logout()" style="display:none;">Sair</button>
-
   <div id="conteudo" style="display:none;">
     <h2 style="text-align:center;">Cadastro de Atividades (Firestore)</h2>
     <table>
@@ -141,6 +167,19 @@
       </div>
     </div>
 
+    <!-- POPUP de COMENTÁRIO -->
+    <div id="comentarioPopup" class="popup" onclick="fecharComentarioPopup()">
+      <div class="popup-content" onclick="event.stopPropagation();">
+        <h3>Comentário da Atividade</h3>
+        <div id="comentarioAtividadeNome" style="font-size:15px;color:#444;margin-bottom:6px;"></div>
+        <textarea id="comentarioTextarea" placeholder="Digite seu comentário aqui..."></textarea>
+        <br>
+        <button onclick="salvarComentarioAtual()">Salvar</button>
+        <button onclick="fecharComentarioPopup()">Fechar</button>
+        <div id="comentarioMsg" style="color: #007b00; margin-top:7px; font-size:14px;"></div>
+      </div>
+    </div>
+
     <h3 style="text-align:center;">Histórico de Atividades</h3>
     <div id="historicoContainer" style="display: flex; justify-content: center;">
       <table id="historicoTable" style="width:90%;">
@@ -152,6 +191,7 @@
             <th>Fim</th>
             <th>Status</th>
             <th>Tipo</th>
+            <th>Comentário</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -215,7 +255,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script>
-  // Configuração do Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
     authDomain: "pa-pg-a7abc.firebaseapp.com",
@@ -228,7 +267,10 @@
   const db = firebase.firestore();
   const auth = firebase.auth();
 
-  let editandoId = null; // Se estiver editando, guarda o ID do documento
+  let editandoId = null;
+  let comentarioIdAtual = null;
+  let comentarioNomeAtividadeAtual = "";
+  let comentarioValorAtual = "";
 
   function mostrarLogin() {
     document.getElementById('loginBox').style.display = 'block';
@@ -294,14 +336,18 @@
     const novaAtividade = { nome, duracao, inicio, fim, status, tipo };
 
     if(editandoId) {
-      db.collection('atividades').doc(editandoId).set(novaAtividade)
-      .then(() => {
-        mostrarPopup('Atividade editada com sucesso!');
-        limparCampos();
-      })
-      .catch((error) => {
-        document.getElementById('mensagem').style.color = 'red';
-        document.getElementById('mensagem').innerText = 'Erro ao salvar!';
+      db.collection('atividades').doc(editandoId).get().then(docSnap => {
+        const oldData = docSnap.exists ? docSnap.data() : {};
+        novaAtividade.comentario = oldData.comentario || "";
+        db.collection('atividades').doc(editandoId).set(novaAtividade)
+        .then(() => {
+          mostrarPopup('Atividade editada com sucesso!');
+          limparCampos();
+        })
+        .catch((error) => {
+          document.getElementById('mensagem').style.color = 'red';
+          document.getElementById('mensagem').innerText = 'Erro ao salvar!';
+        });
       });
     } else {
       db.collection('atividades').add(novaAtividade)
@@ -354,6 +400,10 @@
         if(atividade.tipo === 'Minor') atividadesMinor.push(atividade);
         const tr = document.createElement('tr');
         if(editandoId === key) tr.className = "editando";
+        // Comentário botão
+        const temComentario = atividade.comentario && atividade.comentario.trim().length > 0;
+        const comentarioBtnClass = temComentario ? "btn-comentario comentado" : "btn-comentario";
+        const comentarioBtnTitle = temComentario ? "Visualizar/Editar Comentário" : "Adicionar Comentário";
         tr.innerHTML = `
           <td>${atividade.nome}</td>
           <td>${atividade.duracao}</td>
@@ -361,6 +411,11 @@
           <td>${atividade.fim?.replace('T',' ')}</td>
           <td>${formatarStatus(atividade.status)}</td>
           <td>${atividade.tipo || ''}</td>
+          <td>
+            <button class="${comentarioBtnClass}" title="${comentarioBtnTitle}" onclick="abrirComentarioPopup('${key}', '${escapeHtml(atividade.nome)}', '${escapeHtml(atividade.comentario||'')}')">
+              Comentário
+            </button>
+          </td>
           <td>
             <button onclick="editarAtividade('${key}')">Editar</button>
             <button onclick="excluirAtividade('${key}')">Excluir</button>
@@ -421,6 +476,44 @@
     return status;
   }
 
+  // --- Comentários
+  function abrirComentarioPopup(id, nome, comentario) {
+    comentarioIdAtual = id;
+    comentarioNomeAtividadeAtual = unescapeHtml(nome);
+    comentarioValorAtual = unescapeHtml(comentario || "");
+    document.getElementById('comentarioAtividadeNome').innerText = comentarioNomeAtividadeAtual;
+    document.getElementById('comentarioTextarea').value = comentarioValorAtual;
+    document.getElementById('comentarioMsg').innerText = "";
+    document.getElementById('comentarioPopup').style.display = 'flex';
+  }
+  function fecharComentarioPopup() {
+    document.getElementById('comentarioPopup').style.display = 'none';
+    comentarioIdAtual = null;
+    comentarioNomeAtividadeAtual = "";
+    comentarioValorAtual = "";
+  }
+  function salvarComentarioAtual() {
+    const comentario = document.getElementById('comentarioTextarea').value;
+    if(comentarioIdAtual) {
+      db.collection('atividades').doc(comentarioIdAtual).update({
+        comentario: comentario
+      }).then(() => {
+        document.getElementById('comentarioMsg').innerText = "Comentário salvo!";
+        setTimeout(fecharComentarioPopup, 700);
+      });
+    }
+  }
+  function escapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+  function unescapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, "&");
+  }
+
   // Graficos de QUANTIDADE
   let graficos = {
     graficoPG: null,
@@ -428,13 +521,11 @@
   };
 
   function atualizarGraficos(atividadesPG, atividadesMinor, graficos) {
-    // Função para calcular os dados dos gráficos
     function calcularDados(atividades) {
       const total = atividades.length;
       const em_andamento = atividades.filter(a => a.status === 'em_andamento').length;
       const atrasada = atividades.filter(a => a.status === 'atrasada').length;
       const concluida = atividades.filter(a => a.status === 'concluida').length;
-      // Porcentagem
       function pct(x) {
         return total ? Math.round((x/total)*100) : 0;
       }
@@ -448,12 +539,8 @@
         concluida_pct: pct(concluida)
       };
     }
-
-    // Dados PG
     const dadosPG = calcularDados(atividadesPG);
     const dadosMinor = calcularDados(atividadesMinor);
-
-    // Labels e valores
     const labels = ["Total", "Em andamento", "Atrasadas", "Finalizadas"];
     const valoresPG = [
       dadosPG.total,
@@ -467,8 +554,6 @@
       dadosMinor.atrasada,
       dadosMinor.concluida
     ];
-
-    // Tooltips com porcentagem
     function gerarTooltip(tipo, dados) {
       return function(context) {
         const idx = context.dataIndex;
@@ -478,16 +563,12 @@
         return `${dados.total}`;
       }
     }
-
-    // Cores por barra
     const coresBarra = [
-      "#8884d8", // total
-      "#1976d2", // em andamento
-      "#e53935", // atrasada
-      "#388e3c"  // finalizada
+      "#8884d8",
+      "#1976d2",
+      "#e53935",
+      "#388e3c"
     ];
-
-    // GRAFICO PG
     if(graficos.graficoPG) graficos.graficoPG.destroy();
     graficos.graficoPG = new Chart(document.getElementById('graficoPG').getContext('2d'), {
       type: 'bar',
@@ -514,8 +595,6 @@
         }
       }
     });
-
-    // GRAFICO MINOR
     if(graficos.graficoMinor) graficos.graficoMinor.destroy();
     graficos.graficoMinor = new Chart(document.getElementById('graficoMinor').getContext('2d'), {
       type: 'bar',
@@ -550,9 +629,7 @@
     graficoDuracaoMinor: null
   };
   function atualizarGraficosDuracao(atividadesPG, atividadesMinor, graficosDuracao) {
-    // Função para calcular dados de duração
     function calcularDuracao(atividades) {
-      // Todas as durações são números
       function somaDuracao(arr) {
         return arr.reduce((acc, a) => acc + (parseFloat(a.duracao) || 0), 0);
       }
@@ -573,11 +650,8 @@
         finalizada_pct: pct(finalizada)
       };
     }
-
-    // Dados PG
     const dadosPG = calcularDuracao(atividadesPG);
     const dadosMinor = calcularDuracao(atividadesMinor);
-
     const labels = ["Total", "Em andamento (metade)", "Atrasadas", "Finalizadas"];
     const valoresPG = [
       dadosPG.total,
@@ -591,8 +665,6 @@
       dadosMinor.atrasada,
       dadosMinor.finalizada
     ];
-
-    // Tooltips com porcentagem
     function gerarTooltipDuracao(tipo, dados) {
       return function(context) {
         const idx = context.dataIndex;
@@ -602,16 +674,9 @@
         return `${dados.total.toFixed(2)}`;
       }
     }
-
-    // Cores por barra (as mesmas dos gráficos de quantidade)
     const coresBarra = [
-      "#8884d8", // total
-      "#1976d2", // em andamento
-      "#e53935", // atrasada
-      "#388e3c"  // finalizada
+      "#8884d8", "#1976d2", "#e53935", "#388e3c"
     ];
-
-    // GRAFICO DURACAO PG
     if(graficosDuracao.graficoDuracaoPG) graficosDuracao.graficoDuracaoPG.destroy();
     graficosDuracao.graficoDuracaoPG = new Chart(document.getElementById('graficoDuracaoPG').getContext('2d'), {
       type: 'bar',
@@ -638,8 +703,6 @@
         }
       }
     });
-
-    // GRAFICO DURACAO MINOR
     if(graficosDuracao.graficoDuracaoMinor) graficosDuracao.graficoDuracaoMinor.destroy();
     graficosDuracao.graficoDuracaoMinor = new Chart(document.getElementById('graficoDuracaoMinor').getContext('2d'), {
       type: 'bar',
@@ -668,7 +731,6 @@
     });
   }
 
-  // No início, mostra login se não autenticado
   window.onload = function() {
     auth.onAuthStateChanged((user) => {
       if(user) {
