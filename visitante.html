@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Visão do Visitante - Gráficos de Atividades</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 32px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 14px #3332;
+            padding: 30px 24px 40px 24px;
+        }
+        h1 {
+            text-align: center;
+            color: #226;
+            font-size: 2rem;
+            margin-bottom: 18px;
+        }
+        .grafico-box {
+            margin: 32px auto 24px auto;
+            background: #fcfcff;
+            border-radius: 10px;
+            padding: 25px 18px 18px 18px;
+            box-shadow: 0 1px 8px #3331;
+            max-width: 750px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .grafico-titulo {
+            font-weight: bold;
+            font-size: 1.15rem;
+            margin-bottom: 15px;
+            color: #222;
+            letter-spacing: 0.5px;
+        }
+        canvas {
+            max-width: 660px;
+            max-height: 370px;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 12px; }
+            canvas { max-width: 97vw; }
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Painel de Atividades</h1>
+        <div class="grafico-box">
+            <div class="grafico-titulo">Status das Atividades</div>
+            <canvas id="statusAtividadesChart" width="600" height="340"></canvas>
+        </div>
+        <div class="grafico-box">
+            <div class="grafico-titulo">Comparação de Atividades</div>
+            <canvas id="comparacaoAtividadesChart" width="600" height="340"></canvas>
+        </div>
+    </div>
+    <script>
+        // Configuração Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaZC2E6EpcC8Xl4lOTDQA3n3lMTP6NxwQ",
+            authDomain: "pa-pg-a7abc.firebaseapp.com",
+            projectId: "pa-pg-a7abc",
+            storageBucket: "pa-pg-a7abc.appspot.com",
+            messagingSenderId: "102164980919",
+            appId: "1:102164980919:web:72220a8b2ed478a2cdd932"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let statusAtividadesChart, comparacaoAtividadesChart;
+
+        // Função para carregar e atualizar os gráficos
+        async function carregarGraficos() {
+            // Busca todos os formulários
+            const snapshot = await db.collection('formularios').get();
+            const formularios = [];
+            snapshot.forEach(doc => formularios.push({ id: doc.id, ...doc.data() }));
+
+            // Status das atividades
+            const atividadesPendentes = formularios.filter(f => !f.fimReal || f.fimReal.trim() === '').length;
+            const atividadesConcluidas = formularios.filter(f => f.fimReal && f.fimReal.trim() !== '').length;
+
+            // Gráfico de status das atividades
+            if (statusAtividadesChart) statusAtividadesChart.destroy();
+            const statusCtx = document.getElementById('statusAtividadesChart').getContext('2d');
+            statusAtividadesChart = new Chart(statusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Pendentes', 'Concluídas'],
+                    datasets: [{
+                        label: 'Status das Atividades',
+                        data: [atividadesPendentes, atividadesConcluidas],
+                        backgroundColor: [
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: {
+                            display: true,
+                            text: 'Status das Atividades',
+                            font: { size: 16 }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de comparação
+            // Busca o total de atividades QR Code
+            let totalAtividadesQRCode = 0;
+            try {
+                const contadorDoc = await db.collection('contadores').doc('contador_qrcode').get();
+                totalAtividadesQRCode = contadorDoc.exists ? contadorDoc.data().total : 0;
+            } catch (e) { totalAtividadesQRCode = 0; }
+            const totalFormularios = formularios.length;
+            const totalFormulariosFinalizados = atividadesConcluidas;
+            const totalFormulariosAbertos = atividadesPendentes;
+
+            if (comparacaoAtividadesChart) comparacaoAtividadesChart.destroy();
+            const comparacaoCtx = document.getElementById('comparacaoAtividadesChart').getContext('2d');
+            comparacaoAtividadesChart = new Chart(comparacaoCtx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'QR Code',
+                        'Formulários (Total)',
+                        'Formulários (Finalizados)',
+                        'Formulários (Abertos)'
+                    ],
+                    datasets: [{
+                        label: 'Total de Atividades',
+                        data: [
+                            totalAtividadesQRCode,
+                            totalFormularios,
+                            totalFormulariosFinalizados,
+                            totalFormulariosAbertos
+                        ],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(255, 159, 64, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Comparação Atividades: QR Code vs. Formulários',
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) label += context.parsed.y;
+                                    // Mostra porcentagem em relação ao QR Code (exceto o próprio QR Code)
+                                    if (context.label !== 'QR Code' && totalAtividadesQRCode > 0) {
+                                        const value = context.parsed.y;
+                                        const percentage = ((value / totalAtividadesQRCode) * 100).toFixed(2) + '%';
+                                        label += ' (' + percentage + ')';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Atualização automática (real time)
+        db.collection('formularios').onSnapshot(carregarGraficos);
+        db.collection('contadores').doc('contador_qrcode').onSnapshot(carregarGraficos);
+        // Também carrega na primeira vez
+        window.onload = carregarGraficos;
+    </script>
+</body>
+</html>
