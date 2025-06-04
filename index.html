@@ -192,6 +192,28 @@
             contadorQrcodeElement.textContent = `Contador: ${contadorQrcode}`;
         }
 
+        // Função para buscar o total real de QR Codes gerados por todos os usuários
+        async function carregarContadorTotalQRCodes() {
+            try {
+                const snapshot = await db.collection("historico").get();
+                contadorQrcode = snapshot.size;
+                atualizarContadorDisplay();
+            } catch (error) {
+                console.error("Erro ao buscar o total de QR Codes:", error);
+            }
+        }
+
+        // Função para atualizar o valor do contador no Firestore para ser igual ao total global de QR Codes
+        async function atualizarContadorFirestoreParaTotalGlobal() {
+            try {
+                const snapshot = await db.collection("historico").get();
+                const totalGlobal = snapshot.size;
+                await db.collection('contadores').doc('contador_qrcode').set({ total: totalGlobal }, { merge: true });
+            } catch (error) {
+                console.error("Erro ao atualizar o contador global no Firestore:", error);
+            }
+        }
+
         function cadastrarUsuario() {
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
@@ -213,6 +235,8 @@
                     document.getElementById("app").style.display = "block";
                     document.getElementById("loginMessage").textContent = "";
                     checarAdminEMostrarHistorico();
+                    carregarContadorTotalQRCodes(); // Chamar sempre que logar
+                    atualizarContadorFirestoreParaTotalGlobal();
                 })
                 .catch((error) => {
                     document.getElementById("loginMessage").textContent = "Erro ao logar: " + error.message;
@@ -252,7 +276,7 @@
             }
         }
 
-        // Função para mostrar histórico e atualizar contador
+        // Função para mostrar histórico e atualizar contador (individual)
         async function mostrarHistorico() {
             const lista = document.getElementById("listaAtividades");
             lista.innerHTML = "";
@@ -264,25 +288,14 @@
 
             let query;
             if (usuarioEhAdmin) {
-                // Admin vê todos
                 query = db.collection("historico");
             } else {
-                // Usuário comum vê só os seus
                 query = db.collection("historico").where("userId", "==", auth.currentUser.uid);
             }
 
             try {
                 const querySnapshot = await query.get();
-                if (querySnapshot.empty) {
-                    lista.innerHTML = "<p>Nenhuma atividade encontrada.</p>";
-                    contadorQrcode = 0;
-                    atualizarContadorDisplay();
-                    return;
-                }
-
-                contadorQrcode = querySnapshot.size;
-                atualizarContadorDisplay();
-
+                // Para o contador no canto, usamos sempre o total global, então não mudamos contadorQrcode aqui
                 querySnapshot.forEach((doc) => {
                     const atv = doc.data();
                     const div = document.createElement("div");
@@ -311,8 +324,8 @@
             if (confirmar) {
                 try {
                     await db.collection("historico").doc(docId).delete();
-                    contadorQrcode--;
-                    atualizarContadorDisplay();
+                    await carregarContadorTotalQRCodes(); // Atualiza o contador global após exclusão
+                    await atualizarContadorFirestoreParaTotalGlobal(); // Atualiza o valor no Firestore
                     mostrarHistorico();
                 } catch (error) {
                     alert("Erro ao excluir atividade: " + error.message);
@@ -338,8 +351,8 @@
                     });
                     await batch.commit();
 
-                    contadorQrcode = 0;
-                    atualizarContadorDisplay();
+                    await carregarContadorTotalQRCodes(); // Atualiza o contador global após exclusão
+                    await atualizarContadorFirestoreParaTotalGlobal(); // Atualiza o valor no Firestore
                     mostrarHistorico();
                 } catch (error) {
                     alert("Erro ao excluir os QR Codes: " + error.message);
@@ -406,6 +419,8 @@
                     const atividade = { descricao, observacoes, inicio, fim, ordemServico, url, qrCodeUrl: dataUrl, userId: auth.currentUser.uid };
                     try {
                         await db.collection("historico").add(atividade);
+                        await carregarContadorTotalQRCodes(); // Atualiza o contador global após novo QR Code
+                        await atualizarContadorFirestoreParaTotalGlobal(); // Atualiza o valor no Firestore
                         mostrarHistorico();
                     } catch (error) {
                         mensagem.textContent = "Erro ao salvar atividade: " + error.message;
@@ -422,6 +437,8 @@
                 document.getElementById("login").style.display = "none";
                 document.getElementById("app").style.display = "block";
                 checarAdminEMostrarHistorico();
+                carregarContadorTotalQRCodes(); // Atualiza o contador ao autenticar
+                atualizarContadorFirestoreParaTotalGlobal(); // Garante sincronização ao autenticar
             } else {
                 document.getElementById("login").style.display = "block";
                 document.getElementById("app").style.display = "none";
