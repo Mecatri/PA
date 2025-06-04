@@ -120,8 +120,6 @@
     <div id="contador-qrcode">Contador: 0</div>
     <button id="excluir-tudo-btn" onclick="confirmarExclusaoTudo()">Excluir Todos os QR Codes</button>
         <style>
-        /* ... Seu CSS existente ... */
-
         #excluir-tudo-btn {
             position: absolute;
             top: 10px;
@@ -134,7 +132,6 @@
             border-radius: 4px;
             cursor: pointer;
         }
-
         #excluir-tudo-btn:hover {
             background-color: #c82333;
         }
@@ -236,8 +233,7 @@
             contadorQrcodeElement.textContent = `Contador: ${contadorQrcode}`;
         }
 
-        // Função de login com Gmail
-// Função para cadastrar novo usuário
+        // Função para cadastrar novo usuário
         function cadastrarUsuario() {
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
@@ -273,20 +269,19 @@
         });
         }
 
-// Função para recuperar senha
-    function recuperarSenha() {
-        const email = document.getElementById("email").value;
-        auth.sendPasswordResetEmail(email)
-        .then(() => {
-            console.log("E-mail de recuperação enviado para:", email);
-            document.getElementById("loginMessage").textContent = "E-mail de recuperação enviado! Verifique sua caixa de entrada.";
-        })
-        .catch((error) => {
-            console.error("Erro ao enviar e-mail de recuperação:", error);
-            document.getElementById("loginMessage").textContent = "Erro ao enviar e-mail: " + error.message;
-        });
-}
-
+        // Função para recuperar senha
+        function recuperarSenha() {
+            const email = document.getElementById("email").value;
+            auth.sendPasswordResetEmail(email)
+            .then(() => {
+                console.log("E-mail de recuperação enviado para:", email);
+                document.getElementById("loginMessage").textContent = "E-mail de recuperação enviado! Verifique sua caixa de entrada.";
+            })
+            .catch((error) => {
+                console.error("Erro ao enviar e-mail de recuperação:", error);
+                document.getElementById("loginMessage").textContent = "Erro ao enviar e-mail: " + error.message;
+            });
+        }
 
         // Função de logout
         function logout() {
