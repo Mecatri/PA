@@ -17,7 +17,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative; /* Para posicionar o contador */
+            position: relative;
         }
         h2, h3 {
             text-align: center;
@@ -114,76 +114,60 @@
                 width: 100%;
             }
         }
-    </style>
-</head>
-<body>
-    <div id="contador-qrcode">Contador: 0</div>
-    <button id="excluir-tudo-btn" onclick="confirmarExclusaoTudo()">Excluir Todos os QR Codes</button>
-        <style>
-        /* ... Seu CSS existente ... */
-
         #excluir-tudo-btn {
             position: absolute;
             top: 10px;
             transform: translateX(10px);
             right: -100px;
-            background-color: #dc3545; /* Vermelho */
+            background-color: #dc3545;
             color: white;
             border: none;
             padding: 8px 12px;
             border-radius: 4px;
             cursor: pointer;
         }
-
         #excluir-tudo-btn:hover {
             background-color: #c82333;
         }
-        </style>
+    </style>
+</head>
+<body>
+    <div id="contador-qrcode">Contador: 0</div>
+    <button id="excluir-tudo-btn" onclick="confirmarExclusaoTudo()">Excluir Todos os QR Codes</button>
     <h2>Gerador de QR Code - Atividade</h2>
-
-  <div id="login">
-    <h3>Login</h3>
-    <div id="login-form">
-        <label for="email">E-mail:</label>
-        <input type="email" id="email" placeholder="Digite seu e-mail">
-        <label for="password">Senha:</label>
-        <input type="password" id="password" placeholder="Digite sua senha">
-        <button onclick="loginComEmailSenha()">Entrar</button>
+    <div id="login">
+        <h3>Login</h3>
+        <div id="login-form">
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" placeholder="Digite seu e-mail">
+            <label for="password">Senha:</label>
+            <input type="password" id="password" placeholder="Digite sua senha">
+            <button onclick="loginComEmailSenha()">Entrar</button>
+        </div>
+        <button onclick="cadastrarUsuario()">Cadastrar</button>
+        <button onclick="recuperarSenha()">Recuperar Senha</button>
+        <p id="loginMessage"></p>
     </div>
-    <button onclick="cadastrarUsuario()">Cadastrar</button>
-    <button onclick="recuperarSenha()">Recuperar Senha</button>
-    <p id="loginMessage"></p>
-    </div>
-
     <div id="app" style="display: none;">
         <label for="descricao">Descrição da Atividade</label>
         <textarea id="descricao" rows="3" placeholder="Ex: Troca da válvula CV-210"></textarea>
-
         <label for="observacoes">Observações</label>
         <textarea id="observacoes" rows="3" placeholder="Detalhes adicionais sobre a atividade"></textarea>
-
         <label for="inicio">Data e Hora de Início Prevista</label>
         <input type="datetime-local" id="inicio">
-
         <label for="fim">Data e Hora de Término Prevista</label>
         <input type="datetime-local" id="fim">
-
         <label for="ordemServico">Ordem de serviço</label>
         <textarea id="ordemServico" rows="3" placeholder="Ex:1234"></textarea>
-
         <button onclick="gerarQRCode()">Gerar QR Code</button>
-
         <div id="qrcode"></div>
         <p id="mensagem" class="error"></p>
-
         <div id="historico">
             <h3>📂 Histórico de Atividades Geradas</h3>
             <div id="listaAtividades"></div>
         </div>
-
         <button onclick="logout()">Sair</button>
     </div>
-
     <script>
         // Configuração do Firebase
         const firebaseConfig = {
@@ -196,242 +180,79 @@
             clientId: "460190166657-18jbdvae4cemj3n38ivsnol1r975nkee.apps.googleusercontent.com"
         };
 
-        // Inicialize o Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // Inicialize os serviços do Firebase
         const auth = firebase.auth();
         const db = firebase.firestore();
         const contadorQrcodeElement = document.getElementById('contador-qrcode');
         let contadorQrcode = 0;
-        const CONTADOR_DOC_ID = 'contador_qrcode'; // ID do documento no Firestore
+        let usuarioEhAdmin = false;
 
-        // Função para carregar o contador do Firestore
-        async function carregarContador() {
-            try {
-                const doc = await db.collection('contadores').doc(CONTADOR_DOC_ID).get();
-                if (doc.exists) {
-                    contadorQrcode = doc.data().total || 0;
-                } else {
-                    // Se o documento não existir, cria com o contador inicial
-                    await db.collection('contadores').doc(CONTADOR_DOC_ID).set({ total: 0 });
-                }
-                atualizarContadorDisplay();
-            } catch (error) {
-                console.error("Erro ao carregar contador:", error);
-            }
-        }
-
-        // Função para atualizar o contador no Firestore
-        async function atualizarContadorFirestore() {
-            try {
-                await db.collection('contadores').doc(CONTADOR_DOC_ID).update({ total: contadorQrcode });
-            } catch (error) {
-                console.error("Erro ao atualizar contador:", error);
-            }
-        }
-
-        // Função para atualizar a exibição do contador
         function atualizarContadorDisplay() {
             contadorQrcodeElement.textContent = `Contador: ${contadorQrcode}`;
         }
 
-        // Função de login com Gmail
-// Função para cadastrar novo usuário
         function cadastrarUsuario() {
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
             auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-            const user = userCredential.user;
-            console.log("Usuário cadastrado:", user);
-            document.getElementById("loginMessage").textContent = "Usuário cadastrado com sucesso!";
-            })
-            .catch((error) => {
-            console.error("Erro ao cadastrar usuário:", error);
-            document.getElementById("loginMessage").textContent = "Erro ao cadastrar: " + error.message;
-            });
-            }
+                .then((userCredential) => {
+                    document.getElementById("loginMessage").textContent = "Usuário cadastrado com sucesso!";
+                })
+                .catch((error) => {
+                    document.getElementById("loginMessage").textContent = "Erro ao cadastrar: " + error.message;
+                });
+        }
 
-        // Função para logar usuário com e-mail e senha
         function loginComEmailSenha() {
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
             auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-            const user = userCredential.user;
-            console.log("Usuário logado:", user);
-            document.getElementById("login").style.display = "none";
-            document.getElementById("app").style.display = "block";
-            document.getElementById("loginMessage").textContent = "";
-            carregarContador();
-            mostrarHistorico();
-        })
-        .catch((error) => {
-            console.error("Erro ao logar usuário:", error);
-            document.getElementById("loginMessage").textContent = "Erro ao logar: " + error.message;
-        });
+                .then(() => {
+                    document.getElementById("login").style.display = "none";
+                    document.getElementById("app").style.display = "block";
+                    document.getElementById("loginMessage").textContent = "";
+                    checarAdminEMostrarHistorico();
+                })
+                .catch((error) => {
+                    document.getElementById("loginMessage").textContent = "Erro ao logar: " + error.message;
+                });
         }
 
-// Função para recuperar senha
-    function recuperarSenha() {
-        const email = document.getElementById("email").value;
-        auth.sendPasswordResetEmail(email)
-        .then(() => {
-            console.log("E-mail de recuperação enviado para:", email);
-            document.getElementById("loginMessage").textContent = "E-mail de recuperação enviado! Verifique sua caixa de entrada.";
-        })
-        .catch((error) => {
-            console.error("Erro ao enviar e-mail de recuperação:", error);
-            document.getElementById("loginMessage").textContent = "Erro ao enviar e-mail: " + error.message;
-        });
-}
+        function recuperarSenha() {
+            const email = document.getElementById("email").value;
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    document.getElementById("loginMessage").textContent = "E-mail de recuperação enviado! Verifique sua caixa de entrada.";
+                })
+                .catch((error) => {
+                    document.getElementById("loginMessage").textContent = "Erro ao enviar e-mail: " + error.message;
+                });
+        }
 
-
-        // Função de logout
         function logout() {
             auth.signOut()
                 .then(() => {
-                    console.log("Usuário deslogado");
                     document.getElementById("login").style.display = "block";
                     document.getElementById("app").style.display = "none";
-                })
-                .catch((error) => {
-                    console.error("Erro ao sair:", error);
                 });
         }
 
-        // Verificar estado de autenticação
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                console.log("Usuário autenticado:", user);
-                document.getElementById("login").style.display = "none";
-                document.getElementById("app").style.display = "block";
-                carregarContador(); // Carrega o contador ao autenticar
+        // Checa se usuário é admin e mostra histórico conforme permissão
+        async function checarAdminEMostrarHistorico() {
+            usuarioEhAdmin = false;
+            if (auth.currentUser) {
+                try {
+                    const idTokenResult = await auth.currentUser.getIdTokenResult(true);
+                    usuarioEhAdmin = !!idTokenResult.claims.admin;
+                } catch (err) {
+                    usuarioEhAdmin = false;
+                }
                 mostrarHistorico();
-            } else {
-                console.log("Nenhum usuário autenticado");
-                document.getElementById("login").style.display = "block";
-                document.getElementById("app").style.display = "none";
-            }
-        });
-
-
-async function confirmarExclusaoTudo() {
-    const confirmar = confirm("Tem certeza de que deseja excluir TODOS os QR Codes gerados?");
-    if (confirmar) {
-        try {
-            const querySnapshot = await db.collection("historico")
-                .where("userId", "==", auth.currentUser.uid)
-                .get();
-
-            const batch = db.batch(); // Use um batch para operações em lote
-
-            querySnapshot.forEach((doc) => {
-                batch.delete(db.collection("historico").doc(doc.id));
-            });
-
-            await batch.commit();
-
-            console.log("Todos os QR Codes excluídos com sucesso!");
-            alert("Todos os QR Codes foram excluídos.");
-
-            contadorQrcode = 0; // Reseta o contador
-            atualizarContadorDisplay();
-            atualizarContadorFirestore();
-            mostrarHistorico(); // Atualiza o histórico na tela
-
-        } catch (error) {
-            console.error("Erro ao excluir todos os QR Codes:", error);
-            alert("Erro ao excluir os QR Codes: " + error.message);
-        }
-    }
-}
-        
-        // Função para gerar QR Code
-        async function gerarQRCode() {
-            if (!auth.currentUser) {
-                alert("Você precisa estar logado para realizar esta ação.");
-                return;
-            }
-
-            const descricao = document.getElementById("descricao").value.trim();
-            const observacoes = document.getElementById("observacoes").value.trim();
-            const inicio = document.getElementById("inicio").value;
-            const fim = document.getElementById("fim").value;
-            const ordemServico = document.getElementById("ordemServico").value;  // Obtenha o valor do input
-            const mensagem = document.getElementById("mensagem");
-            const qrcodeContainer = document.getElementById("qrcode");
-            qrcodeContainer.innerHTML = "";
-
-
-            if (!descricao || !inicio || !fim) {
-                mensagem.textContent = "Por favor, preencha todos os campos.";
-                return;
-            }
-
-            if (new Date(inicio) >= new Date(fim)) {
-                mensagem.textContent = "A data de início deve ser anterior à data de término.";
-                return;
-            }
-
-            mensagem.textContent = "";
-            try {
-                    const querySnapshot = await db.collection("historico")
-                        .where("userId", "==", auth.currentUser.uid)
-                        .where("ordemServico", "==", ordemServico)
-                        .get();
-
-            if (!querySnapshot.empty) {
-                    alert("Já existe uma atividade cadastrada com a mesma Ordem de Serviço.");
-                    return; // Impede o salvamento
-                    }
-            } catch (error) {
-                console.error("Erro ao verificar OS:", error);
-                mensagem.textContent = "Erro ao verificar Ordem de Serviço.";
-                return;
-            }
-            // URL da página do formulário com parâmetros
-           const url = `https://mecatri.github.io/PA/formulario.html?descricao=${encodeURIComponent(descricao)}&observacoes=${encodeURIComponent(observacoes)}&inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}&ordemServico=${encodeURIComponent(ordemServico)}`;
-
-            try {
-                // Gerar QR Code como Data URL
-                QRCode.toDataURL(url, async function (error, dataUrl) {
-                    if (error) {
-                        console.error(error);
-                        qrcodeContainer.innerHTML = "<p>Erro ao gerar QR Code</p>";
-                        return;
-                    }
-
-                    const link = document.createElement("p");
-                    link.innerHTML = `Link gerado: <a href="${url}" target="_blank">${url}</a><br><strong>${descricao}</strong>`;
-                    qrcodeContainer.appendChild(link);
-
-                    const img = document.createElement("img");
-                    img.src = dataUrl;
-                    img.style.maxWidth = "200px";
-                    qrcodeContainer.appendChild(img);
-
-                    // Salvar no Firestore (incluindo a dataUrl do QR Code)
-                    const atividade = { descricao, observacoes, inicio, fim, ordemServico, url, qrCodeUrl: dataUrl, userId: auth.currentUser.uid };
-                    try {
-                        const docRef = await db.collection("historico").add(atividade);
-                        console.log("Atividade salva no Firebase com ID:", docRef.id);
-                        contadorQrcode++; // Incrementa o contador
-                        atualizarContadorDisplay();
-                        atualizarContadorFirestore();
-                        mostrarHistorico();
-                    } catch (error) {
-                        console.error("Erro ao salvar atividade:", error);
-                    }
-                });
-            } catch (error) {
-                console.error("Erro ao gerar QR Code:", error);
-                qrcodeContainer.innerHTML = "<p>Erro ao gerar QR Code</p>";
             }
         }
 
-        // Função para mostrar histórico
+        // Função para mostrar histórico e atualizar contador
         async function mostrarHistorico() {
             const lista = document.getElementById("listaAtividades");
             lista.innerHTML = "";
@@ -441,14 +262,24 @@ async function confirmarExclusaoTudo() {
                 return;
             }
 
+            let query;
+            if (usuarioEhAdmin) {
+                // Admin vê todos
+                query = db.collection("historico");
+            } else {
+                // Usuário comum vê só os seus
+                query = db.collection("historico").where("userId", "==", auth.currentUser.uid);
+            }
+
             try {
-                const querySnapshot = await db.collection("historico").where("userId", "==", auth.currentUser.uid).get();
+                const querySnapshot = await query.get();
                 if (querySnapshot.empty) {
                     lista.innerHTML = "<p>Nenhuma atividade encontrada.</p>";
+                    contadorQrcode = 0;
+                    atualizarContadorDisplay();
                     return;
                 }
 
-                // Atualiza o contador com o número de itens no histórico (pode ser útil se itens forem excluídos)
                 contadorQrcode = querySnapshot.size;
                 atualizarContadorDisplay();
 
@@ -470,33 +301,132 @@ async function confirmarExclusaoTudo() {
                     lista.appendChild(div);
                 });
             } catch (error) {
-                console.error("Erro ao carregar histórico:", error);
                 lista.innerHTML = `<p class="error">Erro ao carregar histórico: ${error.message}</p>`;
             }
         }
 
-        // Função para confirmar e excluir uma atividade
+        // Confirma e exclui uma atividade
         async function confirmarExclusao(docId) {
             const confirmar = confirm("Tem certeza de que deseja excluir esta atividade?");
             if (confirmar) {
                 try {
                     await db.collection("historico").doc(docId).delete();
-                    console.log("Atividade excluída com sucesso:", docId);
-                    contadorQrcode--; // Decrementa o contador ao excluir
+                    contadorQrcode--;
                     atualizarContadorDisplay();
-                    atualizarContadorFirestore();
-                    mostrarHistorico(); // Atualiza o histórico após exclusão
+                    mostrarHistorico();
                 } catch (error) {
-                    console.error("Erro ao excluir atividade:", error);
                     alert("Erro ao excluir atividade: " + error.message);
                 }
             }
         }
 
-        // Carregar o contador inicial ao carregar a página
-        if (auth.currentUser) {
-            carregarContador();
+        // Excluir todas as atividades do usuário logado ou, se admin, todas do sistema
+        async function confirmarExclusaoTudo() {
+            const confirmar = confirm("Tem certeza de que deseja excluir TODOS os QR Codes gerados?");
+            if (confirmar) {
+                try {
+                    let query;
+                    if (usuarioEhAdmin) {
+                        query = db.collection("historico");
+                    } else {
+                        query = db.collection("historico").where("userId", "==", auth.currentUser.uid);
+                    }
+                    const querySnapshot = await query.get();
+                    const batch = db.batch();
+                    querySnapshot.forEach((doc) => {
+                        batch.delete(db.collection("historico").doc(doc.id));
+                    });
+                    await batch.commit();
+
+                    contadorQrcode = 0;
+                    atualizarContadorDisplay();
+                    mostrarHistorico();
+                } catch (error) {
+                    alert("Erro ao excluir os QR Codes: " + error.message);
+                }
+            }
         }
+
+        // Gerar QRCode
+        async function gerarQRCode() {
+            if (!auth.currentUser) {
+                alert("Você precisa estar logado para realizar esta ação.");
+                return;
+            }
+
+            const descricao = document.getElementById("descricao").value.trim();
+            const observacoes = document.getElementById("observacoes").value.trim();
+            const inicio = document.getElementById("inicio").value;
+            const fim = document.getElementById("fim").value;
+            const ordemServico = document.getElementById("ordemServico").value;
+            const mensagem = document.getElementById("mensagem");
+            const qrcodeContainer = document.getElementById("qrcode");
+            qrcodeContainer.innerHTML = "";
+
+            if (!descricao || !inicio || !fim) {
+                mensagem.textContent = "Por favor, preencha todos os campos.";
+                return;
+            }
+            if (new Date(inicio) >= new Date(fim)) {
+                mensagem.textContent = "A data de início deve ser anterior à data de término.";
+                return;
+            }
+            mensagem.textContent = "";
+
+            try {
+                const querySnapshot = await db.collection("historico")
+                    .where("userId", "==", auth.currentUser.uid)
+                    .where("ordemServico", "==", ordemServico)
+                    .get();
+                if (!querySnapshot.empty) {
+                    alert("Já existe uma atividade cadastrada com a mesma Ordem de Serviço.");
+                    return;
+                }
+            } catch (error) {
+                mensagem.textContent = "Erro ao verificar Ordem de Serviço.";
+                return;
+            }
+            const url = `https://mecatri.github.io/PA/formulario.html?descricao=${encodeURIComponent(descricao)}&observacoes=${encodeURIComponent(observacoes)}&inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}&ordemServico=${encodeURIComponent(ordemServico)}`;
+
+            try {
+                QRCode.toDataURL(url, async function (error, dataUrl) {
+                    if (error) {
+                        qrcodeContainer.innerHTML = "<p>Erro ao gerar QR Code</p>";
+                        return;
+                    }
+                    const link = document.createElement("p");
+                    link.innerHTML = `Link gerado: <a href="${url}" target="_blank">${url}</a><br><strong>${descricao}</strong>`;
+                    qrcodeContainer.appendChild(link);
+
+                    const img = document.createElement("img");
+                    img.src = dataUrl;
+                    img.style.maxWidth = "200px";
+                    qrcodeContainer.appendChild(img);
+
+                    const atividade = { descricao, observacoes, inicio, fim, ordemServico, url, qrCodeUrl: dataUrl, userId: auth.currentUser.uid };
+                    try {
+                        await db.collection("historico").add(atividade);
+                        mostrarHistorico();
+                    } catch (error) {
+                        mensagem.textContent = "Erro ao salvar atividade: " + error.message;
+                    }
+                });
+            } catch (error) {
+                qrcodeContainer.innerHTML = "<p>Erro ao gerar QR Code</p>";
+            }
+        }
+
+        // Estado de autenticação
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById("login").style.display = "none";
+                document.getElementById("app").style.display = "block";
+                checarAdminEMostrarHistorico();
+            } else {
+                document.getElementById("login").style.display = "block";
+                document.getElementById("app").style.display = "none";
+            }
+        });
     </script>
 </body>
 </html>
