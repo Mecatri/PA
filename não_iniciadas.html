@@ -18,6 +18,19 @@
         h2 {
             text-align: center;
         }
+        #contador-atividades {
+            position: absolute;
+            top: 10px;
+            right: 30px;
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 1px 2px 6px rgba(0,0,0,0.07);
+            z-index: 1000;
+        }
         #nao-iniciadas-list {
             margin-top: 30px;
         }
@@ -87,10 +100,17 @@
             body {
                 padding: 5px;
             }
+            #contador-atividades {
+                right: 10px;
+                top: 5px;
+                padding: 6px 10px;
+                font-size: 1em;
+            }
         }
     </style>
 </head>
 <body>
+    <div id="contador-atividades" style="display:none;">Atividades: 0</div>
     <h2>Atividades Não Iniciadas (Não Scaneadas)</h2>
     <div id="login">
         <h3>Login</h3>
@@ -166,6 +186,7 @@
                 .then(() => {
                     document.getElementById("login").style.display = "block";
                     document.getElementById("app").style.display = "none";
+                    document.getElementById("contador-atividades").style.display = "none";
                 });
         }
 
@@ -177,12 +198,15 @@
             } else {
                 document.getElementById("login").style.display = "block";
                 document.getElementById("app").style.display = "none";
+                document.getElementById("contador-atividades").style.display = "none";
             }
         });
 
         async function carregarAtividadesNaoIniciadas() {
             const listaDiv = document.getElementById("nao-iniciadas-list");
+            const contadorDiv = document.getElementById("contador-atividades");
             listaDiv.innerHTML = "<p>Carregando...</p>";
+            contadorDiv.style.display = "none";
             try {
                 // Pegue todas as atividades do "historico" (index.html)
                 const historicoSnap = await db.collection("historico").get();
@@ -220,6 +244,10 @@
                     return !chavesFormularios.has(chave);
                 });
 
+                // Atualiza o contador
+                contadorDiv.textContent = `Atividades: ${naoIniciadas.length}`;
+                contadorDiv.style.display = "block";
+
                 if (naoIniciadas.length === 0) {
                     listaDiv.innerHTML = "<div class='empty'>Não há atividades não iniciadas! 🎉</div>";
                     return;
@@ -243,6 +271,7 @@
 
             } catch (error) {
                 listaDiv.innerHTML = `<div class='empty'>Erro ao carregar atividades: ${error.message}</div>`;
+                contadorDiv.style.display = "none";
             }
         }
     </script>
