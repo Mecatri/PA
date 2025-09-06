@@ -184,14 +184,16 @@
                 return storedGuests ? JSON.parse(storedGuests) : [];
             }
 
+            // FUNÇÃO calculateTotals CORRIGIDA
             function calculateTotals() {
                 let confirmedCount = 0;
                 let totalGuestCount = 0;
 
                 guests.forEach(guest => {
-                    totalGuestCount += guest.totalPeople;
+                    // Garante que guest.totalPeople é tratado como um número
+                    totalGuestCount += Number(guest.totalPeople);
                     if (guest.confirmation === 'Sim') {
-                        confirmedCount += guest.totalPeople;
+                        confirmedCount += Number(guest.totalPeople);
                     }
                 });
 
@@ -352,7 +354,8 @@
                         if (field === 'companions') {
                             const newCompanions = parseInt(newValue) || 0;
                             guest[field] = newCompanions;
-                            guest.totalPeople = (newCompanions > 0) ? newCompanions + 1 : 1;
+                            // Garante que guest.totalPeople é sempre um número
+                            guest.totalPeople = (newCompanions > 0) ? Number(newCompanions) + 1 : 1;
                             row.querySelector('td[data-field="totalPeople"]').textContent = guest.totalPeople; // Atualiza a célula de total de pessoas
                         } else {
                             guest[field] = newValue;
