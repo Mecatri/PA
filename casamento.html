@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Casamento - [Seu Nome] & [Nome do Parceiro(a)]</title>
+    <title>Lista de Casamento - Nomes dos Noivos</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,6 +28,50 @@
             margin-bottom: 25px;
         }
 
+        /* Estilos das abas */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-button {
+            background-color: #f2f2f2;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #555;
+            transition: background-color 0.3s ease;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            margin-right: 5px; /* Espaço entre os botões da aba */
+        }
+
+        .tab-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .tab-button.active {
+            background-color: #fff;
+            border-color: #ddd;
+            border-bottom-color: #fff; /* Para dar o efeito de aba selecionada */
+            color: #5d4037;
+            cursor: default;
+        }
+
+        .tab-content {
+            display: none; /* Conteúdo das abas oculto por padrão */
+            padding-top: 20px;
+        }
+
+        .tab-content.active {
+            display: block; /* Mostra o conteúdo da aba ativa */
+        }
+
         .summary {
             background-color: #e8eaf6; /* Azul claro suave */
             padding: 15px;
@@ -42,7 +86,14 @@
             color: #3f51b5; /* Azul mais escuro */
         }
 
-        button {
+        .controls {
+            display: flex;
+            gap: 10px; /* Espaço entre os botões */
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Permite que os botões quebrem a linha em telas menores */
+        }
+
+        .controls button, button.add-guest-btn { /* Alterado para classe */
             background-color: #795548; /* Marrom médio */
             color: white;
             padding: 10px 15px;
@@ -50,12 +101,28 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 1em;
-            margin-bottom: 20px;
             transition: background-color 0.3s ease;
+            margin-bottom: 0; /* Ajuste para o flexbox */
         }
 
-        button:hover {
+        .controls button:hover, button.add-guest-btn:hover { /* Alterado para classe */
             background-color: #5d4037; /* Marrom mais escuro */
+        }
+
+        /* Botão de edição em massa pode ter uma cor ligeiramente diferente */
+        button.edit-all-btn { /* Alterado para classe */
+            background-color: #ff9800; /* Laranja */
+        }
+        button.edit-all-btn:hover { /* Alterado para classe */
+            background-color: #fb8c00;
+        }
+
+        /* Botão de confirmação em massa */
+        button.confirm-all-btn { /* Alterado para classe */
+            background-color: #4CAF50; /* Verde */
+        }
+        button.confirm-all-btn:hover { /* Alterado para classe */
+            background-color: #45a049;
         }
 
         table {
@@ -141,56 +208,114 @@
     <div class="container">
         <h1>Nossa Lista de Convidados</h1>
 
-        <div class="summary">
-            <p>Total de Convidados Confirmados: <span id="totalConfirmed">0</span></p>
-            <p>Total Geral de Pessoas na Lista: <span id="totalGuests">0</span></p>
+        <div class="tabs">
+            <button class="tab-button active" data-tab="husband">Lista do Marido</button>
+            <button class="tab-button" data-tab="wife">Lista da Esposa</button>
         </div>
 
-        <button id="addGuestBtn">Adicionar Convidado</button>
+        <div id="husband" class="tab-content active">
+            <div class="summary">
+                <p>Total de Convidados Confirmados (Marido): <span id="husbandTotalConfirmed">0</span></p>
+                <p>Total Geral de Pessoas na Lista (Marido): <span id="husbandTotalGuests">0</span></p>
+            </div>
 
-        <table id="guestTable">
-            <thead>
-                <tr>
-                    <th>Nome do Convidado</th>
-                    <th>Acompanhantes</th>
-                    <th>Total Pessoas</th>
-                    <th>Confirmação</th>
-                    <th>Telefone</th>
-                    <th>E-mail</th>
-                    <th>Observações</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                </tbody>
-        </table>
+            <div class="controls">
+                <button class="add-guest-btn" data-list="husband">Adicionar Convidado (Marido)</button>
+                <button class="edit-all-btn" data-list="husband">Editar Todos (Marido)</button>
+                <button class="confirm-all-btn" data-list="husband">Marcar Todos Confirmados (Marido)</button>
+            </div>
+
+            <table id="husbandGuestTable">
+                <thead>
+                    <tr>
+                        <th>Nome do Convidado</th>
+                        <th>Acompanhantes</th>
+                        <th>Total Pessoas</th>
+                        <th>Confirmação</th>
+                        <th>Telefone</th>
+                        <th>E-mail</th>
+                        <th>Observações</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="wife" class="tab-content">
+            <div class="summary">
+                <p>Total de Convidados Confirmados (Esposa): <span id="wifeTotalConfirmed">0</span></p>
+                <p>Total Geral de Pessoas na Lista (Esposa): <span id="wifeTotalGuests">0</span></p>
+            </div>
+
+            <div class="controls">
+                <button class="add-guest-btn" data-list="wife">Adicionar Convidado (Esposa)</button>
+                <button class="edit-all-btn" data-list="wife">Editar Todos (Esposa)</button>
+                <button class="confirm-all-btn" data-list="wife">Marcar Todos Confirmados (Esposa)</button>
+            </div>
+
+            <table id="wifeGuestTable">
+                <thead>
+                    <tr>
+                        <th>Nome do Convidado</th>
+                        <th>Acompanhantes</th>
+                        <th>Total Pessoas</th>
+                        <th>Confirmação</th>
+                        <th>Telefone</th>
+                        <th>E-mail</th>
+                        <th>Observações</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const addGuestBtn = document.getElementById('addGuestBtn');
-            const guestTableBody = document.querySelector('#guestTable tbody');
-            const totalConfirmedSpan = document.getElementById('totalConfirmed');
-            const totalGuestsSpan = document.getElementById('totalGuests');
+            const tabsContainer = document.querySelector('.tabs');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
 
-            let guests = loadGuests(); // Carrega os convidados do localStorage
+            // --- Elementos para a lista do Marido ---
+            const husbandAddGuestBtn = document.querySelector('.add-guest-btn[data-list="husband"]');
+            const husbandEditAllBtn = document.querySelector('.edit-all-btn[data-list="husband"]');
+            const husbandConfirmAllBtn = document.querySelector('.confirm-all-btn[data-list="husband"]');
+            const husbandGuestTableBody = document.querySelector('#husbandGuestTable tbody');
+            const husbandTotalConfirmedSpan = document.getElementById('husbandTotalConfirmed');
+            const husbandTotalGuestsSpan = document.getElementById('husbandTotalGuests');
 
-            function saveGuests() {
-                localStorage.setItem('weddingGuests', JSON.stringify(guests));
+            // --- Elementos para a lista da Esposa ---
+            const wifeAddGuestBtn = document.querySelector('.add-guest-btn[data-list="wife"]');
+            const wifeEditAllBtn = document.querySelector('.edit-all-btn[data-list="wife"]');
+            const wifeConfirmAllBtn = document.querySelector('.confirm-all-btn[data-list="wife"]');
+            const wifeGuestTableBody = document.querySelector('#wifeGuestTable tbody');
+            const wifeTotalConfirmedSpan = document.getElementById('wifeTotalConfirmed');
+            const wifeTotalGuestsSpan = document.getElementById('wifeTotalGuests');
+
+            let husbandGuests = loadGuests('husbandGuests');
+            let wifeGuests = loadGuests('wifeGuests');
+
+            let activeList = 'husband'; // Controla qual lista está ativa
+
+            // --- Funções Genéricas para Listas ---
+            function saveGuests(listType, guestsArray) {
+                localStorage.setItem(listType, JSON.stringify(guestsArray));
             }
 
-            function loadGuests() {
-                const storedGuests = localStorage.getItem('weddingGuests');
+            function loadGuests(listType) {
+                const storedGuests = localStorage.getItem(listType);
                 return storedGuests ? JSON.parse(storedGuests) : [];
             }
 
-            // FUNÇÃO calculateTotals CORRIGIDA
-            function calculateTotals() {
+            function calculateTotals(guestsArray, totalConfirmedSpan, totalGuestsSpan) {
                 let confirmedCount = 0;
                 let totalGuestCount = 0;
 
-                guests.forEach(guest => {
-                    // Garante que guest.totalPeople é tratado como um número
+                guestsArray.forEach(guest => {
                     totalGuestCount += Number(guest.totalPeople);
                     if (guest.confirmation === 'Sim') {
                         confirmedCount += Number(guest.totalPeople);
@@ -201,11 +326,17 @@
                 totalGuestsSpan.textContent = totalGuestCount;
             }
 
-            function renderGuests() {
-                guestTableBody.innerHTML = ''; // Limpa a tabela antes de renderizar
-                guests.forEach((guest, index) => {
-                    const row = guestTableBody.insertRow();
-                    row.dataset.index = index; // Para identificar a linha ao editar/deletar
+            function renderGuests(listType) {
+                const guestsArray = (listType === 'husband') ? husbandGuests : wifeGuests;
+                const tableBody = (listType === 'husband') ? husbandGuestTableBody : wifeGuestTableBody;
+                const totalConfirmedSpan = (listType === 'husband') ? husbandTotalConfirmedSpan : wifeTotalConfirmedSpan;
+                const totalGuestsSpan = (listType === 'husband') ? husbandTotalGuestsSpan : wifeTotalGuestsSpan;
+
+                tableBody.innerHTML = '';
+                guestsArray.forEach((guest, index) => {
+                    const row = tableBody.insertRow();
+                    row.dataset.index = index;
+                    row.dataset.listType = listType; // Adicionar tipo de lista para o evento
 
                     row.innerHTML = `
                         <td data-field="name">${guest.name}</td>
@@ -221,13 +352,14 @@
                         </td>
                     `;
                 });
-                calculateTotals();
-                saveGuests(); // Salva sempre que a lista é renderizada (após adicionar/excluir)
+                calculateTotals(guestsArray, totalConfirmedSpan, totalGuestsSpan);
+                saveGuests(listType + 'Guests', guestsArray);
             }
 
-            function addGuest(name = '', companions = 0, confirmation = 'Pendente', phone = '', email = '', observations = '') {
+            function addGuest(listType, name = '', companions = 0, confirmation = 'Pendente', phone = '', email = '', observations = '') {
+                const guestsArray = (listType === 'husband') ? husbandGuests : wifeGuests;
                 const totalPeople = (parseInt(companions) > 0) ? parseInt(companions) + 1 : 1;
-                guests.push({
+                guestsArray.push({
                     name,
                     companions: parseInt(companions),
                     totalPeople,
@@ -236,107 +368,22 @@
                     email,
                     observations
                 });
-                renderGuests();
+                renderGuests(listType);
             }
 
-            // Inicializa a lista com seus convidados existentes, se a lista estiver vazia no localStorage
-            if (guests.length === 0) {
-                addGuest('Mãe');
-                addGuest('Pai');
-                addGuest('Cyro');
-                addGuest('Lucas');
-                addGuest('Vó Tera');
-                addGuest('Vó Maria');
-                addGuest('Tio Júnior');
-                addGuest('Tia Clyde');
-                addGuest('Tio Clayton');
-                addGuest('Tio Bin');
-                addGuest('Tia Célia');
-                addGuest('Tia Daniela');
-                addGuest('Tia Andréia');
-                addGuest('Tia Patrícia');
-                addGuest('Tio Marquinho');
-                addGuest('Tia Sandra');
-                addGuest('Tia Solange');
-                addGuest('Tio Isaías');
-                addGuest('Tio Júlio');
-                addGuest('Lesley');
-                addGuest('Dudu', 1, 'Pendente', '', '', 'Esposa Dudu');
-                addGuest('Mônica');
-                addGuest('Stela');
-                addGuest('Celina');
-                addGuest('Rafael');
-                addGuest('Morena');
-                addGuest('Léo');
-                addGuest('Pedro');
-                addGuest('Daniela');
-                addGuest('Saulo');
-                addGuest('Laís');
-                addGuest('Simone');
-                addGuest('Luiz');
-                addGuest('João');
-                addGuest('Lara');
-                addGuest('Luiz Eduardo');
-                addGuest('João Gabriel');
-                addGuest('Laura');
-                addGuest('Yago');
-                addGuest('Bruna');
-                addGuest('Sandro');
-                addGuest('Gabriel');
-                addGuest('Lyana', 1, 'Pendente', '', '', 'Namorado Lyana');
-                addGuest('Chandler', 1, 'Pendente', '', '', 'Namorada Chandler');
-                addGuest('Caio');
-                addGuest('Paula');
-                addGuest('Humberto');
-                addGuest('Igor');
-                addGuest('Elias');
-                addGuest('Victor');
-                addGuest('Serviço', 6, 'Pendente', '', '', 'Equipe de Serviço (7 pessoas)');
-                addGuest('Padrinho');
-                addGuest('Madrinha');
-                addGuest('Duda');
-                addGuest('Mariana');
-                addGuest('Alzira');
-                addGuest('Vitória');
-                addGuest('Daniela', 1, 'Pendente', '', '', 'Boy Daniela');
-                addGuest('Carol');
-                addGuest('Yuri');
-                addGuest('Basílio');
-                addGuest('Jô');
-                addGuest('Ariel');
-                addGuest('Victor', 1, 'Pendente', '', '', 'Mulher Victor');
-                addGuest('Goiânia', 5, 'Pendente', '', '', 'Grupo de 6 pessoas');
-                addGuest('Parentes MT', 4, 'Pendente', '', '', 'Grupo de 5 pessoas');
+            function deleteGuest(listType, index) {
+                const guestsArray = (listType === 'husband') ? husbandGuests : wifeGuests;
+                guestsArray.splice(index, 1);
+                renderGuests(listType);
             }
 
-
-            addGuestBtn.addEventListener('click', () => {
-                addGuest('Novo Convidado', 0, 'Pendente', '', '', 'Adicionar Observação'); // Adiciona um novo convidado com valores padrão
-            });
-
-            guestTableBody.addEventListener('click', (event) => {
-                const target = event.target;
-                const row = target.closest('tr');
-                if (!row) return;
-
-                const index = parseInt(row.dataset.index);
-
-                if (target.classList.contains('delete-btn')) {
-                    if (confirm('Tem certeza que deseja excluir este convidado?')) {
-                        guests.splice(index, 1);
-                        renderGuests();
-                    }
-                } else if (target.classList.contains('edit-btn')) {
-                    toggleEditMode(row, index);
-                }
-            });
-
-            function toggleEditMode(row, index) {
-                const guest = guests[index];
+            function toggleEditMode(row, index, listType, isMassEdit = false) {
+                const guestsArray = (listType === 'husband') ? husbandGuests : wifeGuests;
+                const guest = guestsArray[index];
                 const cells = row.querySelectorAll('td[data-field]');
                 const editButton = row.querySelector('.edit-btn');
 
-                if (row.classList.contains('editing')) {
+                if (row.classList.contains('editing') && (isMassEdit || editButton.textContent === 'Salvar')) {
                     // Salvar edições
                     cells.forEach(cell => {
                         const field = cell.dataset.field;
@@ -347,25 +394,23 @@
                         } else if (cell.querySelector('select')) {
                             newValue = cell.querySelector('select').value;
                         } else {
-                            // Se não há input/select, o valor já é o texto atual da célula
                             newValue = cell.textContent;
                         }
 
                         if (field === 'companions') {
                             const newCompanions = parseInt(newValue) || 0;
                             guest[field] = newCompanions;
-                            // Garante que guest.totalPeople é sempre um número
                             guest.totalPeople = (newCompanions > 0) ? Number(newCompanions) + 1 : 1;
-                            row.querySelector('td[data-field="totalPeople"]').textContent = guest.totalPeople; // Atualiza a célula de total de pessoas
+                            row.querySelector('td[data-field="totalPeople"]').textContent = guest.totalPeople;
                         } else {
                             guest[field] = newValue;
                         }
-                        cell.innerHTML = guest[field]; // Atualiza o conteúdo da célula com o valor final do objeto guest
+                        cell.innerHTML = guest[field];
                     });
-                    renderGuests(); // Renderiza para garantir que todos os campos atualizados sejam exibidos
                     row.classList.remove('editing');
-                    editButton.textContent = 'Editar';
-                } else {
+                    if (editButton) editButton.textContent = 'Editar';
+
+                } else if (!row.classList.contains('editing') && (isMassEdit || (editButton && editButton.textContent === 'Editar'))) {
                     // Entrar no modo de edição
                     cells.forEach(cell => {
                         const field = cell.dataset.field;
@@ -398,22 +443,188 @@
                                     inputElement.appendChild(option);
                                 });
                                 break;
-                            case 'totalPeople': // Total Pessoas não é editável diretamente
+                            case 'totalPeople':
                                 return;
                             default:
                                 return;
                         }
-                        cell.innerHTML = ''; // Limpa o conteúdo da célula
+                        cell.innerHTML = '';
                         cell.appendChild(inputElement);
                         cell.classList.add('editable');
                     });
                     row.classList.add('editing');
-                    editButton.textContent = 'Salvar';
+                    if (editButton) editButton.textContent = 'Salvar';
                 }
             }
 
-            // Renderiza os convidados iniciais ao carregar a página
-            renderGuests();
+            // --- Event Listeners para Botões de Ação ---
+            // Listener genérico para botões "Adicionar Convidado"
+            document.querySelectorAll('.add-guest-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const listType = event.target.dataset.list;
+                    addGuest(listType, 'Novo Convidado', 0, 'Pendente', '', '', 'Adicionar Observação');
+                });
+            });
+
+            // Listener genérico para botões "Editar Todos"
+            document.querySelectorAll('.edit-all-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const listType = event.target.dataset.list;
+                    const tableBody = (listType === 'husband') ? husbandGuestTableBody : wifeGuestTableBody;
+                    const allRows = tableBody.querySelectorAll('tr');
+                    const isEditing = allRows[0] && allRows[0].classList.contains('editing');
+
+                    allRows.forEach((row, index) => {
+                        toggleEditMode(row, index, listType, true); // Chamar com isMassEdit = true
+                    });
+
+                    if (isEditing) {
+                        renderGuests(listType);
+                        event.target.textContent = `Editar Todos (${listType === 'husband' ? 'Marido' : 'Esposa'})`;
+                    } else {
+                        event.target.textContent = `Salvar Todos (${listType === 'husband' ? 'Marido' : 'Esposa'})`;
+                    }
+                });
+            });
+
+            // Listener genérico para botões "Marcar Todos Confirmados"
+            document.querySelectorAll('.confirm-all-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const listType = event.target.dataset.list;
+                    const guestsArray = (listType === 'husband') ? husbandGuests : wifeGuests;
+
+                    if (confirm(`Tem certeza que deseja marcar TODOS os convidados da lista do ${listType === 'husband' ? 'Marido' : 'Esposa'} como "Sim" (Confirmados)?`)) {
+                        guestsArray.forEach(guest => {
+                            guest.confirmation = 'Sim';
+                        });
+                        renderGuests(listType);
+                    }
+                });
+            });
+
+            // Listener para ações individuais na tabela (Editar/Excluir)
+            // Usamos um listener no body da tabela para delegar eventos
+            document.querySelectorAll('tbody').forEach(tbody => {
+                tbody.addEventListener('click', (event) => {
+                    const target = event.target;
+                    const row = target.closest('tr');
+                    if (!row) return;
+
+                    const index = parseInt(row.dataset.index);
+                    const listType = row.dataset.listType; // Pega o tipo de lista da linha
+
+                    if (target.classList.contains('delete-btn')) {
+                        if (confirm('Tem certeza que deseja excluir este convidado?')) {
+                            deleteGuest(listType, index);
+                        }
+                    } else if (target.classList.contains('edit-btn')) {
+                        toggleEditMode(row, index, listType, false); // Edição individual
+                    }
+                });
+            });
+
+            // --- Lógica das Abas ---
+            function switchTab(tabId) {
+                tabContents.forEach(content => {
+                    if (content.id === tabId) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+
+                tabButtons.forEach(button => {
+                    if (button.dataset.tab === tabId) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                });
+                activeList = tabId; // Atualiza a lista ativa
+            }
+
+            tabsContainer.addEventListener('click', (event) => {
+                if (event.target.classList.contains('tab-button')) {
+                    const tabId = event.target.dataset.tab;
+                    switchTab(tabId);
+                }
+            });
+
+
+            // --- Inicialização (Pré-popula a lista do marido se estiver vazia) ---
+            if (husbandGuests.length === 0) {
+                addGuest('husband', 'Mãe');
+                addGuest('husband', 'Pai');
+                addGuest('husband', 'Cyro');
+                addGuest('husband', 'Lucas');
+                addGuest('husband', 'Vó Tera');
+                addGuest('husband', 'Vó Maria');
+                addGuest('husband', 'Tio Júnior');
+                addGuest('husband', 'Tia Clyde');
+                addGuest('husband', 'Tio Clayton');
+                addGuest('husband', 'Tio Bin');
+                addGuest('husband', 'Tia Célia');
+                addGuest('husband', 'Tia Daniela');
+                addGuest('husband', 'Tia Andréia');
+                addGuest('husband', 'Tia Patrícia');
+                addGuest('husband', 'Tio Marquinho');
+                addGuest('husband', 'Tia Sandra');
+                addGuest('husband', 'Tia Solange');
+                addGuest('husband', 'Tio Isaías');
+                addGuest('husband', 'Tio Júlio');
+                addGuest('husband', 'Lesley');
+                addGuest('husband', 'Dudu', 1, 'Pendente', '', '', 'Esposa Dudu');
+                addGuest('husband', 'Mônica');
+                addGuest('husband', 'Stela');
+                addGuest('husband', 'Celina');
+                addGuest('husband', 'Rafael');
+                addGuest('husband', 'Morena');
+                addGuest('husband', 'Léo');
+                addGuest('husband', 'Pedro');
+                addGuest('husband', 'Daniela');
+                addGuest('husband', 'Saulo');
+                addGuest('husband', 'Laís');
+                addGuest('husband', 'Simone');
+                addGuest('husband', 'Luiz');
+                addGuest('husband', 'João');
+                addGuest('husband', 'Lara');
+                addGuest('husband', 'Luiz Eduardo');
+                addGuest('husband', 'João Gabriel');
+                addGuest('husband', 'Laura');
+                addGuest('husband', 'Yago');
+                addGuest('husband', 'Bruna');
+                addGuest('husband', 'Sandro');
+                addGuest('husband', 'Gabriel');
+                addGuest('husband', 'Lyana', 1, 'Pendente', '', '', 'Namorado Lyana');
+                addGuest('husband', 'Chandler', 1, 'Pendente', '', '', 'Namorada Chandler');
+                addGuest('husband', 'Caio');
+                addGuest('husband', 'Paula');
+                addGuest('husband', 'Humberto');
+                addGuest('husband', 'Igor');
+                addGuest('husband', 'Elias');
+                addGuest('husband', 'Victor');
+                addGuest('husband', 'Serviço', 6, 'Pendente', '', '', 'Equipe de Serviço (7 pessoas)');
+                addGuest('husband', 'Padrinho');
+                addGuest('husband', 'Madrinha');
+                addGuest('husband', 'Duda');
+                addGuest('husband', 'Mariana');
+                addGuest('husband', 'Alzira');
+                addGuest('husband', 'Vitória');
+                addGuest('husband', 'Daniela', 1, 'Pendente', '', '', 'Boy Daniela');
+                addGuest('husband', 'Carol');
+                addGuest('husband', 'Yuri');
+                addGuest('husband', 'Basílio');
+                addGuest('husband', 'Jô');
+                addGuest('husband', 'Ariel');
+                addGuest('husband', 'Victor', 1, 'Pendente', '', '', 'Mulher Victor');
+                addGuest('husband', 'Goiânia', 5, 'Pendente', '', '', 'Grupo de 6 pessoas');
+                addGuest('husband', 'Parentes MT', 4, 'Pendente', '', '', 'Grupo de 5 pessoas');
+            }
+
+            // Renderiza as duas listas e exibe a aba do marido por padrão
+            renderGuests('husband');
+            renderGuests('wife');
+            switchTab('husband');
         });
     </script>
 </body>
