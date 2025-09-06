@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Casamento - [Seu Nome] & [Nome do Parceiro(a)]</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #5d4037; /* Um tom de marrom para o tema de casamento */
+            margin-bottom: 25px;
+        }
+
+        .summary {
+            background-color: #e8eaf6; /* Azul claro suave */
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .summary span {
+            font-weight: bold;
+            color: #3f51b5; /* Azul mais escuro */
+        }
+
+        button {
+            background-color: #795548; /* Marrom médio */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #5d4037; /* Marrom mais escuro */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #555;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        select, input[type="number"], input[type="text"], input[type="email"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Garante que padding não aumente a largura */
+        }
+
+        select {
+            appearance: none; /* Remove seta padrão do select */
+            -webkit-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="#333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+            padding-right: 30px; /* Espaço para a seta customizada */
+        }
+
+        /* Estilos para os botões de ação na tabela */
+        .action-buttons button {
+            margin-right: 5px;
+            padding: 6px 10px;
+            font-size: 0.85em;
+            margin-bottom: 0; /* Remove margem inferior para botões dentro da tabela */
+        }
+
+        .action-buttons .edit-btn {
+            background-color: #ff9800; /* Laranja */
+        }
+        .action-buttons .edit-btn:hover {
+            background-color: #fb8c00;
+        }
+
+        .action-buttons .delete-btn {
+            background-color: #f44336; /* Vermelho */
+        }
+        .action-buttons .delete-btn:hover {
+            background-color: #e53935;
+        }
+
+        /* Estilos para campos em modo de edição */
+        td.editable {
+            padding: 0; /* Remove padding para input preencher a célula */
+        }
+        td.editable input, td.editable select {
+            border: none;
+            padding: 10px;
+            width: calc(100% - 2px); /* Ajuste fino */
+            height: 100%;
+            background-color: transparent;
+            border-radius: 0;
+        }
+        td.editable input:focus, td.editable select:focus {
+            outline: 1px solid #795548;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Nossa Lista de Convidados</h1>
+
+        <div class="summary">
+            <p>Total de Convidados Confirmados: <span id="totalConfirmed">0</span></p>
+            <p>Total Geral de Pessoas na Lista: <span id="totalGuests">0</span></p>
+        </div>
+
+        <button id="addGuestBtn">Adicionar Convidado</button>
+
+        <table id="guestTable">
+            <thead>
+                <tr>
+                    <th>Nome do Convidado</th>
+                    <th>Acompanhantes</th>
+                    <th>Total Pessoas</th>
+                    <th>Confirmação</th>
+                    <th>Telefone</th>
+                    <th>E-mail</th>
+                    <th>Observações</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const addGuestBtn = document.getElementById('addGuestBtn');
+            const guestTableBody = document.querySelector('#guestTable tbody');
+            const totalConfirmedSpan = document.getElementById('totalConfirmed');
+            const totalGuestsSpan = document.getElementById('totalGuests');
+
+            let guests = loadGuests(); // Carrega os convidados do localStorage
+
+            function saveGuests() {
+                localStorage.setItem('weddingGuests', JSON.stringify(guests));
+            }
+
+            function loadGuests() {
+                const storedGuests = localStorage.getItem('weddingGuests');
+                return storedGuests ? JSON.parse(storedGuests) : [];
+            }
+
+            function calculateTotals() {
+                let confirmedCount = 0;
+                let totalGuestCount = 0;
+
+                guests.forEach(guest => {
+                    totalGuestCount += guest.totalPeople;
+                    if (guest.confirmation === 'Sim') {
+                        confirmedCount += guest.totalPeople;
+                    }
+                });
+
+                totalConfirmedSpan.textContent = confirmedCount;
+                totalGuestsSpan.textContent = totalGuestCount;
+            }
+
+            function renderGuests() {
+                guestTableBody.innerHTML = ''; // Limpa a tabela antes de renderizar
+                guests.forEach((guest, index) => {
+                    const row = guestTableBody.insertRow();
+                    row.dataset.index = index; // Para identificar a linha ao editar/deletar
+
+                    row.innerHTML = `
+                        <td data-field="name">${guest.name}</td>
+                        <td data-field="companions">${guest.companions}</td>
+                        <td data-field="totalPeople">${guest.totalPeople}</td>
+                        <td data-field="confirmation">${guest.confirmation}</td>
+                        <td data-field="phone">${guest.phone}</td>
+                        <td data-field="email">${guest.email}</td>
+                        <td data-field="observations">${guest.observations}</td>
+                        <td class="action-buttons">
+                            <button class="edit-btn">Editar</button>
+                            <button class="delete-btn">Excluir</button>
+                        </td>
+                    `;
+                });
+                calculateTotals();
+                saveGuests(); // Salva sempre que a lista é renderizada (após adicionar/excluir)
+            }
+
+            function addGuest(name = '', companions = 0, confirmation = 'Pendente', phone = '', email = '', observations = '') {
+                const totalPeople = (parseInt(companions) > 0) ? parseInt(companions) + 1 : 1;
+                guests.push({
+                    name,
+                    companions: parseInt(companions),
+                    totalPeople,
+                    confirmation,
+                    phone,
+                    email,
+                    observations
+                });
+                renderGuests();
+            }
+
+            // Inicializa a lista com seus convidados existentes, se a lista estiver vazia no localStorage
+            if (guests.length === 0) {
+                addGuest('Mãe');
+                addGuest('Pai');
+                addGuest('Cyro');
+                addGuest('Lucas');
+                addGuest('Vó Tera');
+                addGuest('Vó Maria');
+                addGuest('Tio Júnior');
+                addGuest('Tia Clyde');
+                addGuest('Tio Clayton');
+                addGuest('Tio Bin');
+                addGuest('Tia Célia');
+                addGuest('Tia Daniela');
+                addGuest('Tia Andréia');
+                addGuest('Tia Patrícia');
+                addGuest('Tio Marquinho');
+                addGuest('Tia Sandra');
+                addGuest('Tia Solange');
+                addGuest('Tio Isaías');
+                addGuest('Tio Júlio');
+                addGuest('Lesley');
+                addGuest('Dudu', 1, 'Pendente', '', '', 'Esposa Dudu');
+                addGuest('Mônica');
+                addGuest('Stela');
+                addGuest('Celina');
+                addGuest('Rafael');
+                addGuest('Morena');
+                addGuest('Léo');
+                addGuest('Pedro');
+                addGuest('Daniela');
+                addGuest('Saulo');
+                addGuest('Laís');
+                addGuest('Simone');
+                addGuest('Luiz');
+                addGuest('João');
+                addGuest('Lara');
+                addGuest('Luiz Eduardo');
+                addGuest('João Gabriel');
+                addGuest('Laura');
+                addGuest('Yago');
+                addGuest('Bruna');
+                addGuest('Sandro');
+                addGuest('Gabriel');
+                addGuest('Lyana', 1, 'Pendente', '', '', 'Namorado Lyana');
+                addGuest('Chandler', 1, 'Pendente', '', '', 'Namorada Chandler');
+                addGuest('Caio');
+                addGuest('Paula');
+                addGuest('Humberto');
+                addGuest('Igor');
+                addGuest('Elias');
+                addGuest('Victor');
+                addGuest('Serviço', 6, 'Pendente', '', '', 'Equipe de Serviço (7 pessoas)');
+                addGuest('Padrinho');
+                addGuest('Madrinha');
+                addGuest('Duda');
+                addGuest('Mariana');
+                addGuest('Alzira');
+                addGuest('Vitória');
+                addGuest('Daniela', 1, 'Pendente', '', '', 'Boy Daniela');
+                addGuest('Carol');
+                addGuest('Yuri');
+                addGuest('Basílio');
+                addGuest('Jô');
+                addGuest('Ariel');
+                addGuest('Victor', 1, 'Pendente', '', '', 'Mulher Victor');
+                addGuest('Goiânia', 5, 'Pendente', '', '', 'Grupo de 6 pessoas');
+                addGuest('Parentes MT', 4, 'Pendente', '', '', 'Grupo de 5 pessoas');
+            }
+
+
+            addGuestBtn.addEventListener('click', () => {
+                addGuest('Novo Convidado', 0, 'Pendente', '', '', 'Adicionar Observação'); // Adiciona um novo convidado com valores padrão
+            });
+
+            guestTableBody.addEventListener('click', (event) => {
+                const target = event.target;
+                const row = target.closest('tr');
+                if (!row) return;
+
+                const index = parseInt(row.dataset.index);
+
+                if (target.classList.contains('delete-btn')) {
+                    if (confirm('Tem certeza que deseja excluir este convidado?')) {
+                        guests.splice(index, 1);
+                        renderGuests();
+                    }
+                } else if (target.classList.contains('edit-btn')) {
+                    toggleEditMode(row, index);
+                }
+            });
+
+            function toggleEditMode(row, index) {
+                const guest = guests[index];
+                const cells = row.querySelectorAll('td[data-field]');
+                const editButton = row.querySelector('.edit-btn');
+
+                if (row.classList.contains('editing')) {
+                    // Salvar edições
+                    cells.forEach(cell => {
+                        const field = cell.dataset.field;
+                        let newValue;
+
+                        if (cell.querySelector('input')) {
+                            newValue = cell.querySelector('input').value;
+                        } else if (cell.querySelector('select')) {
+                            newValue = cell.querySelector('select').value;
+                        } else {
+                            // Se não há input/select, o valor já é o texto atual da célula
+                            newValue = cell.textContent;
+                        }
+
+                        if (field === 'companions') {
+                            const newCompanions = parseInt(newValue) || 0;
+                            guest[field] = newCompanions;
+                            guest.totalPeople = (newCompanions > 0) ? newCompanions + 1 : 1;
+                            row.querySelector('td[data-field="totalPeople"]').textContent = guest.totalPeople; // Atualiza a célula de total de pessoas
+                        } else {
+                            guest[field] = newValue;
+                        }
+                        cell.innerHTML = guest[field]; // Atualiza o conteúdo da célula com o valor final do objeto guest
+                    });
+                    renderGuests(); // Renderiza para garantir que todos os campos atualizados sejam exibidos
+                    row.classList.remove('editing');
+                    editButton.textContent = 'Editar';
+                } else {
+                    // Entrar no modo de edição
+                    cells.forEach(cell => {
+                        const field = cell.dataset.field;
+                        let inputElement;
+
+                        switch (field) {
+                            case 'name':
+                            case 'phone':
+                            case 'email':
+                            case 'observations':
+                                inputElement = document.createElement('input');
+                                inputElement.type = (field === 'email') ? 'email' : 'text';
+                                inputElement.value = guest[field];
+                                break;
+                            case 'companions':
+                                inputElement = document.createElement('input');
+                                inputElement.type = 'number';
+                                inputElement.min = "0";
+                                inputElement.value = guest[field];
+                                break;
+                            case 'confirmation':
+                                inputElement = document.createElement('select');
+                                ['Pendente', 'Sim', 'Não'].forEach(optionText => {
+                                    const option = document.createElement('option');
+                                    option.value = optionText;
+                                    option.textContent = optionText;
+                                    if (optionText === guest[field]) {
+                                        option.selected = true;
+                                    }
+                                    inputElement.appendChild(option);
+                                });
+                                break;
+                            case 'totalPeople': // Total Pessoas não é editável diretamente
+                                return;
+                            default:
+                                return;
+                        }
+                        cell.innerHTML = ''; // Limpa o conteúdo da célula
+                        cell.appendChild(inputElement);
+                        cell.classList.add('editable');
+                    });
+                    row.classList.add('editing');
+                    editButton.textContent = 'Salvar';
+                }
+            }
+
+            // Renderiza os convidados iniciais ao carregar a página
+            renderGuests();
+        });
+    </script>
+</body>
+</html>
