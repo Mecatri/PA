@@ -34,21 +34,24 @@
             justify-content: center;
             margin-bottom: 20px;
             border-bottom: 2px solid #ddd;
+            flex-wrap: wrap; /* Permite que as abas quebrem em mobile */
         }
 
         .tab-button {
             background-color: #f2f2f2;
             border: 1px solid #ddd;
             border-bottom: none;
-            padding: 10px 20px;
+            padding: 10px 15px; /* Ajuste para mobile */
             cursor: pointer;
-            font-size: 1.1em;
+            font-size: 1em; /* Ajuste para mobile */
             font-weight: bold;
             color: #555;
             transition: background-color 0.3s ease;
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
-            margin-right: 5px; /* Espaço entre os botões da aba */
+            margin-right: 5px;
+            flex-grow: 1; /* Permite que os botões cresçam para preencher o espaço */
+            text-align: center;
         }
 
         .tab-button:hover {
@@ -58,22 +61,22 @@
         .tab-button.active {
             background-color: #fff;
             border-color: #ddd;
-            border-bottom-color: #fff; /* Para dar o efeito de aba selecionada */
+            border-bottom-color: #fff;
             color: #5d4037;
             cursor: default;
         }
 
         .tab-content {
-            display: none; /* Conteúdo das abas oculto por padrão */
+            display: none;
             padding-top: 20px;
         }
 
         .tab-content.active {
-            display: block; /* Mostra o conteúdo da aba ativa */
+            display: block;
         }
 
         .summary {
-            background-color: #e8eaf6; /* Azul claro suave */
+            background-color: #e8eaf6;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
@@ -83,18 +86,19 @@
 
         .summary span {
             font-weight: bold;
-            color: #3f51b5; /* Azul mais escuro */
+            color: #3f51b5;
         }
 
         .controls {
             display: flex;
-            gap: 10px; /* Espaço entre os botões */
+            gap: 10px;
             margin-bottom: 20px;
-            flex-wrap: wrap; /* Permite que os botões quebrem a linha em telas menores */
+            flex-wrap: wrap; /* Permite que os botões quebrem a linha */
+            justify-content: center; /* Centraliza os botões em mobile */
         }
 
-        .controls button, button.add-guest-btn { /* Alterado para classe */
-            background-color: #795548; /* Marrom médio */
+        .controls button, button.add-guest-btn {
+            background-color: #795548;
             color: white;
             padding: 10px 15px;
             border: none;
@@ -102,39 +106,46 @@
             cursor: pointer;
             font-size: 1em;
             transition: background-color 0.3s ease;
-            margin-bottom: 0; /* Ajuste para o flexbox */
+            flex-grow: 1; /* Permite que os botões cresçam para preencher o espaço */
+            max-width: 100%; /* Garante que não ultrapasse */
         }
 
-        .controls button:hover, button.add-guest-btn:hover { /* Alterado para classe */
-            background-color: #5d4037; /* Marrom mais escuro */
+        .controls button:hover, button.add-guest-btn:hover {
+            background-color: #5d4037;
         }
 
-        /* Botão de edição em massa pode ter uma cor ligeiramente diferente */
-        button.edit-all-btn { /* Alterado para classe */
-            background-color: #ff9800; /* Laranja */
+        button.edit-all-btn {
+            background-color: #ff9800;
         }
-        button.edit-all-btn:hover { /* Alterado para classe */
+        button.edit-all-btn:hover {
             background-color: #fb8c00;
         }
 
-        /* Botão de confirmação em massa */
-        button.confirm-all-btn { /* Alterado para classe */
-            background-color: #4CAF50; /* Verde */
+        button.confirm-all-btn {
+            background-color: #4CAF50;
         }
-        button.confirm-all-btn:hover { /* Alterado para classe */
+        button.confirm-all-btn:hover {
             background-color: #45a049;
+        }
+
+        /* --- Estilo da Tabela Responsiva --- */
+        .table-wrapper {
+            overflow-x: auto; /* Permite rolagem horizontal em telas pequenas */
+            -webkit-overflow-scrolling: touch; /* Melhora a rolagem em iOS */
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            min-width: 700px; /* Garante que a tabela tenha uma largura mínima para a rolagem */
         }
 
         th, td {
             border: 1px solid #ddd;
             padding: 10px;
             text-align: left;
+            white-space: nowrap; /* Impede que o conteúdo das células quebre a linha */
         }
 
         th {
@@ -152,55 +163,112 @@
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            box-sizing: border-box; /* Garante que padding não aumente a largura */
+            box-sizing: border-box;
+            font-size: 0.9em; /* Ajuste de fonte para inputs em mobile */
         }
 
         select {
-            appearance: none; /* Remove seta padrão do select */
+            appearance: none;
             -webkit-appearance: none;
             background-image: url('data:image/svg+xml;utf8,<svg fill="#333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
             background-repeat: no-repeat;
             background-position: right 8px center;
             background-size: 16px;
-            padding-right: 30px; /* Espaço para a seta customizada */
+            padding-right: 30px;
         }
 
-        /* Estilos para os botões de ação na tabela */
         .action-buttons button {
             margin-right: 5px;
             padding: 6px 10px;
-            font-size: 0.85em;
-            margin-bottom: 0; /* Remove margem inferior para botões dentro da tabela */
+            font-size: 0.8em; /* Ajuste de fonte para botões de ação em mobile */
+            margin-bottom: 0;
+            white-space: nowrap; /* Evita que o texto do botão quebre */
         }
 
         .action-buttons .edit-btn {
-            background-color: #ff9800; /* Laranja */
+            background-color: #ff9800;
         }
         .action-buttons .edit-btn:hover {
             background-color: #fb8c00;
         }
 
         .action-buttons .delete-btn {
-            background-color: #f44336; /* Vermelho */
+            background-color: #f44336;
         }
         .action-buttons .delete-btn:hover {
             background-color: #e53935;
         }
 
-        /* Estilos para campos em modo de edição */
         td.editable {
-            padding: 0; /* Remove padding para input preencher a célula */
+            padding: 0;
         }
         td.editable input, td.editable select {
             border: none;
             padding: 10px;
-            width: calc(100% - 2px); /* Ajuste fino */
+            width: calc(100% - 2px);
             height: 100%;
             background-color: transparent;
             border-radius: 0;
         }
         td.editable input:focus, td.editable select:focus {
             outline: 1px solid #795548;
+        }
+
+        /* Media Queries para telas menores */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+
+            .summary {
+                font-size: 1em;
+                padding: 10px;
+            }
+
+            .tabs {
+                flex-direction: column; /* Abas em coluna em telas pequenas */
+                gap: 5px;
+                border-bottom: none;
+            }
+
+            .tab-button {
+                margin-right: 0;
+                border-bottom: 1px solid #ddd;
+                border-radius: 5px;
+            }
+
+            .tab-button.active {
+                border-bottom-color: #ddd; /* Normaliza a borda para a aba ativa em coluna */
+            }
+
+            .controls {
+                flex-direction: column; /* Botões de controle em coluna */
+                gap: 10px;
+            }
+
+            .controls button, button.add-guest-btn {
+                width: 100%; /* Botões preenchem a largura total */
+                max-width: none;
+            }
+
+            /* Para a tabela, o `overflow-x: auto` no `table-wrapper` já fará a rolagem.
+               O `min-width` na tabela garante que ela não se "esprema" demais. */
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
         }
     </style>
 </head>
@@ -225,22 +293,24 @@
                 <button class="confirm-all-btn" data-list="husband">Marcar Todos Confirmados (Marido)</button>
             </div>
 
-            <table id="husbandGuestTable">
-                <thead>
-                    <tr>
-                        <th>Nome do Convidado</th>
-                        <th>Acompanhantes</th>
-                        <th>Total Pessoas</th>
-                        <th>Confirmação</th>
-                        <th>Telefone</th>
-                        <th>E-mail</th>
-                        <th>Observações</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table id="husbandGuestTable">
+                    <thead>
+                        <tr>
+                            <th>Nome do Convidado</th>
+                            <th>Acompanhantes</th>
+                            <th>Total Pessoas</th>
+                            <th>Confirmação</th>
+                            <th>Telefone</th>
+                            <th>E-mail</th>
+                            <th>Observações</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
         </div>
 
         <div id="wife" class="tab-content">
@@ -255,22 +325,24 @@
                 <button class="confirm-all-btn" data-list="wife">Marcar Todos Confirmados (Esposa)</button>
             </div>
 
-            <table id="wifeGuestTable">
-                <thead>
-                    <tr>
-                        <th>Nome do Convidado</th>
-                        <th>Acompanhantes</th>
-                        <th>Total Pessoas</th>
-                        <th>Confirmação</th>
-                        <th>Telefone</th>
-                        <th>E-mail</th>
-                        <th>Observações</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table id="wifeGuestTable">
+                    <thead>
+                        <tr>
+                            <th>Nome do Convidado</th>
+                            <th>Acompanhantes</th>
+                            <th>Total Pessoas</th>
+                            <th>Confirmação</th>
+                            <th>Telefone</th>
+                            <th>E-mail</th>
+                            <th>Observações</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -383,7 +455,7 @@
                 const cells = row.querySelectorAll('td[data-field]');
                 const editButton = row.querySelector('.edit-btn');
 
-                if (row.classList.contains('editing') && (isMassEdit || editButton.textContent === 'Salvar')) {
+                if (row.classList.contains('editing') && (isMassEdit || (editButton && editButton.textContent === 'Salvar'))) {
                     // Salvar edições
                     cells.forEach(cell => {
                         const field = cell.dataset.field;
@@ -458,7 +530,6 @@
             }
 
             // --- Event Listeners para Botões de Ação ---
-            // Listener genérico para botões "Adicionar Convidado"
             document.querySelectorAll('.add-guest-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const listType = event.target.dataset.list;
@@ -466,7 +537,6 @@
                 });
             });
 
-            // Listener genérico para botões "Editar Todos"
             document.querySelectorAll('.edit-all-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const listType = event.target.dataset.list;
@@ -475,7 +545,7 @@
                     const isEditing = allRows[0] && allRows[0].classList.contains('editing');
 
                     allRows.forEach((row, index) => {
-                        toggleEditMode(row, index, listType, true); // Chamar com isMassEdit = true
+                        toggleEditMode(row, index, listType, true);
                     });
 
                     if (isEditing) {
@@ -487,7 +557,6 @@
                 });
             });
 
-            // Listener genérico para botões "Marcar Todos Confirmados"
             document.querySelectorAll('.confirm-all-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const listType = event.target.dataset.list;
@@ -502,8 +571,6 @@
                 });
             });
 
-            // Listener para ações individuais na tabela (Editar/Excluir)
-            // Usamos um listener no body da tabela para delegar eventos
             document.querySelectorAll('tbody').forEach(tbody => {
                 tbody.addEventListener('click', (event) => {
                     const target = event.target;
@@ -511,14 +578,14 @@
                     if (!row) return;
 
                     const index = parseInt(row.dataset.index);
-                    const listType = row.dataset.listType; // Pega o tipo de lista da linha
+                    const listType = row.dataset.listType;
 
                     if (target.classList.contains('delete-btn')) {
                         if (confirm('Tem certeza que deseja excluir este convidado?')) {
                             deleteGuest(listType, index);
                         }
                     } else if (target.classList.contains('edit-btn')) {
-                        toggleEditMode(row, index, listType, false); // Edição individual
+                        toggleEditMode(row, index, listType, false);
                     }
                 });
             });
@@ -540,7 +607,7 @@
                         button.classList.remove('active');
                     }
                 });
-                activeList = tabId; // Atualiza a lista ativa
+                activeList = tabId;
             }
 
             tabsContainer.addEventListener('click', (event) => {
