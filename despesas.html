@@ -1,350 +1,624 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💍 Controle de Gastos do Casamento</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Controle de Gastos - Casamento · Modern</title>
+
+<!-- Modern fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 <style>
-    :root {
-        --cor-principal: #8B4513;
-        --cor-secundaria: #F0E68C;
-        --fundo-claro: #FFF8DC;
-        --fundo-escuro: #fafafa;
-        --sombra: 0 4px 10px rgba(0,0,0,0.1);
-        --radius: 10px;
+:root{
+    --bg: #fbfaf7;
+    --card: #ffffff;
+    --muted: #7a7a7a;
+    --accent: #8B5E3C;      /* warm brown */
+    --accent-2: #D9B873;    /* gold */
+    --success: #3a9d56;
+    --danger: #c9302c;
+    --warn: #c87f00;
+    --shadow: 0 8px 24px rgba(22,22,22,0.08);
+    --radius: 14px;
+}
+
+/* Reset / base */
+*{ box-sizing: border-box; }
+html,body{ height:100%; }
+body{
+    margin:0;
+    font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    background: linear-gradient(180deg, #fbfaf7 0%, #fffefc 100%);
+    color:#222;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    padding:20px;
+}
+
+/* container */
+.container{
+    max-width:1100px;
+    margin:0 auto;
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
+    border-radius: 18px;
+    padding:20px;
+    box-shadow: var(--shadow);
+}
+
+/* header */
+.header {
+    text-align:center;
+    margin-bottom:14px;
+}
+.header h1{
+    margin:0;
+    font-family: 'Playfair Display', serif;
+    font-size:1.6rem;
+    color:var(--accent);
+}
+.header p{
+    margin:6px 0 0 0;
+    color:var(--muted);
+}
+
+/* SUMMARY CARDS - fluid responsive layout */
+.summary {
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:18px 0;
+    align-items:stretch;
+}
+
+/* each card: flexible basis so they auto-fit (3 per row on large) */
+.card {
+    background: var(--card);
+    border-radius: 12px;
+    padding:12px 14px;
+    box-shadow: 0 6px 18px rgba(20,20,20,0.05);
+    flex: 1 1 30%;
+    min-width: 180px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:flex-start;
+    gap:6px;
+}
+.card .label { font-weight:600; color:var(--muted); font-size:0.9rem; }
+.card .value {
+    font-weight:800;
+    font-size:1.15rem;
+    color:var(--accent);
+}
+
+/* Variants */
+.card.pago .value { color: #d9534f; }     /* redish for paid (visual) */
+.card.apagar .value { color: var(--accent-2); } /* gold for a pagar */
+.card.geral .value { color: var(--success); }
+
+/* Orçamento card should stand out (spans full row on small screens) */
+.orcamento-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+/* Edit button in orcamento */
+.btn-edit-orc{
+    background: linear-gradient(90deg, var(--accent), #6f4a2f);
+    color:white;
+    border:none;
+    padding:8px 10px;
+    border-radius:10px;
+    cursor:pointer;
+    box-shadow: 0 6px 12px rgba(139,94,60,0.12);
+    font-weight:700;
+}
+
+/* Form */
+.form {
+    background: linear-gradient(180deg, #fff, #fbfbfb);
+    border-radius: 12px;
+    padding:14px;
+    display:grid;
+    gap:10px;
+    box-shadow: 0 6px 14px rgba(18,18,18,0.03);
+    align-items:center;
+}
+
+/* grid columns adapt */
+.form-grid{
+    display:grid;
+    gap:10px;
+}
+@media (min-width:900px){
+    .form-grid{ grid-template-columns: 1fr 1fr 1fr 1fr 200px; }
+}
+@media (max-width:899px){
+    .form-grid{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width:520px){
+    .form-grid{ grid-template-columns: 1fr; }
+}
+
+.input, select {
+    padding:10px 12px;
+    border-radius: 10px;
+    border: 1px solid #e6e6e6;
+    font-size:0.95rem;
+    background: #fff;
+    width:100%;
+}
+
+/* main action button */
+.btn-primary{
+    background: linear-gradient(90deg, var(--accent-2), #cd9f52);
+    border: none;
+    color: #fff;
+    padding:10px 12px;
+    border-radius: 12px;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow: 0 6px 14px rgba(205,159,82,0.16);
+}
+
+/* TABLE / CARD LIST */
+.table-wrap {
+    margin-top:18px;
+}
+table {
+    width:100%;
+    border-collapse:collapse;
+    min-width:720px;
+}
+th, td{
+    padding:12px 10px;
+    text-align:left;
+    border-bottom:1px solid #f1f1f1;
+    font-size:0.95rem;
+}
+th{
+    background: var(--accent);
+    color:white;
+    font-weight:700;
+}
+.row-action {
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+/* action buttons */
+.btn-small{
+    padding:6px 8px;
+    border-radius:8px;
+    border: none;
+    cursor:pointer;
+    font-weight:700;
+}
+.btn-edit{
+    background: #fff7ec;
+    color: #8b5e3c;
+}
+.btn-delete{
+    background:#fff0f0;
+    color: var(--danger);
+}
+
+/* alert classes (color whole row) */
+.alert-orange td{ background: #fff7ee; color: var(--warn); font-weight:700; }
+.alert-red td{ background: #fff0f0; color: var(--danger); font-weight:700; }
+
+/* MOBILE: convert rows to cards (stacked) */
+@media (max-width:760px){
+    table, thead, tbody, th, td, tr { display:block; }
+    thead { display:none; }
+    tr { margin:10px 0; background: #fff; border-radius:12px; padding:12px; box-shadow: 0 6px 18px rgba(10,10,10,0.03); border:1px solid #f4f4f4; }
+    td { border:none; padding:8px 6px; position:relative; }
+    td::before{
+        content: attr(data-label);
+        display:inline-block;
+        width:120px;
+        font-weight:700;
+        color:var(--muted);
     }
+    .row-action{ justify-content:flex-end; }
+}
 
-    body {
-        font-family: 'Poppins', sans-serif;
-        margin: 0;
-        background: var(--fundo-claro);
-        background-image: url('https://i.imgur.com/e2oWjXn.jpg');
-        background-size: cover;
-        background-attachment: fixed;
-        background-position: center;
-        color: #333;
-    }
+/* modal (edit) */
+.modal-backdrop{
+    position:fixed;
+    inset:0;
+    background: rgba(10,10,10,0.45);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+}
+.modal{
+    background:var(--card);
+    border-radius:12px;
+    padding:18px;
+    width:clamp(320px, 80%, 720px);
+    box-shadow: 0 12px 32px rgba(20,20,20,0.18);
+}
+.modal h3{ margin:0 0 8px 0; color:var(--accent); font-family: 'Playfair Display', serif; }
+.modal .row{ display:grid; gap:8px; margin-bottom:10px; }
+@media(min-width:700px){ .modal .row { grid-template-columns: 1fr 1fr; } }
 
-    .container {
-        background-color: rgba(255,255,255,0.95);
-        max-width: 1000px;
-        margin: 20px auto;
-        padding: 20px;
-        border-radius: var(--radius);
-        box-shadow: var(--sombra);
-    }
+/* small helpers */
+.note { font-size:0.85rem; color:var(--muted); margin-top:8px; }
+.small { font-size:0.85rem; color:var(--muted); }
 
-    h1, h2 {
-        text-align: center;
-        color: var(--cor-principal);
-        font-family: 'Playfair Display', serif;
-    }
+/* responsive: summary card widths adjust to 3/2/1 */
+@media (min-width:1000px){
+    .card { flex-basis: 30%; } /* ~3 cols */
+}
+@media (min-width:700px) and (max-width:999px){
+    .card { flex-basis: 48%; } /* 2 cols */
+}
+@media (max-width:699px){
+    .card { flex-basis: 100%; } /* 1 col */
+}
 
-    .resumo {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-
-    .total-box {
-        background: var(--fundo-escuro);
-        padding: 15px;
-        border-radius: var(--radius);
-        text-align: center;
-        box-shadow: var(--sombra);
-        font-weight: bold;
-    }
-
-    .total-box strong {
-        display: block;
-        font-size: 1.4em;
-        margin-top: 5px;
-        color: var(--cor-principal);
-    }
-
-    .total-gasto strong { color: #d9534f; }
-    .total-apagar strong { color: #f0ad4e; }
-    .total-planejado strong { color: #5cb85c; }
-
-    .total-planejado button {
-        background: linear-gradient(90deg, var(--cor-principal), #a0522d);
-        border: none;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: 0.3s;
-        font-size: 0.9em;
-    }
-
-    .total-planejado button:hover {
-        opacity: 0.85;
-    }
-
-    /* Formulário */
-    #form-gasto {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        background: var(--fundo-escuro);
-        padding: 15px;
-        border-radius: var(--radius);
-        margin-bottom: 20px;
-    }
-
-    #form-gasto input, #form-gasto select, #form-gasto button {
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 1em;
-    }
-
-    #form-gasto button {
-        grid-column: 1 / -1;
-        background: linear-gradient(90deg, var(--cor-principal), #a0522d);
-        color: white;
-        cursor: pointer;
-        font-weight: bold;
-        transition: 0.3s;
-    }
-
-    #form-gasto button:hover {
-        opacity: 0.85;
-    }
-
-    /* Tabela (Desktop) */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        display: table;
-    }
-
-    th, td {
-        padding: 10px;
-        border: 1px solid #ddd;
-        text-align: left;
-    }
-
-    th {
-        background: var(--cor-principal);
-        color: white;
-    }
-
-    tr:nth-child(even) {
-        background: var(--fundo-escuro);
-    }
-
-    .btn {
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        padding: 6px 10px;
-        color: white;
-        font-weight: bold;
-        margin: 2px;
-        transition: 0.3s;
-    }
-
-    .btn-edit { background: #0275d8; }
-    .btn-remove { background: #d9534f; }
-
-    .btn:hover { opacity: 0.85; }
-
-    /* Cartões no mobile */
-    @media (max-width: 700px) {
-        table, thead, tbody, th, td, tr {
-            display: block;
-        }
-
-        thead { display: none; }
-
-        tr {
-            background: white;
-            margin-bottom: 10px;
-            border-radius: var(--radius);
-            box-shadow: var(--sombra);
-            padding: 10px;
-        }
-
-        td {
-            border: none;
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 10px;
-        }
-
-        td::before {
-            content: attr(data-label);
-            font-weight: bold;
-            color: var(--cor-principal);
-        }
-
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 5px;
-        }
-    }
-
-    /* Alertas de prazo */
-    .alerta-laranja {
-        background-color: #fff3cd !important;
-    }
-
-    .alerta-vermelho {
-        background-color: #f8d7da !important;
-    }
 </style>
 </head>
 <body>
-<div class="container">
-    <h1>💍 Controle de Gastos do Casamento 🥂</h1>
-
-    <h2>Resumo Financeiro</h2>
-    <div class="resumo">
-        <div class="total-box total-gasto">Pago - Noivo<strong id="pago-noivo">R$ 0,00</strong></div>
-        <div class="total-box total-gasto">Pago - Noiva<strong id="pago-noiva">R$ 0,00</strong></div>
-        <div class="total-box total-apagar">A Pagar - Noivo<strong id="apagar-noivo">R$ 0,00</strong></div>
-        <div class="total-box total-apagar">A Pagar - Noiva<strong id="apagar-noiva">R$ 0,00</strong></div>
-        <div class="total-box total-gasto">Total Pago<strong id="total-pago">R$ 0,00</strong></div>
-        <div class="total-box total-apagar total-planejado">
-            Orçamento Planejado<strong id="orcamento-planejado">R$ 60.000,00</strong>
-            <button id="btn-editar-orcamento">Editar</button>
-        </div>
+<div class="container" role="main">
+    <div class="header">
+        <h1>💍 Controle de Gastos do Casamento</h1>
+        <p class="small">Resumo financeiro, vencimentos e gerenciamento — moderno e responsivo.</p>
     </div>
 
-    <h2>Adicionar Gasto</h2>
-    <form id="form-gasto">
-        <input type="text" id="item" placeholder="Item" required>
-        <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" required>
-        <input type="date" id="data" required>
-        <select id="status" required>
-            <option value="" disabled selected>Status</option>
-            <option value="Pago">Pago</option>
-            <option value="A Pagar">A Pagar</option>
-        </select>
-        <select id="responsavel" required>
-            <option value="" disabled selected>Responsável</option>
-            <option value="Noivo">Noivo</option>
-            <option value="Noiva">Noiva</option>
-        </select>
-        <button type="submit">Adicionar</button>
+    <!-- SUMMARY CARDS -->
+    <section class="summary" aria-label="Resumo financeiro">
+        <div class="card pago">
+            <div class="label">Pago — Noivo</div>
+            <div class="value" id="total-pago-noivo">R$ 0,00</div>
+        </div>
+        <div class="card pago">
+            <div class="label">Pago — Noiva</div>
+            <div class="value" id="total-pago-noiva">R$ 0,00</div>
+        </div>
+        <div class="card geral">
+            <div class="label">Total Pago</div>
+            <div class="value" id="total-pago-geral">R$ 0,00</div>
+        </div>
+
+        <div class="card apagar">
+            <div class="label">A Pagar — Noivo</div>
+            <div class="value" id="total-apagar-noivo">R$ 0,00</div>
+        </div>
+        <div class="card apagar">
+            <div class="label">A Pagar — Noiva</div>
+            <div class="value" id="total-apagar-noiva">R$ 0,00</div>
+        </div>
+        <div class="card apagar">
+            <div class="label">Total a Pagar</div>
+            <div class="value" id="total-apagar-geral">R$ 0,00</div>
+        </div>
+
+        <!-- Orçamento card (will flow with others) -->
+        <div class="card geral" style="display:flex; align-items:center; justify-content:space-between;">
+            <div>
+                <div class="label">Orçamento Planejado</div>
+                <div class="value" id="orcamento-planejado">R$ 60.000,00</div>
+            </div>
+            <div style="margin-left:12px;">
+                <button id="edit-orc" class="btn-edit-orc" title="Editar orçamento">Editar</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FORM -->
+    <form id="form" class="form" aria-label="Formulário de gastos">
+        <div class="form-grid">
+            <input id="item" class="input" type="text" placeholder="Item (Ex: Buffet)" required />
+            <input id="valor" class="input" type="number" min="0" step="0.01" placeholder="Valor (R$)" required />
+            <select id="status" class="input" required>
+                <option value="" disabled selected>Status</option>
+                <option value="Pago">Pago</option>
+                <option value="A Pagar">A Pagar</option>
+            </select>
+            <select id="responsavel" class="input" required>
+                <option value="" disabled selected>Responsável</option>
+                <option value="Noivo">Noivo</option>
+                <option value="Noiva">Noiva</option>
+            </select>
+            <input id="data" class="input" type="date" placeholder="Data (obrigatória se A Pagar)" />
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center; margin-top:6px;">
+            <button type="submit" class="btn-primary">Adicionar Gasto</button>
+            <div class="note">Se escolher <strong>"A Pagar"</strong>, informe a data para alertas.</div>
+        </div>
     </form>
 
-    <h2>Detalhes dos Gastos</h2>
-    <table id="tabela-gastos">
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>Valor</th>
-                <th>Data</th>
-                <th>Status</th>
-                <th>Responsável</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <!-- Table / List -->
+    <div class="table-wrap" aria-live="polite">
+        <table id="tabela" aria-label="Tabela de gastos">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th>Responsável</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-hidden="true">
+    <div class="modal" role="document" aria-modal="true" aria-labelledby="modal-title">
+        <h3 id="modal-title">Editar Lançamento</h3>
+        <div class="row">
+            <div style="display:grid; gap:8px;">
+                <label class="small">Item</label>
+                <input id="edit-item" class="input" type="text" />
+            </div>
+            <div style="display:grid; gap:8px;">
+                <label class="small">Valor (R$)</label>
+                <input id="edit-valor" class="input" type="number" min="0" step="0.01" />
+            </div>
+        </div>
+        <div class="row">
+            <div style="display:grid; gap:8px;">
+                <label class="small">Status</label>
+                <select id="edit-status" class="input">
+                    <option value="Pago">Pago</option>
+                    <option value="A Pagar">A Pagar</option>
+                </select>
+            </div>
+            <div style="display:grid; gap:8px;">
+                <label class="small">Responsável</label>
+                <select id="edit-resp" class="input">
+                    <option value="Noivo">Noivo</option>
+                    <option value="Noiva">Noiva</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:grid; gap:8px; margin-top:10px;">
+            <label class="small">Data (obrigatório se A Pagar)</label>
+            <input id="edit-data" class="input" type="date" />
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
+            <button id="cancel-edit" class="btn-small" style="background:#f0f0f0;">Cancelar</button>
+            <button id="save-edit" class="btn-primary">Salvar alterações</button>
+        </div>
+    </div>
 </div>
 
 <script>
-let orcamentoTotal = 60000.00;
+/* Data and DOM */
+let orcamento = 60000.00;
 let gastos = [
-    { item: "Buffet", valor: 7500, data: "2025-12-01", status: "Pago", responsavel: "Noivo" },
-    { item: "Vestido", valor: 8500, data: "2025-11-20", status: "A Pagar", responsavel: "Noiva" }
+    { item: "Sinal do Buffet", valor: 7500.00, status: "Pago", responsavel: "Noivo", data: "" },
+    { item: "Vestido da Noiva", valor: 8500.00, status: "A Pagar", responsavel: "Noiva", data: "2025-11-15" },
+    { item: "Terno do Noivo", valor: 2500.00, status: "A Pagar", responsavel: "Noivo", data: "2025-11-05" }
 ];
 
-const tbody = document.querySelector('#tabela-gastos tbody');
-const orcamentoPlanejado = document.getElementById('orcamento-planejado');
-const btnEditarOrcamento = document.getElementById('btn-editar-orcamento');
-const form = document.getElementById('form-gasto');
+const ids = {
+    tabelaBody: document.querySelector('#tabela tbody'),
+    totalPagoNoivo: document.getElementById('total-pago-noivo'),
+    totalPagoNoiva: document.getElementById('total-pago-noiva'),
+    totalPagoGeral: document.getElementById('total-pago-geral'),
+    totalApagarNoivo: document.getElementById('total-apagar-noivo'),
+    totalApagarNoiva: document.getElementById('total-apagar-noiva'),
+    totalApagarGeral: document.getElementById('total-apagar-geral'),
+    orcamentoEl: document.getElementById('orcamento-planejado'),
+    form: document.getElementById('form'),
+    editOrcBtn: document.getElementById('edit-orc'),
+    modalBackdrop: document.getElementById('modal-backdrop'),
+    // inputs
+    itemIn: document.getElementById('item'),
+    valorIn: document.getElementById('valor'),
+    statusIn: document.getElementById('status'),
+    respIn: document.getElementById('responsavel'),
+    dataIn: document.getElementById('data'),
+    // modal inputs
+    editItem: document.getElementById('edit-item'),
+    editValor: document.getElementById('edit-valor'),
+    editStatus: document.getElementById('edit-status'),
+    editResp: document.getElementById('edit-resp'),
+    editData: document.getElementById('edit-data'),
+    saveEditBtn: document.getElementById('save-edit'),
+    cancelEditBtn: document.getElementById('cancel-edit')
+};
 
-function formatar(valor){return valor.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+/* Utils */
+function formatBRL(v){
+    return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
 
-function atualizarTabela(){
-    tbody.innerHTML='';
-    let totalPagoNoivo=0,totalPagoNoiva=0,apagarNoivo=0,apagarNoiva=0;
+/* Render function */
+function render(){
+    // reset table
+    ids.tabelaBody.innerHTML = '';
 
-    gastos.forEach((g,i)=>{
-        const tr=document.createElement('tr');
-        let classe='';
-        if(g.status==="A Pagar"){
-            const diff=(new Date(g.data)-new Date())/(1000*60*60*24);
-            if(diff<0) classe='alerta-vermelho';
-            else if(diff<=7) classe='alerta-laranja';
+    let pagoNoivo = 0, pagoNoiva = 0, apagarNoivo = 0, apagarNoiva = 0;
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+    gastos.forEach((gasto, idx) => {
+        // accumulate totals
+        const val = Number(gasto.valor || 0);
+        if (gasto.status === 'Pago'){
+            if (gasto.responsavel === 'Noivo') pagoNoivo += val; else pagoNoiva += val;
+        } else {
+            if (gasto.responsavel === 'Noivo') apagarNoivo += val; else apagarNoiva += val;
         }
-        tr.className=classe;
-        tr.innerHTML=`
-            <td data-label="Item">${g.item}</td>
-            <td data-label="Valor">${formatar(g.valor)}</td>
-            <td data-label="Data">${g.data}</td>
-            <td data-label="Status">${g.status}</td>
-            <td data-label="Responsável">${g.responsavel}</td>
-            <td data-label="Ações">
-                <div class="btn-container">
-                    <button class="btn btn-edit" onclick="editarGasto(${i})">Editar</button>
-                    <button class="btn btn-remove" onclick="removerGasto(${i})">Remover</button>
-                </div>
-            </td>`;
-        tbody.appendChild(tr);
 
-        if(g.status==="Pago"){
-            if(g.responsavel==="Noivo") totalPagoNoivo+=g.valor;
-            else totalPagoNoiva+=g.valor;
-        }else{
-            if(g.responsavel==="Noivo") apagarNoivo+=g.valor;
-            else apagarNoiva+=g.valor;
+        // create row
+        const tr = document.createElement('tr');
+
+        // compute alert classes for A Pagar with date
+        let alertClass = '';
+        if (gasto.status === 'A Pagar' && gasto.data){
+            const dt = new Date(gasto.data); dt.setHours(0,0,0,0);
+            const diffMs = dt - hoje;
+            const diffDays = Math.ceil(diffMs / (1000*60*60*24));
+            if (diffDays < 0) alertClass = 'alert-red';
+            else if (diffDays <= 7) alertClass = 'alert-orange';
         }
+        if (alertClass) tr.classList.add(alertClass);
+
+        // cells
+        const tdItem = document.createElement('td'); tdItem.setAttribute('data-label','Item'); tdItem.textContent = gasto.item || '-';
+        const tdValor = document.createElement('td'); tdValor.setAttribute('data-label','Valor'); tdValor.textContent = formatBRL(gasto.valor);
+        const tdStatus = document.createElement('td'); tdStatus.setAttribute('data-label','Status'); tdStatus.textContent = gasto.status;
+        const tdResp = document.createElement('td'); tdResp.setAttribute('data-label','Responsável'); tdResp.textContent = gasto.responsavel;
+        const tdData = document.createElement('td'); tdData.setAttribute('data-label','Data'); tdData.textContent = gasto.data ? (new Date(gasto.data)).toLocaleDateString('pt-BR') : '-';
+
+        const tdActions = document.createElement('td'); tdActions.setAttribute('data-label','Ações');
+        const rowAction = document.createElement('div'); rowAction.className = 'row-action';
+
+        // edit button
+        const btnEdit = document.createElement('button');
+        btnEdit.className = 'btn-small btn-edit';
+        btnEdit.textContent = 'Editar';
+        btnEdit.type = 'button';
+        btnEdit.addEventListener('click', () => openEditModal(idx));
+
+        // delete button
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'btn-small btn-delete';
+        btnDelete.textContent = 'Remover';
+        btnDelete.type = 'button';
+        btnDelete.addEventListener('click', () => removeItem(idx));
+
+        rowAction.appendChild(btnEdit);
+        rowAction.appendChild(btnDelete);
+        tdActions.appendChild(rowAction);
+
+        tr.appendChild(tdItem);
+        tr.appendChild(tdValor);
+        tr.appendChild(tdStatus);
+        tr.appendChild(tdResp);
+        tr.appendChild(tdData);
+        tr.appendChild(tdActions);
+
+        ids.tabelaBody.appendChild(tr);
     });
 
-    document.getElementById('pago-noivo').textContent=formatar(totalPagoNoivo);
-    document.getElementById('pago-noiva').textContent=formatar(totalPagoNoiva);
-    document.getElementById('apagar-noivo').textContent=formatar(apagarNoivo);
-    document.getElementById('apagar-noiva').textContent=formatar(apagarNoiva);
-    document.getElementById('total-pago').textContent=formatar(totalPagoNoivo+totalPagoNoiva);
-    orcamentoPlanejado.textContent=formatar(orcamentoTotal);
+    // update totals
+    ids.totalPagoNoivo.textContent = formatBRL(pagoNoivo);
+    ids.totalPagoNoiva.textContent = formatBRL(pagoNoiva);
+    ids.totalPagoGeral.textContent = formatBRL(pagoNoivo + pagoNoiva);
+    ids.totalApagarNoivo.textContent = formatBRL(apagarNoivo);
+    ids.totalApagarNoiva.textContent = formatBRL(apagarNoiva);
+    ids.totalApagarGeral.textContent = formatBRL(apagarNoivo + apagarNoiva);
+    ids.orcamentoEl.textContent = formatBRL(orcamento);
 }
 
-function editarOrcamento(){
-    let novo=prompt("Novo valor do orçamento:",orcamentoTotal);
-    if(novo){orcamentoTotal=parseFloat(novo);atualizarTabela();}
-}
+/* Add item */
+ids.form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    const item = ids.itemIn.value.trim();
+    const valor = parseFloat(ids.valorIn.value);
+    const status = ids.statusIn.value;
+    const resp = ids.respIn.value;
+    const data = ids.dataIn.value || '';
 
-function removerGasto(i){
-    if(confirm("Remover este gasto?")){gastos.splice(i,1);atualizarTabela();}
-}
-
-function editarGasto(i){
-    const g=gastos[i];
-    let item=prompt("Item:",g.item);
-    let valor=parseFloat(prompt("Valor:",g.valor));
-    let data=prompt("Data (YYYY-MM-DD):",g.data);
-    let status=prompt("Status (Pago/A Pagar):",g.status);
-    let resp=prompt("Responsável (Noivo/Noiva):",g.responsavel);
-    if(item&&valor&&data&&status&&resp){
-        gastos[i]={item,valor,data,status,responsavel:resp};
-        atualizarTabela();
+    if (!item || isNaN(valor) || valor <= 0 || !status || !resp){
+        alert('Preencha todos os campos corretamente.');
+        return;
     }
-}
-
-form.addEventListener('submit',e=>{
-    e.preventDefault();
-    let item=form.item.value.trim();
-    let valor=parseFloat(form.valor.value);
-    let data=form.data.value;
-    let status=form.status.value;
-    let responsavel=form.responsavel.value;
-    if(item&&valor>0&&data&&status&&responsavel){
-        gastos.push({item,valor,data,status,responsavel});
-        form.reset();
-        atualizarTabela();
+    if (status === 'A Pagar' && !data){
+        alert('Para itens "A Pagar" informe a data de pagamento.');
+        return;
     }
+
+    gastos.push({ item, valor, status, responsavel: resp, data });
+    // reset
+    ids.form.reset();
+    ids.statusIn.value = '';
+    ids.respIn.value = '';
+    render();
 });
 
-btnEditarOrcamento.onclick=editarOrcamento;
-document.addEventListener('DOMContentLoaded',atualizarTabela);
+/* Remove item */
+function removeItem(index){
+    if (!confirm('Remover este lançamento?')) return;
+    gastos.splice(index,1);
+    render();
+}
+
+/* Edit modal behavior */
+let editingIndex = null;
+function openEditModal(index){
+    editingIndex = index;
+    const g = gastos[index];
+    ids.editItem.value = g.item || '';
+    ids.editValor.value = g.valor || '';
+    ids.editStatus.value = g.status || 'Pago';
+    ids.editResp.value = g.responsavel || 'Noivo';
+    ids.editData.value = g.data || '';
+
+    ids.modalBackdrop.style.display = 'flex';
+    ids.modalBackdrop.setAttribute('aria-hidden', 'false');
+    // focus first field
+    setTimeout(()=> ids.editItem.focus(), 120);
+}
+
+function closeEditModal(){
+    ids.modalBackdrop.style.display = 'none';
+    ids.modalBackdrop.setAttribute('aria-hidden', 'true');
+    editingIndex = null;
+}
+
+ids.cancelEditBtn.addEventListener('click', closeEditModal);
+ids.modalBackdrop.addEventListener('click', (ev) => {
+    if (ev.target === ids.modalBackdrop) closeEditModal();
+});
+
+/* Save edit */
+ids.saveEditBtn.addEventListener('click', () => {
+    if (editingIndex === null) return;
+    const item = ids.editItem.value.trim();
+    const valor = parseFloat(ids.editValor.value);
+    const status = ids.editStatus.value;
+    const resp = ids.editResp.value;
+    const data = ids.editData.value || '';
+
+    if (!item || isNaN(valor) || valor <= 0 || !status || !resp){
+        alert('Preencha todos os campos corretamente no formulário de edição.');
+        return;
+    }
+    if (status === 'A Pagar' && !data){
+        alert('Para itens "A Pagar" informe a data de pagamento.');
+        return;
+    }
+
+    gastos[editingIndex] = { item, valor, status, responsavel: resp, data };
+    closeEditModal();
+    render();
+});
+
+/* Edit Orçamento */
+ids.editOrcBtn.addEventListener('click', () => {
+    const novo = prompt('Digite o novo valor do Orçamento Planejado (apenas números):', orcamento.toFixed(2));
+    if (novo === null) return;
+    const parsed = parseFloat(String(novo).replace(',', '.'));
+    if (isNaN(parsed) || parsed < 0) { alert('Valor inválido'); return; }
+    orcamento = parsed;
+    render();
+});
+
+/* Initialize */
+document.addEventListener('DOMContentLoaded', render);
+
+/* Keyboard: Esc closes modal */
+document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape') {
+        if (ids.modalBackdrop.style.display === 'flex') closeEditModal();
+    }
+});
 </script>
 </body>
 </html>
