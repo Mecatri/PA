@@ -20,8 +20,8 @@
             color: #333;
             margin: 0;
             padding: 0;
-            /* Fundo de tela com decoração de casamento */
-            background-image: url('https://i.imgur.com/gK2oQ9Z.jpg'); /* Imagem placeholder de decoração rústica/floral */
+            /* Fundo de tela corrigido com madeira suave */
+            background-image: url('https://i.imgur.com/e2oWjXn.jpg'); 
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
@@ -69,9 +69,32 @@
         }
         .total-gasto strong { color: #d9534f; } /* Vermelho para Gasto */
         .total-apagar strong { color: #f0ad4e; } /* Amarelo para A Pagar */
-        .total-geral strong { color: #5cb85c; } /* Verde para Total */
+        .total-planejado { 
+            display: flex; /* Para alinhar o texto e o botão */
+            justify-content: space-between;
+            align-items: center;
+        }
+        .total-planejado span {
+            color: #5cb85c; /* Verde para Orçamento */
+            font-size: 1.5em;
+        }
 
-        /* Formulário de Adição */
+        /* Botão de Edição */
+        #btn-editar-orcamento {
+            background-color: var(--cor-principal);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        #btn-editar-orcamento:hover {
+            opacity: 0.9;
+        }
+
+        /* Formulário de Adição (Mantido) */
         #form-gasto {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -98,15 +121,15 @@
             opacity: 0.9;
         }
 
-        /* Tabela de Gastos */
+        /* Tabela de Gastos (Mantido) */
         .tabela-container {
-            overflow-x: auto; /* Permite scroll horizontal em telas pequenas */
+            overflow-x: auto;
         }
         #tabela-gastos {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            min-width: 550px; /* Garante legibilidade mínima */
+            min-width: 550px;
         }
         #tabela-gastos th, #tabela-gastos td {
             padding: 8px 10px;
@@ -138,7 +161,7 @@
                 justify-content: space-around;
             }
             #form-gasto {
-                grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr; /* Mais colunas em telas maiores */
+                grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr;
             }
             #form-gasto button {
                 grid-column: auto;
@@ -159,7 +182,11 @@
                 Total a Pagar (Futuro): <strong id="total-a-pagar">R$ 0,00</strong>
             </div>
             <div class="total-box total-geral">
-                Orçamento Total: <strong id="total-geral">R$ 0,00</strong>
+                Orçamento Planejado: 
+                <div class="total-planejado">
+                    <span id="orcamento-planejado">R$ 60.000,00</span>
+                    <button id="btn-editar-orcamento">Editar</button>
+                </div>
             </div>
         </div>
 
@@ -202,6 +229,9 @@
     <script>
         /* JavaScript para a Lógica de Cálculo e Manipulação da Tabela */
 
+        // NOVO: Variável para o Orçamento Total
+        let orcamentoTotal = 60000.00; 
+
         // Dados Iniciais (Exemplo)
         let gastos = [
             { item: "Sinal do Buffet", valor: 7500.00, status: "Pago", responsavel: "Noivo" },
@@ -213,7 +243,8 @@
         const tabelaBody = document.querySelector('#tabela-gastos tbody');
         const totalPagoElement = document.getElementById('total-pago');
         const totalAPagarElement = document.getElementById('total-a-pagar');
-        const totalGeralElement = document.getElementById('total-geral');
+        const orcamentoPlanejadoElement = document.getElementById('orcamento-planejado'); // NOVO ID
+        const btnEditarOrcamento = document.getElementById('btn-editar-orcamento'); // NOVO BOTÃO
         const formGasto = document.getElementById('form-gasto');
 
         // Função para formatar o valor como BRL
@@ -226,19 +257,16 @@
             let totalPago = 0;
             let totalAPagar = 0;
 
-            // 1. Limpa a tabela atual
+            // 1. Limpa a tabela atual e calcula os totais
             tabelaBody.innerHTML = '';
-
-            // 2. Preenche a tabela e calcula os totais
             gastos.forEach((gasto, index) => {
-                // Calcula os totais
                 if (gasto.status === "Pago") {
                     totalPago += gasto.valor;
                 } else {
                     totalAPagar += gasto.valor;
                 }
 
-                // Cria a linha da tabela
+                // Cria a linha da tabela (Mantido)
                 const row = tabelaBody.insertRow();
                 row.innerHTML = `
                     <td>${gasto.item}</td>
@@ -249,17 +277,36 @@
                 `;
             });
 
-            // 3. Atualiza o resumo
-            const totalGeral = totalPago + totalAPagar;
+            // 2. Atualiza o resumo
             totalPagoElement.textContent = formatarMoeda(totalPago);
             totalAPagarElement.textContent = formatarMoeda(totalAPagar);
-            totalGeralElement.textContent = formatarMoeda(totalGeral);
+            orcamentoPlanejadoElement.textContent = formatarMoeda(orcamentoTotal); // ATUALIZA O NOVO CAMPO
         }
 
-        // Função para adicionar um novo gasto
-        formGasto.addEventListener('submit', function(e) {
-            e.preventDefault(); // Impede o recarregamento da página
+        // NOVO: Função para editar o orçamento
+        function editarOrcamento() {
+            let novoOrcamento = prompt("Digite o novo valor do Orçamento Total (apenas números):", orcamentoTotal.toFixed(2));
+            
+            if (novoOrcamento !== null) {
+                // Tenta converter o valor digitado para um número
+                let valor = parseFloat(novoOrcamento.replace(',', '.')); 
+                
+                if (!isNaN(valor) && valor >= 0) {
+                    orcamentoTotal = valor;
+                    atualizarTabelaEContadores(); // Recalcula e atualiza a exibição
+                    alert("Orçamento atualizado com sucesso!");
+                } else {
+                    alert("Valor inválido. Por favor, digite apenas números.");
+                }
+            }
+        }
 
+        // Adiciona o evento de clique no novo botão
+        btnEditarOrcamento.addEventListener('click', editarOrcamento);
+
+        // Função para adicionar um novo gasto (Mantido)
+        formGasto.addEventListener('submit', function(e) {
+            e.preventDefault(); 
             const item = document.getElementById('item').value;
             const valor = parseFloat(document.getElementById('valor').value);
             const status = document.getElementById('status').value;
@@ -269,8 +316,6 @@
                 const novoGasto = { item, valor, status, responsavel };
                 gastos.push(novoGasto);
                 atualizarTabelaEContadores();
-
-                // Limpa o formulário
                 formGasto.reset();
                 document.getElementById('status').value = "";
                 document.getElementById('responsavel').value = "";
@@ -279,7 +324,7 @@
             }
         });
 
-        // Função para remover um gasto
+        // Função para remover um gasto (Mantido)
         function removerGasto(index) {
             gastos.splice(index, 1);
             atualizarTabelaEContadores();
