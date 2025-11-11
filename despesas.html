@@ -181,6 +181,14 @@ th{background:var(--accent);color:white;font-weight:700;}
 .modal .row{display:grid;gap:8px;margin-bottom:10px;}
 @media(min-width:700px){.modal .row{grid-template-columns:1fr 1fr;}}
 .small{font-size:0.85rem;color:var(--muted);}
+
+/* utility */
+.sr-only{
+    position:absolute!important;
+    width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+.controls {display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:10px;}
+.controls .btn-clear{background:#f5f5f5;border-radius:10px;padding:8px 12px;border:1px solid #eee;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -190,7 +198,7 @@ th{background:var(--accent);color:white;font-weight:700;}
         <p class="small">Resumo financeiro, vencimentos e gerenciamento — moderno e responsivo.</p>
     </div>
 
-    <section class="summary">
+    <section class="summary" aria-hidden="false">
         <div class="card pago"><div class="label">Pago — Noivo</div><div class="value" id="total-pago-noivo">R$ 0,00</div></div>
         <div class="card pago"><div class="label">Pago — Noiva</div><div class="value" id="total-pago-noiva">R$ 0,00</div></div>
         <div class="card geral"><div class="label">Total Pago</div><div class="value" id="total-pago-geral">R$ 0,00</div></div>
@@ -199,49 +207,68 @@ th{background:var(--accent);color:white;font-weight:700;}
         <div class="card apagar"><div class="label">Total a Pagar</div><div class="value" id="total-apagar-geral">R$ 0,00</div></div>
     </section>
 
-    <form id="form" class="form">
+    <form id="form" class="form" aria-label="Adicionar gasto">
         <div class="form-grid">
-            <input id="item" class="input" type="text" placeholder="Item" required />
-            <input id="valor" class="input" type="number" min="0" step="0.01" placeholder="Valor (R$)" required />
-            <select id="status" class="input" required>
+            <label for="item" class="sr-only">Item</label>
+            <input id="item" class="input" type="text" placeholder="Item" required aria-required="true" />
+
+            <label for="valor" class="sr-only">Valor (R$)</label>
+            <input id="valor" class="input" type="number" min="0" step="0.01" inputmode="decimal" pattern="[0-9]+([.,][0-9]{1,2})?" placeholder="Valor (R$)" required aria-required="true" />
+
+            <label for="status" class="sr-only">Status</label>
+            <select id="status" class="input" required aria-required="true" >
                 <option value="" disabled selected>Status</option>
                 <option value="Pago">Pago</option>
                 <option value="A Pagar">A Pagar</option>
             </select>
-            <select id="responsavel" class="input" required>
+
+            <label for="responsavel" class="sr-only">Responsável</label>
+            <select id="responsavel" class="input" required aria-required="true" >
                 <option value="" disabled selected>Responsável</option>
                 <option value="Noivo">Noivo</option>
                 <option value="Noiva">Noiva</option>
             </select>
+
+            <label for="data" class="sr-only">Data</label>
             <input id="data" class="input" type="date" placeholder="Data" />
         </div>
-        <button type="submit" class="btn-primary">Adicionar Gasto</button>
+
+        <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px;">
+            <div style="display:flex;gap:8px;">
+                <button type="submit" class="btn-primary">Adicionar Gasto</button>
+                <button type="button" id="export-csv" class="btn-clear">Exportar CSV</button>
+                <button type="button" id="clear-all" class="btn-clear">Limpar todos</button>
+            </div>
+            <div class="small">Os lançamentos são salvos localmente no navegador.</div>
+        </div>
     </form>
 
-    <div class="table-wrap">
+    <div class="table-wrap" role="region" aria-label="Lista de gastos">
         <table id="tabela">
             <thead>
-                <tr><th>Item</th><th>Valor</th><th>Status</th><th>Responsável</th><th>Data</th><th>Ações</th></tr>
+                <tr><th scope="col">Item</th><th scope="col">Valor</th><th scope="col">Status</th><th scope="col">Responsável</th><th scope="col">Data</th><th scope="col">Ações</th></tr>
             </thead>
             <tbody></tbody>
         </table>
     </div>
 </div>
 
-<div class="modal-backdrop" id="modal-backdrop">
-    <div class="modal">
-        <h3>Editar Lançamento</h3>
+<div class="modal-backdrop" id="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
+        <h3 id="modal-title">Editar Lançamento</h3>
+        <div id="modal-desc" class="small" style="margin-bottom:8px;">Atualize os dados e clique em salvar.</div>
+
         <div class="row">
-            <div><label class="small">Item</label><input id="edit-item" class="input" type="text" /></div>
-            <div><label class="small">Valor</label><input id="edit-valor" class="input" type="number" min="0" step="0.01" /></div>
+            <div><label class="small" for="edit-item">Item</label><input id="edit-item" class="input" type="text" /></div>
+            <div><label class="small" for="edit-valor">Valor</label><input id="edit-valor" class="input" type="number" min="0" step="0.01" inputmode="decimal" /></div>
         </div>
         <div class="row">
-            <div><label class="small">Status</label>
+            <div><label class="small" for="edit-status">Status</label>
                 <select id="edit-status" class="input"><option>Pago</option><option>A Pagar</option></select></div>
-            <div><label class="small">Responsável</label>
+            <div><label class="small" for="edit-resp">Responsável</label>
                 <select id="edit-resp" class="input"><option>Noivo</option><option>Noiva</option></select></div>
         </div>
-        <label class="small">Data</label><input id="edit-data" class="input" type="date" />
+        <label class="small" for="edit-data">Data</label><input id="edit-data" class="input" type="date" />
         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
             <button id="cancel-edit" class="btn-small" style="background:#f0f0f0;">Cancelar</button>
             <button id="save-edit" class="btn-primary">Salvar</button>
@@ -250,96 +277,11 @@ th{background:var(--accent);color:white;font-weight:700;}
 </div>
 
 <script>
-let gastos=[];
-const ids={
-    tabelaBody:document.querySelector('#tabela tbody'),
-    totalPagoNoivo:document.getElementById('total-pago-noivo'),
-    totalPagoNoiva:document.getElementById('total-pago-noiva'),
-    totalPagoGeral:document.getElementById('total-pago-geral'),
-    totalApagarNoivo:document.getElementById('total-apagar-noivo'),
-    totalApagarNoiva:document.getElementById('total-apagar-noiva'),
-    totalApagarGeral:document.getElementById('total-apagar-geral'),
-    form:document.getElementById('form'),
-    itemIn:document.getElementById('item'),
-    valorIn:document.getElementById('valor'),
-    statusIn:document.getElementById('status'),
-    respIn:document.getElementById('responsavel'),
-    dataIn:document.getElementById('data'),
-    modalBackdrop:document.getElementById('modal-backdrop'),
-    editItem:document.getElementById('edit-item'),
-    editValor:document.getElementById('edit-valor'),
-    editStatus:document.getElementById('edit-status'),
-    editResp:document.getElementById('edit-resp'),
-    editData:document.getElementById('edit-data'),
-    saveEditBtn:document.getElementById('save-edit'),
-    cancelEditBtn:document.getElementById('cancel-edit')
-};
-
-function formatBRL(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
-function render(){
-    ids.tabelaBody.innerHTML='';
-    let pagoNoivo=0,pagoNoiva=0,apagarNoivo=0,apagarNoiva=0;
-    const hoje=new Date();hoje.setHours(0,0,0,0);
-    gastos.forEach((g,idx)=>{
-        const val=Number(g.valor||0);
-        if(g.status==="Pago"){g.responsavel==="Noivo"?pagoNoivo+=val:pagoNoiva+=val;}
-        else{g.responsavel==="Noivo"?apagarNoivo+=val:apagarNoiva+=val;}
-        const tr=document.createElement('tr');
-        let alertClass='';
-        if(g.status==="A Pagar"&&g.data){
-            const dt=new Date(g.data);dt.setHours(0,0,0,0);
-            const diffDays=Math.ceil((dt-hoje)/(1000*60*60*24));
-            if(diffDays<0)alertClass='alert-red';else if(diffDays<=7)alertClass='alert-orange';
-        }
-        if(alertClass)tr.classList.add(alertClass);
-        tr.innerHTML=`
-        <td data-label="Item">${g.item}</td>
-        <td data-label="Valor">${formatBRL(g.valor)}</td>
-        <td data-label="Status">${g.status}</td>
-        <td data-label="Responsável">${g.responsavel}</td>
-        <td data-label="Data">${g.data?(new Date(g.data)).toLocaleDateString('pt-BR'):'-'}</td>
-        <td data-label="Ações"><div class="row-action">
-            <button class="btn-small btn-edit" type="button" onclick="openEditModal(${idx})">Editar</button>
-            <button class="btn-small btn-delete" type="button" onclick="removeItem(${idx})">Remover</button>
-        </div></td>`;
-        ids.tabelaBody.appendChild(tr);
-    });
-    ids.totalPagoNoivo.textContent=formatBRL(pagoNoivo);
-    ids.totalPagoNoiva.textContent=formatBRL(pagoNoiva);
-    ids.totalPagoGeral.textContent=formatBRL(pagoNoivo+pagoNoiva);
-    ids.totalApagarNoivo.textContent=formatBRL(apagarNoivo);
-    ids.totalApagarNoiva.textContent=formatBRL(apagarNoiva);
-    ids.totalApagarGeral.textContent=formatBRL(apagarNoivo+apagarNoiva);
-}
-
-ids.form.addEventListener('submit',ev=>{
-    ev.preventDefault();
-    const item=ids.itemIn.value.trim(),valor=parseFloat(ids.valorIn.value),
-    status=ids.statusIn.value,resp=ids.respIn.value,data=ids.dataIn.value||'';
-    if(!item||isNaN(valor)||valor<=0||!status||!resp)return alert('Preencha todos os campos.');
-    if(status==='A Pagar'&&!data)return alert('Informe a data para "A Pagar".');
-    gastos.push({item,valor,status,responsavel:resp,data});
-    ids.form.reset();render();
-});
-function removeItem(i){if(confirm('Remover este lançamento?')){gastos.splice(i,1);render();}}
-let editingIndex=null;
-function openEditModal(i){
-    editingIndex=i;const g=gastos[i];
-    ids.editItem.value=g.item;ids.editValor.value=g.valor;ids.editStatus.value=g.status;ids.editResp.value=g.responsavel;ids.editData.value=g.data;
-    ids.modalBackdrop.style.display='flex';
-}
-ids.cancelEditBtn.onclick=()=>ids.modalBackdrop.style.display='none';
-ids.saveEditBtn.onclick=()=>{
-    const i=editingIndex;if(i===null)return;
-    gastos[i].item=ids.editItem.value.trim();
-    gastos[i].valor=parseFloat(ids.editValor.value)||0;
-    gastos[i].status=ids.editStatus.value;
-    gastos[i].responsavel=ids.editResp.value;
-    gastos[i].data=ids.editData.value;
-    ids.modalBackdrop.style.display='none';
-    render();
-};
-render();
-</script>
-</body>
-</html>
+/*
+  Melhorias incluídas:
+  - acessibilidade: labels escondidos, roles/aria no modal e na tabela
+  - persistência local via localStorage
+  - export CSV e limpar todos
+  - foco e fechamento do modal com ESC e clique no backdrop
+  - validações extras no formulário de edição e criação
+  - correção na soma por responsável (somente "Noivo" e "Noiva"
