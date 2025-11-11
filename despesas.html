@@ -75,7 +75,6 @@ body{
 .card.pago .value{color:#d9534f;}
 .card.apagar .value{color:var(--accent-2);}
 .card.geral .value{color:var(--success);}
-.orcamento-card{display:flex;justify-content:space-between;align-items:center;gap:10px;}
 .btn-edit-orc{
     background:linear-gradient(90deg,var(--accent),#6f4a2f);
     color:white;border:none;padding:8px 10px;border-radius:10px;cursor:pointer;
@@ -122,9 +121,10 @@ th,td{padding:12px 10px;text-align:left;border-bottom:1px solid #f1f1f1;font-siz
 th{background:var(--accent);color:white;font-weight:700;}
 .row-action{
     display:flex;
-    flex-wrap:wrap;
+    flex-direction:column; /* <-- Botões agora em coluna */
     gap:6px;
-    justify-content:flex-end;
+    justify-content:center;
+    align-items:flex-end;
 }
 .btn-small{
     padding:6px 10px;
@@ -133,7 +133,6 @@ th{background:var(--accent);color:white;font-weight:700;}
     cursor:pointer;
     font-weight:700;
     font-size:0.9rem;
-    flex:1 1 auto;
     min-width:70px;
     text-align:center;
 }
@@ -158,15 +157,10 @@ th{background:var(--accent);color:white;font-weight:700;}
         color:var(--muted);
     }
     .row-action{
-        display:flex;
-        justify-content:space-between;
-        gap:8px;
-        flex-wrap:nowrap;
-        margin-top:8px;
+        flex-direction:column; /* Mantém os botões um embaixo do outro no mobile */
+        align-items:stretch;
     }
     .btn-small{
-        flex:1;
-        min-width:auto;
         font-size:0.85rem;
     }
 }
@@ -186,12 +180,7 @@ th{background:var(--accent);color:white;font-weight:700;}
 .modal h3{margin:0 0 8px;color:var(--accent);font-family:'Playfair Display',serif;}
 .modal .row{display:grid;gap:8px;margin-bottom:10px;}
 @media(min-width:700px){.modal .row{grid-template-columns:1fr 1fr;}}
-.note{font-size:0.85rem;color:var(--muted);margin-top:8px;}
 .small{font-size:0.85rem;color:var(--muted);}
-
-@media (min-width:1000px){.card{flex-basis:30%;}}
-@media (min-width:700px) and (max-width:999px){.card{flex-basis:48%;}}
-@media (max-width:699px){.card{flex-basis:100%;}}
 </style>
 </head>
 <body>
@@ -208,10 +197,6 @@ th{background:var(--accent);color:white;font-weight:700;}
         <div class="card apagar"><div class="label">A Pagar — Noivo</div><div class="value" id="total-apagar-noivo">R$ 0,00</div></div>
         <div class="card apagar"><div class="label">A Pagar — Noiva</div><div class="value" id="total-apagar-noiva">R$ 0,00</div></div>
         <div class="card apagar"><div class="label">Total a Pagar</div><div class="value" id="total-apagar-geral">R$ 0,00</div></div>
-        <div class="card geral" style="display:flex;align-items:center;justify-content:space-between;">
-            <div><div class="label">Orçamento Planejado</div><div class="value" id="orcamento-planejado">R$ 60.000,00</div></div>
-            <button id="edit-orc" class="btn-edit-orc">Editar</button>
-        </div>
     </section>
 
     <form id="form" class="form">
@@ -265,12 +250,7 @@ th{background:var(--accent);color:white;font-weight:700;}
 </div>
 
 <script>
-let orcamento=60000;
-let gastos=[
-    {item:"Sinal do Buffet",valor:7500,status:"Pago",responsavel:"Noivo",data:""},
-    {item:"Vestido da Noiva",valor:8500,status:"A Pagar",responsavel:"Noiva",data:"2025-11-15"},
-    {item:"Terno do Noivo",valor:2500,status:"A Pagar",responsavel:"Noivo",data:"2025-11-05"}
-];
+let gastos=[];
 const ids={
     tabelaBody:document.querySelector('#tabela tbody'),
     totalPagoNoivo:document.getElementById('total-pago-noivo'),
@@ -279,15 +259,13 @@ const ids={
     totalApagarNoivo:document.getElementById('total-apagar-noivo'),
     totalApagarNoiva:document.getElementById('total-apagar-noiva'),
     totalApagarGeral:document.getElementById('total-apagar-geral'),
-    orcamentoEl:document.getElementById('orcamento-planejado'),
     form:document.getElementById('form'),
-    editOrcBtn:document.getElementById('edit-orc'),
-    modalBackdrop:document.getElementById('modal-backdrop'),
     itemIn:document.getElementById('item'),
     valorIn:document.getElementById('valor'),
     statusIn:document.getElementById('status'),
     respIn:document.getElementById('responsavel'),
     dataIn:document.getElementById('data'),
+    modalBackdrop:document.getElementById('modal-backdrop'),
     editItem:document.getElementById('edit-item'),
     editValor:document.getElementById('edit-valor'),
     editStatus:document.getElementById('edit-status'),
@@ -332,7 +310,6 @@ function render(){
     ids.totalApagarNoivo.textContent=formatBRL(apagarNoivo);
     ids.totalApagarNoiva.textContent=formatBRL(apagarNoiva);
     ids.totalApagarGeral.textContent=formatBRL(apagarNoivo+apagarNoiva);
-    ids.orcamentoEl.textContent=formatBRL(orcamento);
 }
 
 ids.form.addEventListener('submit',ev=>{
@@ -361,13 +338,6 @@ ids.saveEditBtn.onclick=()=>{
     gastos[i].data=ids.editData.value;
     ids.modalBackdrop.style.display='none';
     render();
-};
-ids.editOrcBtn.onclick=()=>{
-    const novo=prompt('Informe o novo valor do orçamento planejado:',orcamento);
-    if(!novo)return;
-    const n=parseFloat(novo.replace(',','.'));
-    if(isNaN(n)||n<=0)return alert('Valor inválido.');
-    orcamento=n;render();
 };
 render();
 </script>
