@@ -298,7 +298,16 @@ td::before{
 </div>
 
 <script>
-let gastos=[];
+/* Persistência via localStorage adicionada.
+   - Os lançamentos são salvos automaticamente após qualquer alteração.
+   - Ao abrir/atualizar a página os dados são recarregados.
+   - Use "Limpar" para remover todos os lançamentos (também limpa o storage).
+*/
+
+const STORAGE_KEY = 'gastos_casamento_mobile_v1';
+
+let gastos = []; // será carregado logo em seguida
+
 const ids={
     tabelaBody:document.querySelector('#tabela tbody'),
     totalPagoNoivo:document.getElementById('total-pago-noivo'),
@@ -325,7 +334,38 @@ const ids={
     clearAllBtn:document.getElementById('clear-all')
 };
 
+function saveToStorage(){
+    try{
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(gastos));
+    }catch(e){
+        console.warn('Erro ao salvar no localStorage', e);
+    }
+}
+function loadFromStorage(){
+    try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return null;
+        const parsed = JSON.parse(raw);
+        if(!Array.isArray(parsed)) return null;
+        // garantir tipos corretos
+        return parsed.map(p => ({
+            item: p.item || '',
+            valor: Number(p.valor) || 0,
+            status: p.status || 'A Pagar',
+            responsavel: p.responsavel || 'Noivo',
+            data: p.data || ''
+        }));
+    }catch(e){
+        console.warn('Erro ao carregar do localStorage', e);
+        return null;
+    }
+}
+
 function formatBRL(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+
+function escapeHtml(s){ if(!s && s!==0) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+function escapeCsv(s){ if(s==null) return ''; s=String(s); if(s.includes('"')||s.includes(',')||s.includes('\n')||s.includes('\r')) return '"'+s.replace(/"/g,'""')+'"'; return s; }
+
 function render(){
     ids.tabelaBody.innerHTML='';
     let pagoNoivo=0,pagoNoiva=0,apagarNoivo=0,apagarNoiva=0;
@@ -377,6 +417,9 @@ function render(){
     ids.tabelaBody.querySelectorAll('.btn-edit').forEach(btn=>{
         btn.onclick = ()=> openEditModal(Number(btn.dataset.idx));
     });
+
+    // salvar após render (estado atual persistido)
+    saveToStorage();
 }
 
 ids.form.addEventListener('submit',ev=>{
@@ -388,9 +431,10 @@ ids.form.addEventListener('submit',ev=>{
     gastos.push({item,valor,status,responsavel:resp,data});
     ids.form.reset();render();
 });
-function removeItem(i){if(confirm('Remover este lançamento?')){gastos.splice(i,1);render();}}
+function removeItem(i){ if(!Number.isFinite(i) || i<0 || i>=gastos.length) return; if(confirm('Remover este lançamento?')){ gastos.splice(i,1); render(); } }
 let editingIndex=null;
 function openEditModal(i){
+    if(!Number.isFinite(i) || i<0 || i>=gastos.length) return;
     editingIndex=i;const g=gastos[i];
     ids.editItem.value=g.item;ids.editValor.value=g.valor;ids.editStatus.value=g.status;ids.editResp.value=g.responsavel;ids.editData.value=g.data;
     ids.modalBackdrop.style.display='flex';
@@ -398,9 +442,9 @@ function openEditModal(i){
     ids.editItem.focus();
     document.addEventListener('keydown', modalKeyHandler);
 }
-ids.cancelEditBtn.onclick=()=>{ids.modalBackdrop.style.display='none';ids.modalBackdrop.setAttribute('aria-hidden','true');editingIndex=null;document.removeEventListener('keydown', modalKeyHandler);};
+ids.cancelEditBtn.onclick=()=>{ ids.modalBackdrop.style.display='none'; ids.modalBackdrop.setAttribute('aria-hidden','true'); editingIndex=null; document.removeEventListener('keydown', modalKeyHandler); };
 ids.saveEditBtn.onclick=()=>{
-    const i=editingIndex;if(i===null)return;
+    const i=editingIndex;if(i===null||i===undefined)return;
     const item=ids.editItem.value.trim(),valor=parseFloat(ids.editValor.value),status=ids.editStatus.value,resp=ids.editResp.value,data=ids.editData.value||'';
     if(!item||isNaN(valor)||valor<=0||!status||!resp)return alert('Preencha todos os campos.');
     if(status==='A Pagar'&&!data)return alert('Informe a data para "A Pagar".');
@@ -423,11 +467,12 @@ ids.exportCsvBtn.onclick=()=>{
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a'); a.href=url; a.download='gastos_casamento.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 };
-// Clear all
-ids.clearAllBtn.onclick=()=>{ if(!gastos.length) return; if(confirm('Remover todos os lançamentos?')){gastos=[];render();} };
+// Clear all (limpa também o storage)
+ids.clearAllBtn.onclick=()=>{ if(!gastos.length) return; if(confirm('Remover todos os lançamentos?')){ gastos=[]; saveToStorage(); render(); } };
 
-function escapeHtml(s){ if(!s && s!==0) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-function escapeCsv(s){ if(s==null) return ''; s=String(s); if(s.includes('"')||s.includes(',')||s.includes('\n')||s.includes('\r')) return '"'+s.replace(/"/g,'""')+'"'; return s; }
+// carregar dados do storage ao iniciar
+const loaded = loadFromStorage();
+if(loaded && Array.isArray(loaded)) gastos = loaded;
 
 render();
 </script>
