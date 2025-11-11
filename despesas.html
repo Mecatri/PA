@@ -1,343 +1,473 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Gastos - Casamento 💍</title>
-    <style>
-        :root {
-            --cor-principal: #8B4513;
-            --cor-secundaria: #F0E68C;
-            --fundo-claro: #FFF8DC;
-            --fundo-escuro: #f4f4f4;
-            --sombra: 0 4px 8px rgba(0,0,0,0.1);
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Controle de Gastos - Casamento 💍</title>
+<style>
+    :root{
+        --cor-principal: #8B4513;
+        --cor-secundaria: #F0E68C;
+        --fundo-claro: #FFF8DC;
+        --fundo-escuro: #f4f4f4;
+        --sombra: 0 6px 18px rgba(0,0,0,0.12);
+        --alert-laranja-bg: #fff4e5;
+        --alert-laranja-color: #c87f00;
+        --alert-vermelho-bg: #ffe5e5;
+        --alert-vermelho-color: #c9302c;
+    }
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: var(--fundo-claro);
-            color: #333;
-            margin: 0;
-            padding: 0;
-            background-image: url('https://recreio.com.br/wp-content/uploads/disney/carl_e_ellie.jpg'); 
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            padding-top: 10px;
-        }
-        
-        .container {
-            width: 95%;
-            max-width: 600px;
-            margin: auto;
-            background-color: rgba(255, 255, 255, 0.70);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: var(--sombra);
-        }
+    /* Reset mínimo */
+    *{box-sizing:border-box}
+    body{
+        margin:0;
+        font-family: "Arial", sans-serif;
+        background: var(--fundo-claro);
+        color:#222;
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+        padding:20px;
+        background-image: url('https://i.imgur.com/e2oWjXn.jpg');
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+    }
 
-        h1, h2 {
-            text-align: center;
-            color: var(--cor-principal);
-            border-bottom: 2px solid var(--cor-secundaria);
-            padding-bottom: 8px;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
+    .wrap{
+        max-width:1100px;
+        margin: 0 auto;
+        background: rgba(255,255,255,0.96);
+        border-radius:12px;
+        padding:18px;
+        box-shadow: var(--sombra);
+    }
 
-        .resumo {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
+    header h1{
+        margin:0 0 8px 0;
+        font-size:1.3rem;
+        color:var(--cor-principal);
+        text-align:center;
+    }
+    header h2{
+        margin:0 0 14px 0;
+        font-size:1rem;
+        text-align:center;
+        color:var(--cor-principal);
+        border-bottom:2px solid var(--cor-secundaria);
+        padding-bottom:8px;
+    }
 
-        .total-box {
-            background-color: var(--fundo-escuro);
-            flex: 1 1 47%;
-            padding: 12px;
-            border-radius: 5px;
-            box-shadow: var(--sombra);
-            text-align: center;
-            font-size: 0.95em;
-            font-weight: bold;
+    /* RESUMO: grid 3x2 em desktop, empilha em mobile */
+    .resumo{
+        display:grid;
+        gap:10px;
+        margin-bottom:16px;
+        align-items:stretch;
+    }
+    /* 3 colunas x 2 linhas layout (2 linhas of 3) at >= 760px */
+    @media(min-width:760px){
+        .resumo{
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: minmax(64px, auto);
         }
+    }
+    /* mobile: single column */
+    @media(max-width:759px){
+        .resumo{ grid-template-columns: 1fr; }
+    }
 
-        .total-box strong {
-            display: block;
-            font-size: 1.2em;
-            color: var(--cor-principal);
-            margin-top: 4px;
+    .card-total{
+        background:var(--fundo-escuro);
+        border-radius:8px;
+        padding:12px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+        text-align:center;
+        font-weight:700;
+        font-size:0.95rem;
+    }
+    .card-total .valor{
+        display:block;
+        margin-top:6px;
+        font-size:1.15rem;
+        color:var(--cor-principal);
+    }
+    .card-total.pago .valor{ color:#d9534f; }       /* vermelho para pagos (visual) */
+    .card-total.apagar .valor{ color:#f0ad4e; }     /* amarelo para a pagar */
+    .card-total.geral .valor{ color:#5cb85c; }      /* verde para geral (opcional) */
+
+    /* Orçamento: ocupa full width below the 6 cards on small screens,
+       but we want it visually aligned on desktop. We'll make it span 3 cols on desktop */
+    .orcamento {
+        margin-top:6px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:8px;
+    }
+    #btn-editar-orcamento{
+        background:var(--cor-principal);
+        color:white;
+        border:none;
+        padding:8px 10px;
+        border-radius:8px;
+        cursor:pointer;
+        font-weight:700;
+    }
+
+    /* Form */
+    form#form-gasto{
+        background:var(--fundo-escuro);
+        padding:12px;
+        border-radius:10px;
+        display:grid;
+        gap:10px;
+        margin-bottom:18px;
+    }
+    /* Grid fields: on desktop we show a denser grid */
+    @media(min-width:760px){
+        form#form-gasto{
+            grid-template-columns: 1fr 1fr 1fr 1fr 180px;
+            align-items:center;
         }
+        form#form-gasto button{ grid-column: 1 / -1; }
+    }
+    @media(max-width:759px){
+        form#form-gasto{ grid-template-columns: 1fr; }
+    }
 
-        .total-gasto strong { color: #d9534f; }
-        .total-apagar strong { color: #f0ad4e; }
+    form#form-gasto input[type="text"],
+    form#form-gasto input[type="number"],
+    form#form-gasto input[type="date"],
+    form#form-gasto select{
+        padding:10px;
+        border-radius:8px;
+        border:1px solid #cfcfcf;
+        font-size:0.95rem;
+        width:100%;
+    }
+    form#form-gasto button{
+        background:var(--cor-principal);
+        color:#fff;
+        border:none;
+        padding:10px 12px;
+        border-radius:8px;
+        cursor:pointer;
+        font-weight:800;
+        font-size:1rem;
+    }
 
-        .total-planejado {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+    /* Tabela - desktop view */
+    .tabela-container{
+        margin-top:6px;
+        overflow-x:auto;
+    }
+    table#tabela-gastos{
+        width:100%;
+        border-collapse:collapse;
+        min-width:720px;
+    }
+    #tabela-gastos th, #tabela-gastos td{
+        padding:10px 8px;
+        border:1px solid #e4e4e4;
+        text-align:left;
+        font-size:0.95rem;
+    }
+    #tabela-gastos th{
+        background:var(--cor-principal);
+        color:white;
+        font-weight:700;
+    }
+    #tabela-gastos tr:nth-child(even){ background: #fafafa; }
+
+    .btn-acao{
+        background:none;
+        border:none;
+        color: #d9534f;
+        font-weight:800;
+        cursor:pointer;
+        padding:6px 8px;
+        border-radius:6px;
+    }
+    .btn-acao:hover{ background: rgba(0,0,0,0.03) }
+
+    /* alert classes for row coloring */
+    .alerta-laranja td{ background: var(--alert-laranja-bg); color: var(--alert-laranja-color); font-weight:700; }
+    .alerta-vermelho td{ background: var(--alert-vermelho-bg); color: var(--alert-vermelho-color); font-weight:700; }
+
+    /* RESPONSIVE: convert table to cards on small screens */
+    @media(max-width:760px){
+        /* hide the table header, but keep semantic table for accessibility if desired */
+        #tabela-gastos thead{ display:none; }
+
+        #tabela-gastos, #tabela-gastos tbody, #tabela-gastos tr, #tabela-gastos td{
+            display:block;
+            width:100%;
         }
-
-        .total-planejado span {
-            color: #5cb85c;
-            font-size: 1.3em;
+        #tabela-gastos tr{
+            margin-bottom:10px;
+            border-radius:10px;
+            padding:10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+            background: #fff;
+            border:1px solid #eee;
         }
-
-        #btn-editar-orcamento {
-            background-color: var(--cor-principal);
-            color: white;
-            border: none;
-            padding: 5px 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8em;
+        #tabela-gastos td{
+            padding:8px 6px;
+            border:none;
+            border-bottom:1px solid #f0f0f0;
+            position:relative;
         }
+        #tabela-gastos td:last-child{ border-bottom:0; }
 
-        #form-gasto {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 12px;
-            background-color: var(--fundo-escuro);
-            border-radius: 5px;
-            margin-bottom: 20px;
+        /* show label before each cell value */
+        #tabela-gastos td::before{
+            content: attr(data-label);
+            font-weight:700;
+            display:inline-block;
+            width:110px;
+            color:#555;
         }
+    }
 
-        #form-gasto input, 
-        #form-gasto select, 
-        #form-gasto button {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 1em;
-        }
-
-        #form-gasto button {
-            background-color: var(--cor-principal);
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1em;
-        }
-
-        #form-gasto button:hover {
-            opacity: 0.9;
-        }
-
-        .tabela-container {
-            overflow-x: auto;
-        }
-
-        #tabela-gastos {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.9em;
-        }
-
-        #tabela-gastos th, #tabela-gastos td {
-            padding: 8px 6px;
-            border: 1px solid #ddd;
-        }
-
-        #tabela-gastos th {
-            background-color: var(--cor-principal);
-            color: white;
-        }
-
-        #tabela-gastos tr:nth-child(even) {
-            background-color: var(--fundo-escuro);
-        }
-
-        .btn-acao {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #d9534f;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-
-        .btn-acao:hover {
-            color: #c9302c;
-        }
-
-        .alerta-laranja {
-            background-color: #fff4e5 !important;
-            color: #c87f00;
-            font-weight: bold;
-        }
-
-        .alerta-vermelho {
-            background-color: #ffe5e5 !important;
-            color: #c9302c;
-            font-weight: bold;
-        }
-
-        @media (max-width: 600px) {
-            h1, h2 { font-size: 1em; }
-            .total-box { flex: 1 1 100%; font-size: 0.9em; }
-            #form-gasto input, #form-gasto select, #form-gasto button {
-                font-size: 0.9em;
-            }
-        }
-    </style>
+    /* small UI niceties */
+    .nota{
+        font-size:0.85rem;
+        color:#666;
+        margin-top:8px;
+    }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>💍 Controle de Orçamento do Casamento 🥂</h1>
+<div class="wrap">
+    <header>
+        <h1>💍 Controle de Orçamento do Casamento</h1>
+        <h2>Resumo Financeiro & Lançamentos</h2>
+    </header>
 
-        <h2>Resumo Financeiro</h2>
-        <div class="resumo">
-            <div class="total-box total-gasto">Pago - Noivo: <strong id="total-pago-noivo">R$ 0,00</strong></div>
-            <div class="total-box total-gasto">Pago - Noiva: <strong id="total-pago-noiva">R$ 0,00</strong></div>
-            <div class="total-box total-apagar">A Pagar - Noivo: <strong id="total-apagar-noivo">R$ 0,00</strong></div>
-            <div class="total-box total-apagar">A Pagar - Noiva: <strong id="total-apagar-noiva">R$ 0,00</strong></div>
-            <div class="total-box total-gasto">Total Pago: <strong id="total-pago-geral">R$ 0,00</strong></div>
-            <div class="total-box total-apagar">Total a Pagar: <strong id="total-apagar-geral">R$ 0,00</strong></div>
-            <div class="total-box total-geral">
-                Orçamento Planejado:
-                <div class="total-planejado">
-                    <span id="orcamento-planejado">R$ 60.000,00</span>
-                    <button id="btn-editar-orcamento">Editar</button>
-                </div>
+    <!-- RESUMO: 6 caixas (duas linhas de 3 em desktop) -->
+    <section class="resumo" aria-label="Resumo financeiro">
+        <div class="card-total pago"><div>Pago - Noivo</div><div class="valor" id="total-pago-noivo">R$ 0,00</div></div>
+        <div class="card-total pago"><div>Pago - Noiva</div><div class="valor" id="total-pago-noiva">R$ 0,00</div></div>
+        <div class="card-total geral"><div>Total Pago</div><div class="valor" id="total-pago-geral">R$ 0,00</div></div>
+
+        <div class="card-total apagar"><div>A Pagar - Noivo</div><div class="valor" id="total-apagar-noivo">R$ 0,00</div></div>
+        <div class="card-total apagar"><div>A Pagar - Noiva</div><div class="valor" id="total-apagar-noiva">R$ 0,00</div></div>
+        <div class="card-total apagar"><div>Total a Pagar</div><div class="valor" id="total-apagar-geral">R$ 0,00</div></div>
+
+        <!-- Orçamento ocupa entire width on mobile, on desktop it will be visually next to cards -->
+        <div class="card-total geral" style="grid-column: span 3; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div>Orçamento Planejado</div>
+                <div class="valor" id="orcamento-planejado">R$ 60.000,00</div>
+            </div>
+            <div style="margin-left:12px;">
+                <button id="btn-editar-orcamento">Editar</button>
             </div>
         </div>
+    </section>
 
-        <h2>Lançar Novo Gasto</h2>
-        <form id="form-gasto">
-            <input type="text" id="item" placeholder="Item (Ex: Buffet)" required>
-            <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" required>
-            <select id="status" required>
-                <option value="" disabled selected>Status</option>
-                <option value="Pago">Pago</option>
-                <option value="A Pagar">A Pagar</option>
-            </select>
-            <select id="responsavel" required>
-                <option value="" disabled selected>Responsável</option>
-                <option value="Noivo">Noivo</option>
-                <option value="Noiva">Noiva</option>
-            </select>
-            <input type="date" id="data-pagamento" placeholder="Data do pagamento (para futuros)">
-            <button type="submit">Adicionar Gasto</button>
-        </form>
+    <!-- Formulário -->
+    <form id="form-gasto" aria-label="Formulário de lançamento de gasto">
+        <input type="text" id="item" placeholder="Item (Ex: Buffet)" required>
+        <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" min="0" required>
+        <select id="status" required>
+            <option value="" disabled selected>Status</option>
+            <option value="Pago">Pago</option>
+            <option value="A Pagar">A Pagar</option>
+        </select>
+        <select id="responsavel" required>
+            <option value="" disabled selected>Responsável</option>
+            <option value="Noivo">Noivo</option>
+            <option value="Noiva">Noiva</option>
+        </select>
+        <input type="date" id="data-pagamento" aria-label="Data do pagamento (obrigatório se A Pagar)">
+        <button type="submit">Adicionar Gasto</button>
+        <div class="nota">Observação: ao escolher "A Pagar", a <strong>data</strong> é obrigatória para o alerta de vencimento.</div>
+    </form>
 
-        <h2>Detalhes dos Gastos</h2>
-        <div class="tabela-container">
-            <table id="tabela-gastos">
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Valor (R$)</th>
-                        <th>Status</th>
-                        <th>Responsável</th>
-                        <th>Data</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+    <!-- Tabela / Cards -->
+    <div class="tabela-container" aria-live="polite">
+        <table id="tabela-gastos" aria-label="Detalhes dos gastos">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Valor (R$)</th>
+                    <th>Status</th>
+                    <th>Responsável</th>
+                    <th>Data</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
+</div>
 
-    <script>
-        let orcamentoTotal = 60000.00;
-        let gastos = [
-            { item: "Sinal do Buffet", valor: 7500.00, status: "Pago", responsavel: "Noivo", data: "" },
-            { item: "Vestido da Noiva", valor: 8500.00, status: "A Pagar", responsavel: "Noiva", data: "2025-11-15" },
-            { item: "Terno do Noivo", valor: 2500.00, status: "A Pagar", responsavel: "Noivo", data: "2025-11-05" }
-        ];
+<script>
+    /* Script principal */
+    let orcamentoTotal = 60000.00;
 
-        const tabelaBody = document.querySelector('#tabela-gastos tbody');
-        const totalPagoNoivo = document.getElementById('total-pago-noivo');
-        const totalPagoNoiva = document.getElementById('total-pago-noiva');
-        const totalApagarNoivo = document.getElementById('total-apagar-noivo');
-        const totalApagarNoiva = document.getElementById('total-apagar-noiva');
-        const totalPagoGeral = document.getElementById('total-pago-geral');
-        const totalApagarGeral = document.getElementById('total-apagar-geral');
-        const orcamentoPlanejadoElement = document.getElementById('orcamento-planejado');
-        const btnEditarOrcamento = document.getElementById('btn-editar-orcamento');
-        const formGasto = document.getElementById('form-gasto');
+    // Exemplo inicial:
+    let gastos = [
+        { item: "Sinal do Buffet", valor: 7500.00, status: "Pago", responsavel: "Noivo", data: "" },
+        { item: "Vestido da Noiva", valor: 8500.00, status: "A Pagar", responsavel: "Noiva", data: "2025-11-15" },
+        { item: "Terno do Noivo", valor: 2500.00, status: "A Pagar", responsavel: "Noivo", data: "2025-11-05" }
+    ];
 
-        function formatarMoeda(valor) {
-            return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
+    // DOM
+    const tbody = document.querySelector('#tabela-gastos tbody');
+    const elPagoNoivo = document.getElementById('total-pago-noivo');
+    const elPagoNoiva = document.getElementById('total-pago-noiva');
+    const elApagarNoivo = document.getElementById('total-apagar-noivo');
+    const elApagarNoiva = document.getElementById('total-apagar-noiva');
+    const elPagoGeral = document.getElementById('total-pago-geral');
+    const elApagarGeral = document.getElementById('total-apagar-geral');
+    const elOrcamento = document.getElementById('orcamento-planejado');
+    const btnEditarOrcamento = document.getElementById('btn-editar-orcamento');
+    const form = document.getElementById('form-gasto');
 
-        function atualizarTabelaEContadores() {
-            let pagoNoivo = 0, pagoNoiva = 0, apagarNoivo = 0, apagarNoiva = 0;
-            tabelaBody.innerHTML = '';
-            const hoje = new Date();
+    // Util: formatar moeda BRL
+    function formatarMoeda(v){
+        return Number(v || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+    }
 
-            gastos.forEach((gasto, index) => {
-                if (gasto.status === "Pago") {
-                    gasto.responsavel === "Noivo" ? pagoNoivo += gasto.valor : pagoNoiva += gasto.valor;
-                } else {
-                    gasto.responsavel === "Noivo" ? apagarNoivo += gasto.valor : apagarNoiva += gasto.valor;
-                }
+    // Atualiza tabela e totais
+    function atualizarTabelaEContadores(){
+        let pagoNoivo = 0, pagoNoiva = 0, apagarNoivo = 0, apagarNoiva = 0;
+        tbody.innerHTML = '';
+        const hoje = new Date();
+        // zerar horas para calculos de dias (apenas data)
+        hoje.setHours(0,0,0,0);
 
-                const row = tabelaBody.insertRow();
-                let classe = '';
-                if (gasto.status === "A Pagar" && gasto.data) {
-                    const dataGasto = new Date(gasto.data);
-                    const diffDias = Math.ceil((dataGasto - hoje) / (1000 * 60 * 60 * 24));
-                    if (diffDias < 0) classe = 'alerta-vermelho';
-                    else if (diffDias <= 7) classe = 'alerta-laranja';
-                }
-
-                row.innerHTML = `
-                    <td>${gasto.item}</td>
-                    <td>${formatarMoeda(gasto.valor)}</td>
-                    <td>${gasto.status}</td>
-                    <td>${gasto.responsavel}</td>
-                    <td>${gasto.data ? new Date(gasto.data).toLocaleDateString('pt-BR') : '-'}</td>
-                    <td><button class="btn-acao" onclick="removerGasto(${index})">X</button></td>
-                `;
-                if (classe) row.classList.add(classe);
-            });
-
-            totalPagoNoivo.textContent = formatarMoeda(pagoNoivo);
-            totalPagoNoiva.textContent = formatarMoeda(pagoNoiva);
-            totalApagarNoivo.textContent = formatarMoeda(apagarNoivo);
-            totalApagarNoiva.textContent = formatarMoeda(apagarNoiva);
-            totalPagoGeral.textContent = formatarMoeda(pagoNoivo + pagoNoiva);
-            totalApagarGeral.textContent = formatarMoeda(apagarNoivo + apagarNoiva);
-            orcamentoPlanejadoElement.textContent = formatarMoeda(orcamentoTotal);
-        }
-
-        btnEditarOrcamento.addEventListener('click', () => {
-            let novoOrcamento = prompt("Digite o novo valor do orçamento total:", orcamentoTotal.toFixed(2));
-            if (novoOrcamento) {
-                let valor = parseFloat(novoOrcamento.replace(',', '.'));
-                if (!isNaN(valor)) {
-                    orcamentoTotal = valor;
-                    atualizarTabelaEContadores();
-                }
+        gastos.forEach((gasto, idx) => {
+            // totais por responsável/status
+            if (gasto.status === "Pago"){
+                if (gasto.responsavel === "Noivo") pagoNoivo += Number(gasto.valor || 0);
+                else pagoNoiva += Number(gasto.valor || 0);
+            } else {
+                if (gasto.responsavel === "Noivo") apagarNoivo += Number(gasto.valor || 0);
+                else apagarNoiva += Number(gasto.valor || 0);
             }
+
+            // cria linha com data-labels para mobile
+            const tr = document.createElement('tr');
+
+            // determine alert class (apenas para "A Pagar" com data válida)
+            let classe = '';
+            if (gasto.status === "A Pagar" && gasto.data){
+                const dataGasto = new Date(gasto.data);
+                dataGasto.setHours(0,0,0,0);
+                // diferença em dias: data - hoje
+                const diffMs = dataGasto - hoje;
+                const diffDias = Math.ceil(diffMs / (1000*60*60*24));
+                if (diffDias < 0) classe = 'alerta-vermelho';
+                else if (diffDias <= 7) classe = 'alerta-laranja';
+            }
+
+            if (classe) tr.classList.add(classe);
+
+            // cells (usamos data-label para visual mobile)
+            const tdItem = document.createElement('td');
+            tdItem.setAttribute('data-label','Item');
+            tdItem.textContent = gasto.item || '-';
+
+            const tdValor = document.createElement('td');
+            tdValor.setAttribute('data-label','Valor');
+            tdValor.textContent = formatarMoeda(gasto.valor);
+
+            const tdStatus = document.createElement('td');
+            tdStatus.setAttribute('data-label','Status');
+            tdStatus.textContent = gasto.status;
+
+            const tdResp = document.createElement('td');
+            tdResp.setAttribute('data-label','Responsável');
+            tdResp.textContent = gasto.responsavel;
+
+            const tdData = document.createElement('td');
+            tdData.setAttribute('data-label','Data');
+            tdData.textContent = gasto.data ? (new Date(gasto.data)).toLocaleDateString('pt-BR') : '-';
+
+            const tdAcao = document.createElement('td');
+            tdAcao.setAttribute('data-label','Ação');
+            const btn = document.createElement('button');
+            btn.className = 'btn-acao';
+            btn.textContent = 'Remover';
+            btn.type = 'button';
+            btn.addEventListener('click', () => removerGasto(idx));
+            tdAcao.appendChild(btn);
+
+            tr.appendChild(tdItem);
+            tr.appendChild(tdValor);
+            tr.appendChild(tdStatus);
+            tr.appendChild(tdResp);
+            tr.appendChild(tdData);
+            tr.appendChild(tdAcao);
+
+            tbody.appendChild(tr);
         });
 
-        formGasto.addEventListener('submit', e => {
-            e.preventDefault();
-            const item = document.getElementById('item').value;
-            const valor = parseFloat(document.getElementById('valor').value);
-            const status = document.getElementById('status').value;
-            const responsavel = document.getElementById('responsavel').value;
-            const data = document.getElementById('data-pagamento').value;
-            if (item && valor > 0 && status && responsavel) {
-                gastos.push({ item, valor, status, responsavel, data });
+        // atualizar valores visuais
+        elPagoNoivo.textContent = formatarMoeda(pagoNoivo);
+        elPagoNoiva.textContent = formatarMoeda(pagoNoiva);
+        elApagarNoivo.textContent = formatarMoeda(apagarNoivo);
+        elApagarNoiva.textContent = formatarMoeda(apagarNoiva);
+        elPagoGeral.textContent = formatarMoeda(pagoNoivo + pagoNoiva);
+        elApagarGeral.textContent = formatarMoeda(apagarNoivo + apagarNoiva);
+        elOrcamento.textContent = formatarMoeda(orcamentoTotal);
+    }
+
+    // editar orçamento
+    btnEditarOrcamento.addEventListener('click', () => {
+        const nova = prompt('Digite o novo valor do Orçamento Total (apenas números):', orcamentoTotal.toFixed(2));
+        if (nova !== null){
+            const parsed = parseFloat(String(nova).replace(',', '.'));
+            if (!isNaN(parsed) && parsed >= 0){
+                orcamentoTotal = parsed;
                 atualizarTabelaEContadores();
-                formGasto.reset();
+                alert('Orçamento atualizado.');
+            } else {
+                alert('Valor inválido.');
             }
-        });
+        }
+    });
 
-        function removerGasto(index) {
-            gastos.splice(index, 1);
-            atualizarTabelaEContadores();
+    // enviar formulario
+    form.addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        const item = document.getElementById('item').value.trim();
+        const valorRaw = document.getElementById('valor').value;
+        const valor = valorRaw ? parseFloat(valorRaw) : NaN;
+        const status = document.getElementById('status').value;
+        const responsavel = document.getElementById('responsavel').value;
+        const data = document.getElementById('data-pagamento').value;
+
+        // validações: obrigar data quando "A Pagar"
+        if (!item || isNaN(valor) || valor <= 0 || !status || !responsavel){
+            alert('Preencha todos os campos corretamente.');
+            return;
+        }
+        if (status === 'A Pagar' && (!data || data === '')){
+            alert('Para itens "A Pagar" informe a data de pagamento.');
+            return;
         }
 
-        document.addEventListener('DOMContentLoaded', atualizarTabelaEContadores);
-    </script>
+        gastos.push({ item, valor, status, responsavel, data: data || '' });
+        atualizarTabelaEContadores();
+        form.reset();
+        // reset select placeholders (some browsers won't reset select to placeholder)
+        document.getElementById('status').value = '';
+        document.getElementById('responsavel').value = '';
+    });
+
+    // remover
+    function removerGasto(index){
+        if (!confirm('Remover este gasto?')) return;
+        gastos.splice(index,1);
+        atualizarTabelaEContadores();
+    }
+
+    // inicializa
+    document.addEventListener('DOMContentLoaded', atualizarTabelaEContadores);
+</script>
 </body>
 </html>
