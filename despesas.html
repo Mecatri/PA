@@ -14,8 +14,17 @@
     --success:#3a9d56;--danger:#c9302c;--warn:#c87f00;--shadow:0 8px 24px rgba(22,22,22,0.08);
 }
 *{box-sizing:border-box;}html,body{height:100%;}
-body{margin:0;font-family:'Poppins',system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    background:linear-gradient(180deg,#fbfaf7 0%,#fffefc 100%);color:#222;padding:12px;-webkit-tap-highlight-color:transparent;}
+body {
+    /* ... outras propriedades ... */
+    
+    /* ➡️ COMBINA IMAGEM COM GRADIENTE (sobreposição) */
+    background: 
+        linear-gradient(180deg, rgba(251, 250, 247, 0.5), rgba(255, 254, 252, 0.7)), 
+        url('https://recreio.com.br/wp-content/uploads/disney/carl_e_ellie.jpg');
+        
+    background-size: cover;
+    background-attachment: fixed;
+}
 .container{max-width:460px;margin:0 auto;background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.96));
     border-radius:16px;padding:14px;box-shadow:var(--shadow);}
 .header{text-align:center;margin-bottom:10px;}
