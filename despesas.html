@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Controle de Gastos - Casamento 💍</title>
   <style>
-    /* 🛠️ CORES E TRANSPARÊNCIA */
     :root {
-      --cor-principal: #8B4513; /* Marrom Rústico */
-      --cor-secundaria: #F0E68C; /* Dourado Suave */
-      --fundo-claro: #FFF8DC; /* Creme */
-      /* CORREÇÃO: Usando RGBA para transparência (Branco com 70% de opacidade) */
-      --fundo-escuro: rgba(255, 255, 255, 0.7); 
+      --cor-principal: #8B4513;
+      --cor-secundaria: #F0E68C;
+      --fundo-claro: #FFF8DC;
+      --fundo-escuro: #f4f4f4;
       --sombra: 0 4px 8px rgba(0,0,0,0.1);
     }
 
@@ -21,7 +19,7 @@
       color: #333;
       margin: 0;
       padding: 0;
-      background-image: url('https://recreio.com.br/wp-content/uploads/disney/carl_e_ellie.jpg'); 
+      background-image: url('https://recreio.com.br/wp-content/uploads/disney/carl_e_ellie.jpg'); /* Novo fundo elegante */
       background-size: cover;
       background-attachment: fixed;
       background-position: center;
@@ -31,8 +29,7 @@
     .container {
       max-width: 90%;
       margin: 0 auto;
-      /* CORREÇÃO: Fundo do container ligeiramente mais transparente */
-      background-color: rgba(255, 255, 255, 0.85); 
+      background-color: rgba(255, 255, 255, 0.70);
       padding: 20px;
       border-radius: 10px;
       box-shadow: var(--sombra);
@@ -52,22 +49,9 @@
       gap: 10px;
       margin-bottom: 20px;
     }
-    /* Ajuste de layout de resumo para desktop */
-    @media (min-width: 600px) {
-      .resumo {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr); 
-        gap: 10px;
-      }
-      /* Faz as duas últimas caixas (Orçamento e Diferença) ocuparem toda a largura */
-      .resumo > div:nth-last-child(2), .resumo > div:last-child {
-        grid-column: span 3; 
-      }
-    }
 
     .total-box {
-      /* CORREÇÃO: Aplica a cor transparente */
-      background-color: var(--fundo-escuro); 
+      background-color: var(--fundo-escuro);
       padding: 15px;
       border-radius: 5px;
       box-shadow: var(--sombra);
@@ -81,27 +65,19 @@
       font-size: 1.4em;
       margin-top: 5px;
     }
-    
-    /* Estilos da Diferença de Caixa */
-    .total-diferenca.positivo strong { color: #28a745; } /* Verde para Saldo Positivo */
-    .total-diferenca.negativo strong { color: #dc3545; } /* Vermelho para Saldo Negativo */
-    .total-geral strong { color: var(--cor-principal); } /* Marrom para Total Gasto */
-
 
     .total-gasto-noivo strong { color: #007bff; }
     .total-gasto-noiva strong { color: #e83e8c; }
     .total-apagar-noivo strong { color: #0056b3; }
     .total-apagar-noiva strong { color: #c2185b; }
 
+    .total-geral strong { color: #5cb85c; }
+
     .total-planejado {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .total-planejado strong {
-        color: #5cb85c;
-    }
-
 
     #btn-editar-orcamento {
       background-color: var(--cor-principal);
@@ -116,24 +92,13 @@
 
     #form-gasto {
       display: grid;
-      /* CORREÇÃO: Layout para 5 campos (incluindo data) + botão */
-      grid-template-columns: repeat(3, 1fr) 1fr 1fr 0.7fr;
+      grid-template-columns: 1fr 1fr 1fr 1fr 0.7fr;
       gap: 10px;
-      /* CORREÇÃO: Aplica a cor transparente */
-      background-color: var(--fundo-escuro); 
+      padding: 15px;
+      background-color: var(--fundo-escuro);
       border-radius: 5px;
       margin-bottom: 20px;
     }
-    
-    @media (max-width: 600px) {
-        #form-gasto {
-             grid-template-columns: 1fr 1fr;
-        }
-        #form-gasto button {
-            grid-column: 1 / 3;
-        }
-    }
-
 
     #form-gasto input, #form-gasto select, #form-gasto button {
       padding: 8px;
@@ -156,8 +121,7 @@
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-      /* CORREÇÃO: Aumenta a largura mínima para caber a data */
-      min-width: 650px;
+      min-width: 550px;
     }
 
     #tabela-gastos th, #tabela-gastos td {
@@ -169,25 +133,6 @@
       background-color: var(--cor-principal);
       color: white;
     }
-    
-    /* CORREÇÃO: Linhas da tabela com transparência para alternância de cores */
-    #tabela-gastos tbody tr:nth-child(even) {
-        background-color: rgba(255, 255, 255, 0.5); 
-    }
-    #tabela-gastos tbody tr:nth-child(odd) {
-        background-color: rgba(255, 255, 255, 0.8);
-    }
-
-    /* 🚨 ESTILOS DE ALERTA */
-    /* Alerta Amarelo/Laranja (Menos de 7 dias) */
-    .alerta-amarelo td {
-        background-color: rgba(255, 193, 7, 0.8) !important; 
-    }
-    /* Alerta Vermelho (Atrasado) */
-    .alerta-vermelho td {
-        background-color: rgba(220, 53, 69, 0.8) !important; 
-        color: #333;
-    }
 
     .btn-acao {
       background: none;
@@ -195,6 +140,14 @@
       cursor: pointer;
       color: #d9534f;
       font-weight: bold;
+    }
+
+    @media (min-width: 600px) {
+      .resumo {
+        flex-wrap: wrap;
+        flex-direction: row;
+        justify-content: space-around;
+      }
     }
   </style>
 </head>
@@ -217,17 +170,14 @@
         A Pagar (Noiva): <strong id="total-apagar-noiva">R$ 0,00</strong>
       </div>
       <div class="total-box total-geral">
-        Total Gasto/Comprometido: <strong id="total-geral">R$ 0,00</strong>
+        Total Geral: <strong id="total-geral">R$ 0,00</strong>
       </div>
       <div class="total-box total-geral">
         Orçamento Planejado:
         <div class="total-planejado">
-          <strong id="orcamento-planejado">R$ 60.000,00</strong>
+          <span id="orcamento-planejado">R$ 60.000,00</span>
           <button id="btn-editar-orcamento">Editar</button>
         </div>
-      </div>
-            <div class="total-box total-diferenca">
-        Diferença (Caixa): <strong id="total-diferenca">R$ 0,00</strong>
       </div>
     </div>
 
@@ -240,7 +190,6 @@
         <option value="Pago">Pago</option>
         <option value="A Pagar">A Pagar</option>
       </select>
-      <input type="date" id="data-vencimento" placeholder="Vencimento (A Pagar)">
       <select id="responsavel" required>
         <option value="" disabled selected>Responsável</option>
         <option value="Noivo">Noivo</option>
@@ -257,7 +206,6 @@
             <th>Item</th>
             <th>Valor (R$)</th>
             <th>Status</th>
-              <th>Vencimento</th>
             <th>Responsável</th>
             <th>Ação</th>
           </tr>
@@ -268,19 +216,8 @@
   </div>
 
   <script>
-    // Data de hoje para a lógica de atraso/alerta (2025-11-10)
-    const dataAtrasada = '2025-10-30'; 
-    const dataPerto = '2025-11-15'; 
-    const dataFutura = '2026-01-20'; 
-
     let orcamentoTotal = 60000.00;
     let gastos = [];
-    // Adicionando dados de exemplo para iniciar a planilha
-    gastos.push({ item: "Buffet (Sinal)", valor: 7500.00, status: "Pago", responsavel: "Noivo" });
-    gastos.push({ item: "Vestido da Noiva", valor: 8500.00, status: "A Pagar", responsavel: "Noiva", data_vencimento: dataPerto });
-    gastos.push({ item: "Fotografia (Contrato)", valor: 5000.00, status: "A Pagar", responsavel: "Noivo", data_vencimento: dataFutura });
-    gastos.push({ item: "Decoração (Última Parcela)", valor: 2000.00, status: "A Pagar", responsavel: "Noiva", data_vencimento: dataAtrasada });
-
 
     const tabelaBody = document.querySelector('#tabela-gastos tbody');
     const totalPagoNoivo = document.getElementById('total-pago-noivo');
@@ -289,92 +226,39 @@
     const totalApagarNoiva = document.getElementById('total-apagar-noiva');
     const totalGeral = document.getElementById('total-geral');
     const orcamentoPlanejado = document.getElementById('orcamento-planejado');
-    const totalDiferencaElement = document.getElementById('total-diferenca');
-    const totalDiferencaBox = totalDiferencaElement.closest('.total-box');
-
     const formGasto = document.getElementById('form-gasto');
     const btnEditarOrcamento = document.getElementById('btn-editar-orcamento');
-    const inputDataVencimento = document.getElementById('data-vencimento');
-
 
     function formatarMoeda(valor) {
       return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    // Função auxiliar para formatar a data (AAAA-MM-DD para DD/MM/AAAA)
-    function formatarData(dataString) {
-        if (!dataString) return '-';
-        const [ano, mes, dia] = dataString.split('-');
-        return `${dia}/${mes}/${ano}`;
-    }
-
     function atualizarTabelaEContadores() {
       let pagoNoivo = 0, pagoNoiva = 0, apagarNoivo = 0, apagarNoiva = 0;
-      let totalComprometido = 0;
-
-      // Limpa a hora da data de hoje para que a comparação seja apenas por dia
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0); 
 
       tabelaBody.innerHTML = '';
       gastos.forEach((gasto, index) => {
         const row = tabelaBody.insertRow();
-        let dataVencimentoFormatada = '-';
-        
-        // Lógica de cálculo dos totais
-        if (gasto.status === "Pago" && gasto.responsavel === "Noivo") pagoNoivo += gasto.valor;
-        else if (gasto.status === "Pago" && gasto.responsavel === "Noiva") pagoNoiva += gasto.valor;
-        else if (gasto.status === "A Pagar" && gasto.responsavel === "Noivo") apagarNoivo += gasto.valor;
-        else if (gasto.status === "A Pagar" && gasto.responsavel === "Noiva") apagarNoiva += gasto.valor;
-
-        // Lógica de alerta e formatação de data
-        if (gasto.status === "A Pagar" && gasto.data_vencimento) {
-            dataVencimentoFormatada = formatarData(gasto.data_vencimento);
-            
-            // Cria um objeto Date do vencimento e limpa a hora
-            const vencimento = new Date(gasto.data_vencimento + 'T00:00:00');
-            vencimento.setHours(0, 0, 0, 0);
-
-            // Calcula a diferença em dias
-            const diferencaMs = vencimento - hoje;
-            const diasRestantes = Math.ceil(diferencaMs / (1000 * 60 * 60 * 24)); 
-
-            if (diasRestantes < 0) {
-                row.classList.add('alerta-vermelho'); // Atrasado
-            } else if (diasRestantes <= 7) {
-                row.classList.add('alerta-amarelo'); // Menos de uma semana
-            }
-        }
-        
-        // Insere os dados na linha da tabela
         row.innerHTML = `
           <td>${gasto.item}</td>
           <td>${formatarMoeda(gasto.valor)}</td>
           <td>${gasto.status}</td>
-          <td>${dataVencimentoFormatada}</td>
           <td>${gasto.responsavel}</td>
           <td><button class="btn-acao" onclick="removerGasto(${index})">X</button></td>
         `;
+
+        if (gasto.status === "Pago" && gasto.responsavel === "Noivo") pagoNoivo += gasto.valor;
+        if (gasto.status === "Pago" && gasto.responsavel === "Noiva") pagoNoiva += gasto.valor;
+        if (gasto.status === "A Pagar" && gasto.responsavel === "Noivo") apagarNoivo += gasto.valor;
+        if (gasto.status === "A Pagar" && gasto.responsavel === "Noiva") apagarNoiva += gasto.valor;
       });
-      
-      totalComprometido = pagoNoivo + pagoNoiva + apagarNoivo + apagarNoiva;
-      let diferenca = orcamentoTotal - totalComprometido;
 
       totalPagoNoivo.textContent = formatarMoeda(pagoNoivo);
       totalPagoNoiva.textContent = formatarMoeda(pagoNoiva);
       totalApagarNoivo.textContent = formatarMoeda(apagarNoivo);
       totalApagarNoiva.textContent = formatarMoeda(apagarNoiva);
-      totalGeral.textContent = formatarMoeda(totalComprometido);
+      totalGeral.textContent = formatarMoeda(pagoNoivo + pagoNoiva + apagarNoivo + apagarNoiva);
       orcamentoPlanejado.textContent = formatarMoeda(orcamentoTotal);
-      
-      // Atualiza a Diferença e aplica classe de cor
-      totalDiferencaElement.textContent = formatarMoeda(diferenca);
-      totalDiferencaBox.classList.remove('positivo', 'negativo');
-      if (diferenca >= 0) {
-          totalDiferencaBox.classList.add('positivo');
-      } else {
-          totalDiferencaBox.classList.add('negativo');
-      }
     }
 
     function removerGasto(index) {
@@ -387,40 +271,23 @@
       const item = document.getElementById('item').value;
       const valor = parseFloat(document.getElementById('valor').value);
       const status = document.getElementById('status').value;
-      const dataVencimento = inputDataVencimento.value; 
       const responsavel = document.getElementById('responsavel').value;
-      
-      // Validação: Exige data para "A Pagar"
-      if (status === "A Pagar" && !dataVencimento) {
-          alert("Por favor, insira uma data de vencimento para pagamentos futuros ('A Pagar').");
-          return;
-      }
-      
+
       if (item && valor > 0 && status && responsavel) {
-        gastos.push({ item, valor, status, responsavel, data_vencimento: dataVencimento });
+        gastos.push({ item, valor, status, responsavel });
         atualizarTabelaEContadores();
         formGasto.reset();
       }
     });
-    
-    // Lógica para edição do orçamento (Mantida)
+
     btnEditarOrcamento.addEventListener('click', () => {
-      const novoValor = prompt("Digite o novo valor do orçamento (somente números):", orcamentoTotal); 
-      
-      if (novoValor !== null) {
-          const valorLimpo = novoValor.replace(',', '.');
-          const valorNumerico = parseFloat(valorLimpo);
-          
-          if (!isNaN(valorNumerico) && valorNumerico >= 0) {
-            orcamentoTotal = valorNumerico;
-            atualizarTabelaEContadores();
-          } else {
-              alert("Valor inválido. Por favor, digite um número positivo.");
-          }
+      const novoValor = prompt("Digite o novo valor do orçamento:", orcamentoTotal);
+      if (novoValor !== null && !isNaN(parseFloat(novoValor))) {
+        orcamentoTotal = parseFloat(novoValor);
+        atualizarTabelaEContadores();
       }
     });
 
-    // Inicializa a tabela
     document.addEventListener('DOMContentLoaded', atualizarTabelaEContadores);
   </script>
 </body>
