@@ -10,15 +10,8 @@
 <style>
 /* (Mantive o estilo mobile-first otimizado do arquivo anterior) */
 :root{
-    --bg:#fbfaf7;
-    --card:#ffffff; /* Ainda mantemos a cor branca, mas a usaremos com transparência */
-    --muted:#6b6b6b;
-    --accent:#8B5E3C;
-    --accent-2:#D9B873;
-    --success:#3a9d56;
-    --danger:#c9302c;
-    --warn:#c87f00;
-    --shadow:0 8px 24px rgba(22,22,22,0.08);
+    --bg:#fbfaf7;--card:#ffffff;--muted:#6b6b6b;--accent:#8B5E3C;--accent-2:#D9B873;
+    --success:#3a9d56;--danger:#c9302c;--warn:#c87f00;--shadow:0 8px 24px rgba(22,22,22,0.08);
 }
 *{box-sizing:border-box;}html,body{height:100%;}
 body {
@@ -27,6 +20,7 @@ body {
     color: #222;
     padding: 12px;
     -webkit-tap-highlight-color: transparent;
+    /* ➡️ MANTIDO: Imagem de fundo com gradiente de sobreposição */
     background: 
         linear-gradient(180deg, rgba(251, 250, 247, 0.5), rgba(255, 254, 252, 0.7)), 
         url('https://recreio.com.br/wp-content/uploads/disney/carl_e_ellie.jpg');
@@ -34,13 +28,12 @@ body {
     background-size: cover;
     background-attachment: fixed;
 }
-
-/* ➡️ ALTERAÇÃO AQUI: Torna o .container mais transparente */
+/* ➡️ ALTERAÇÃO 1: CONTAINER PRINCIPAL (MAIS TRANSPARENTE) */
 .container{
     max-width:460px;
     margin:0 auto;
-    /* Reduzindo a opacidade de 0.98/0.96 para 0.85/0.8 */
-    background:linear-gradient(180deg,rgba(255,255,255,0.85),rgba(255,255,255,0.8));
+    /* Opacidade de 0.98/0.96 (quase sólido) reduzida para 0.8 */
+    background:linear-gradient(180deg,rgba(255,255,255,0.8),rgba(255,255,255,0.8));
     border-radius:16px;
     padding:14px;
     box-shadow:var(--shadow);
@@ -49,25 +42,27 @@ body {
 .header h1{margin:0;font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--accent);line-height:1.1;}
 .header p{margin:6px 0 0;color:var(--muted);font-size:0.9rem;}
 .summary{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin:12px 0;}
-
-/* ➡️ ALTERAÇÃO AQUI: Torna o .card mais transparente */
+/* ➡️ ALTERAÇÃO 2: CARDS DE RESUMO (MAIS TRANSPARENTES) */
 .card{
-    /* Usando rgba diretamente para adicionar transparência ao branco */
-    background: rgba(255, 255, 255, 0.7); /* Opacidade de 0.7 */
+    /* Usando RGBA direto para opacidade de 0.65 */
+    background: rgba(255, 255, 255, 0.65);
     border-radius:12px;
     padding:10px 12px;
     box-shadow:0 6px 18px rgba(20,20,20,0.03);
-    min-width:150px;display:flex;flex-direction:column;gap:6px;flex:0 0 auto;
+    min-width:150px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:0 0 auto;
 }
 .card .label{font-weight:700;color:var(--muted);font-size:0.83rem;}
 .card .value{font-weight:800;font-size:1rem;color:var(--accent);}
 .btn-primary{background:linear-gradient(90deg,var(--accent-2),#cd9f52);border:none;color:#fff;padding:12px 14px;border-radius:12px;
     font-weight:800;cursor:pointer;box-shadow:0 6px 14px rgba(205,159,82,0.16);font-size:1rem;min-height:48px;width:100%;}
 .btn-clear{background:#f5f5f5;border-radius:10px;padding:10px 12px;border:1px solid #eee;cursor:pointer;font-weight:700;}
-
-/* ➡️ ALTERAÇÃO AQUI: Torna o .form mais transparente */
+/* ➡️ ALTERAÇÃO 3: FORMULÁRIO DE CADASTRO (MAIS TRANSPARENTE) */
 .form{
-    /* Reduzindo a opacidade de 1 para 0.7/0.65 */
+    /* Opacidade reduzida para 0.7/0.65 */
     background:linear-gradient(180deg,rgba(255,255,255,0.7),rgba(251,251,251,0.65));
     border-radius:12px;
     padding:12px;
@@ -77,39 +72,52 @@ body {
     box-shadow:0 6px 14px rgba(18,18,18,0.03);
     margin-bottom:10px;
 }
-
-/* ➡️ ALTERAÇÃO AQUI: Torna o .input e select mais transparente */
+/* ➡️ ALTERAÇÃO 4: INPUTS E SELECTS (MAIS TRANSPARENTES) */
 .input,select{
     padding:12px 14px;
     border-radius:10px;
-    border:1px solid rgba(230,230,230,0.6); /* Borda também mais suave */
+    /* Borda também mais transparente */
+    border:1px solid rgba(230,230,230,0.6);
     font-size:1rem;
-    background:rgba(255,255,255,0.85); /* Fundo com opacidade */
+    /* Fundo com opacidade de 0.85 */
+    background:rgba(255,255,255,0.85);
     width:100%;
 }
 .form-actions{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
 .table-wrap{margin-top:8px;}table{width:100%;border-collapse:collapse;}thead{display:none;}tbody{display:block;}
-
-/* ➡️ ALTERAÇÃO AQUI: Torna o tr (linhas da tabela) mais transparente */
+/* ➡️ ALTERAÇÃO 5: LINHAS DA TABELA (MAIS TRANSPARENTES) */
 tr{
     display:block;
     margin:10px 0;
-    background:rgba(255,255,255,0.7); /* Opacidade de 0.7 */
+    /* Opacidade de 0.65 */
+    background:rgba(255,255,255,0.65);
     border-radius:12px;
     padding:10px;
     box-shadow:0 6px 18px rgba(10,10,10,0.03);
 }
-
-/* Os botões de ação e modais também precisam de um pequeno ajuste para consistência */
-.btn-small.btn-edit{background:rgba(255,247,236,0.8);color:#8b5e3c;border:1px solid rgba(253,238,216,0.7);}
-.btn-small.btn-delete{background:rgba(255,240,240,0.8);color:var(--danger);border:1px solid rgba(255,236,236,0.7);}
+td{display:flex;justify-content:space-between;padding:6px 0;border:none;font-size:0.95rem;align-items:center;}
+td::before{content:attr(data-label);font-weight:700;color:var(--muted);margin-right:8px;width:40%;font-size:0.9rem;}
+.row-action{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+.btn-small{padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:0.95rem;width:100%;text-align:center;}
+/* Ajuste de transparência nos botões de ação e alertas da tabela */
+.btn-edit{background:rgba(255,247,236,0.8);color:#8b5e3c;border:1px solid rgba(253,238,216,0.7);}
+.btn-delete{background:rgba(255,240,240,0.8);color:var(--danger);border:1px solid rgba(255,236,236,0.7);}
 .alert-orange td{background:rgba(255,247,238,0.7);color:var(--warn);font-weight:700;border-radius:8px;}
 .alert-red td{background:rgba(255,240,240,0.7);color:var(--danger);font-weight:700;border-radius:8px;}
-
-/* ➡️ ALTERAÇÃO AQUI: Torna o modal mais transparente */
-.modal-backdrop{position:fixed;inset:0;background:rgba(10,10,10,0.3);display:none;align-items:flex-end;justify-content:center;z-index:999;} /* Fundo mais suave */
+/* ➡️ ALTERAÇÃO 6: MODAL E BACKDROP */
+.modal-backdrop{
+    position:fixed;
+    inset:0;
+    /* Backdrop com menor opacidade (0.3) */
+    background:rgba(10,10,10,0.3);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:999;
+}
 .modal{
-    background:rgba(255,255,255,0.9); /* O modal pode ser um pouco menos transparente para foco */
+    /* Modal levemente transparente (0.9) */
+    background:rgba(255,255,255,0.9);
     border-top-left-radius:16px;border-top-right-radius:16px;padding:16px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 -6px 24px rgba(20,20,20,0.18);
 }
 .modal h3{margin:0 0 8px;color:var(--accent);font-family:'Playfair Display',serif;} .modal .row{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
