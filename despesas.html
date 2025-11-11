@@ -14,17 +14,18 @@
     }
 
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: var(--fundo-claro);
-      color: #333;
+      font-family: Arial, sans-serif;
+      background-image: url('https://img.elo7.com.br/product/zoom/4EFB639/bonecos-de-casamento-noivinhos-de-biscuit.jpg');
+      background-size: cover;         /* cobre toda a tela */
+      background-repeat: no-repeat;   /* evita repetição */
+      background-position: center;    /* centraliza a imagem */
+      background-attachment: fixed;   /* mantém o fundo fixo ao rolar */
       margin: 0;
       padding: 0;
-      background-image: url('https://img.elo7.com.br/product/zoom/4EFB639/bonecos-de-casamento-noivinhos-de-biscuit.jpg'); /* Novo fundo elegante */
-      background-size: cover;
-      background-attachment: fixed;
-      background-position: center;
-      padding-top: 20px;
+      min-height: 100vh;              /* garante altura mínima de 100% da tela */
+      color: #333;
     }
+
 
     .container {
       max-width: 90%;
