@@ -1,337 +1,295 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Gastos - Casamento 💍</title>
-    <style>
-        /* CSS para Estilo e Responsividade */
-        :root {
-            --cor-principal: #8B4513; /* Marrom Rústico */
-            --cor-secundaria: #F0E68C; /* Dourado Suave */
-            --fundo-claro: #FFF8DC; /* Creme */
-            --fundo-escuro: #f4f4f4;
-            --sombra: 0 4px 8px rgba(0,0,0,0.1);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Gastos - Casamento 💍</title>
+  <style>
+    :root {
+      --cor-principal: #8B4513;
+      --cor-secundaria: #F0E68C;
+      --fundo-claro: #FFF8DC;
+      --fundo-escuro: #f4f4f4;
+      --sombra: 0 4px 8px rgba(0,0,0,0.1);
+    }
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: var(--fundo-claro);
-            color: #333;
-            margin: 0;
-            padding: 0;
-            /* Fundo de tela corrigido com madeira suave */
-            background-image: url('https://i.imgur.com/e2oWjXn.jpg'); 
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            padding-top: 20px;
-        }
-        
-        .container {
-            max-width: 90%;
-            margin: 0 auto;
-            background-color: rgba(255, 255, 255, 0.95); /* Fundo semi-transparente para leitura */
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: var(--sombra);
-        }
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: var(--fundo-claro);
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-image: url('https://i.imgur.com/7K5qbtM.jpg'); /* Novo fundo elegante */
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      padding-top: 20px;
+    }
 
-        h1, h2 {
-            text-align: center;
-            color: var(--cor-principal);
-            border-bottom: 2px solid var(--cor-secundaria);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
+    .container {
+      max-width: 90%;
+      margin: 0 auto;
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: var(--sombra);
+    }
 
-        /* Resumo de Totais */
-        .resumo {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .total-box {
-            background-color: var(--fundo-escuro);
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: var(--sombra);
-            text-align: center;
-            font-size: 1.1em;
-            font-weight: bold;
-        }
-        .total-box strong {
-            display: block;
-            font-size: 1.5em;
-            color: var(--cor-principal);
-            margin-top: 5px;
-        }
-        .total-gasto strong { color: #d9534f; } /* Vermelho para Gasto */
-        .total-apagar strong { color: #f0ad4e; } /* Amarelo para A Pagar */
-        .total-planejado { 
-            display: flex; /* Para alinhar o texto e o botão */
-            justify-content: space-between;
-            align-items: center;
-        }
-        .total-planejado span {
-            color: #5cb85c; /* Verde para Orçamento */
-            font-size: 1.5em;
-        }
+    h1, h2 {
+      text-align: center;
+      color: var(--cor-principal);
+      border-bottom: 2px solid var(--cor-secundaria);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
 
-        /* Botão de Edição */
-        #btn-editar-orcamento {
-            background-color: var(--cor-principal);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8em;
-            margin-left: 10px;
-        }
-        #btn-editar-orcamento:hover {
-            opacity: 0.9;
-        }
+    .resumo {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
 
-        /* Formulário de Adição (Mantido) */
-        #form-gasto {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            padding: 15px;
-            background-color: var(--fundo-escuro);
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        #form-gasto input, #form-gasto select, #form-gasto button {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        #form-gasto button {
-            grid-column: 1 / 3;
-            background-color: var(--cor-principal);
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        #form-gasto button:hover {
-            opacity: 0.9;
-        }
+    .total-box {
+      background-color: var(--fundo-escuro);
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: var(--sombra);
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
 
-        /* Tabela de Gastos (Mantido) */
-        .tabela-container {
-            overflow-x: auto;
-        }
-        #tabela-gastos {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            min-width: 550px;
-        }
-        #tabela-gastos th, #tabela-gastos td {
-            padding: 8px 10px;
-            border: 1px solid #ddd;
-        }
-        #tabela-gastos th {
-            background-color: var(--cor-principal);
-            color: white;
-            font-size: 0.9em;
-        }
-        #tabela-gastos tr:nth-child(even) {
-            background-color: var(--fundo-escuro);
-        }
-        .btn-acao {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #d9534f;
-            font-weight: bold;
-        }
-        .btn-acao:hover {
-            color: #c9302c;
-        }
+    .total-box strong {
+      display: block;
+      font-size: 1.4em;
+      margin-top: 5px;
+    }
 
-        /* Responsividade Específica para Mobile */
-        @media (min-width: 600px) {
-            .resumo {
-                flex-direction: row;
-                justify-content: space-around;
-            }
-            #form-gasto {
-                grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr;
-            }
-            #form-gasto button {
-                grid-column: auto;
-            }
-        }
-    </style>
+    .total-gasto-noivo strong { color: #007bff; }
+    .total-gasto-noiva strong { color: #e83e8c; }
+    .total-apagar-noivo strong { color: #0056b3; }
+    .total-apagar-noiva strong { color: #c2185b; }
+
+    .total-geral strong { color: #5cb85c; }
+
+    .total-planejado {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #btn-editar-orcamento {
+      background-color: var(--cor-principal);
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.8em;
+      margin-left: 10px;
+    }
+
+    #form-gasto {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 0.7fr;
+      gap: 10px;
+      padding: 15px;
+      background-color: var(--fundo-escuro);
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    #form-gasto input, #form-gasto select, #form-gasto button {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    #form-gasto button {
+      background-color: var(--cor-principal);
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tabela-container {
+      overflow-x: auto;
+    }
+
+    #tabela-gastos {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      min-width: 550px;
+    }
+
+    #tabela-gastos th, #tabela-gastos td {
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+    }
+
+    #tabela-gastos th {
+      background-color: var(--cor-principal);
+      color: white;
+    }
+
+    .btn-acao {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #d9534f;
+      font-weight: bold;
+    }
+
+    @media (min-width: 600px) {
+      .resumo {
+        flex-wrap: wrap;
+        flex-direction: row;
+        justify-content: space-around;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>💍 Controle de Orçamento do Casamento 🥂</h1>
+  <div class="container">
+    <h1>💍 Controle de Orçamento do Casamento 🥂</h1>
 
-        <h2>Resumo Financeiro</h2>
-        <div class="resumo">
-            <div class="total-box total-gasto">
-                Total Já Gasto (Pago): <strong id="total-pago">R$ 0,00</strong>
-            </div>
-            <div class="total-box total-apagar">
-                Total a Pagar (Futuro): <strong id="total-a-pagar">R$ 0,00</strong>
-            </div>
-            <div class="total-box total-geral">
-                Orçamento Planejado: 
-                <div class="total-planejado">
-                    <span id="orcamento-planejado">R$ 60.000,00</span>
-                    <button id="btn-editar-orcamento">Editar</button>
-                </div>
-            </div>
+    <h2>Resumo Financeiro</h2>
+    <div class="resumo">
+      <div class="total-box total-gasto-noivo">
+        Já Gasto (Noivo): <strong id="total-pago-noivo">R$ 0,00</strong>
+      </div>
+      <div class="total-box total-gasto-noiva">
+        Já Gasto (Noiva): <strong id="total-pago-noiva">R$ 0,00</strong>
+      </div>
+      <div class="total-box total-apagar-noivo">
+        A Pagar (Noivo): <strong id="total-apagar-noivo">R$ 0,00</strong>
+      </div>
+      <div class="total-box total-apagar-noiva">
+        A Pagar (Noiva): <strong id="total-apagar-noiva">R$ 0,00</strong>
+      </div>
+      <div class="total-box total-geral">
+        Total Geral: <strong id="total-geral">R$ 0,00</strong>
+      </div>
+      <div class="total-box total-geral">
+        Orçamento Planejado:
+        <div class="total-planejado">
+          <span id="orcamento-planejado">R$ 60.000,00</span>
+          <button id="btn-editar-orcamento">Editar</button>
         </div>
-
-        <h2>Lançar Novo Gasto</h2>
-        <form id="form-gasto">
-            <input type="text" id="item" placeholder="Item (Ex: Buffet)" required>
-            <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" required>
-            <select id="status" required>
-                <option value="" disabled selected>Status</option>
-                <option value="Pago">Pago (Passado)</option>
-                <option value="A Pagar">A Pagar (Futuro)</option>
-            </select>
-            <select id="responsavel" required>
-                <option value="" disabled selected>Responsável</option>
-                <option value="Noivo">Noivo</option>
-                <option value="Noiva">Noiva</option>
-            </select>
-            <button type="submit">Adicionar Gasto</button>
-        </form>
-
-        <h2>Detalhes dos Gastos</h2>
-        <div class="tabela-container">
-            <table id="tabela-gastos">
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Valor (R$)</th>
-                        <th>Status</th>
-                        <th>Responsável</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    </tbody>
-            </table>
-        </div>
-
+      </div>
     </div>
 
-    <script>
-        /* JavaScript para a Lógica de Cálculo e Manipulação da Tabela */
+    <h2>Lançar Novo Gasto</h2>
+    <form id="form-gasto">
+      <input type="text" id="item" placeholder="Item (Ex: Buffet)" required>
+      <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" required>
+      <select id="status" required>
+        <option value="" disabled selected>Status</option>
+        <option value="Pago">Pago</option>
+        <option value="A Pagar">A Pagar</option>
+      </select>
+      <select id="responsavel" required>
+        <option value="" disabled selected>Responsável</option>
+        <option value="Noivo">Noivo</option>
+        <option value="Noiva">Noiva</option>
+      </select>
+      <button type="submit">Adicionar Gasto</button>
+    </form>
 
-        // NOVO: Variável para o Orçamento Total
-        let orcamentoTotal = 60000.00; 
+    <h2>Detalhes dos Gastos</h2>
+    <div class="tabela-container">
+      <table id="tabela-gastos">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Valor (R$)</th>
+            <th>Status</th>
+            <th>Responsável</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
-        // Dados Iniciais (Exemplo)
-        let gastos = [
-            { item: "Sinal do Buffet", valor: 7500.00, status: "Pago", responsavel: "Noivo" },
-            { item: "Vestido da Noiva", valor: 8500.00, status: "A Pagar", responsavel: "Noiva" },
-            { item: "Terno do Noivo", valor: 2500.00, status: "A Pagar", responsavel: "Noivo" }
-        ];
+  <script>
+    let orcamentoTotal = 60000.00;
+    let gastos = [];
 
-        // Elementos DOM
-        const tabelaBody = document.querySelector('#tabela-gastos tbody');
-        const totalPagoElement = document.getElementById('total-pago');
-        const totalAPagarElement = document.getElementById('total-a-pagar');
-        const orcamentoPlanejadoElement = document.getElementById('orcamento-planejado'); // NOVO ID
-        const btnEditarOrcamento = document.getElementById('btn-editar-orcamento'); // NOVO BOTÃO
-        const formGasto = document.getElementById('form-gasto');
+    const tabelaBody = document.querySelector('#tabela-gastos tbody');
+    const totalPagoNoivo = document.getElementById('total-pago-noivo');
+    const totalPagoNoiva = document.getElementById('total-pago-noiva');
+    const totalApagarNoivo = document.getElementById('total-apagar-noivo');
+    const totalApagarNoiva = document.getElementById('total-apagar-noiva');
+    const totalGeral = document.getElementById('total-geral');
+    const orcamentoPlanejado = document.getElementById('orcamento-planejado');
+    const formGasto = document.getElementById('form-gasto');
+    const btnEditarOrcamento = document.getElementById('btn-editar-orcamento');
 
-        // Função para formatar o valor como BRL
-        function formatarMoeda(valor) {
-            return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
+    function formatarMoeda(valor) {
+      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
 
-        // Função principal que recalcula e atualiza a interface
-        function atualizarTabelaEContadores() {
-            let totalPago = 0;
-            let totalAPagar = 0;
+    function atualizarTabelaEContadores() {
+      let pagoNoivo = 0, pagoNoiva = 0, apagarNoivo = 0, apagarNoiva = 0;
 
-            // 1. Limpa a tabela atual e calcula os totais
-            tabelaBody.innerHTML = '';
-            gastos.forEach((gasto, index) => {
-                if (gasto.status === "Pago") {
-                    totalPago += gasto.valor;
-                } else {
-                    totalAPagar += gasto.valor;
-                }
+      tabelaBody.innerHTML = '';
+      gastos.forEach((gasto, index) => {
+        const row = tabelaBody.insertRow();
+        row.innerHTML = `
+          <td>${gasto.item}</td>
+          <td>${formatarMoeda(gasto.valor)}</td>
+          <td>${gasto.status}</td>
+          <td>${gasto.responsavel}</td>
+          <td><button class="btn-acao" onclick="removerGasto(${index})">X</button></td>
+        `;
 
-                // Cria a linha da tabela (Mantido)
-                const row = tabelaBody.insertRow();
-                row.innerHTML = `
-                    <td>${gasto.item}</td>
-                    <td>${formatarMoeda(gasto.valor)}</td>
-                    <td>${gasto.status}</td>
-                    <td>${gasto.responsavel}</td>
-                    <td><button class="btn-acao" onclick="removerGasto(${index})">X</button></td>
-                `;
-            });
+        if (gasto.status === "Pago" && gasto.responsavel === "Noivo") pagoNoivo += gasto.valor;
+        if (gasto.status === "Pago" && gasto.responsavel === "Noiva") pagoNoiva += gasto.valor;
+        if (gasto.status === "A Pagar" && gasto.responsavel === "Noivo") apagarNoivo += gasto.valor;
+        if (gasto.status === "A Pagar" && gasto.responsavel === "Noiva") apagarNoiva += gasto.valor;
+      });
 
-            // 2. Atualiza o resumo
-            totalPagoElement.textContent = formatarMoeda(totalPago);
-            totalAPagarElement.textContent = formatarMoeda(totalAPagar);
-            orcamentoPlanejadoElement.textContent = formatarMoeda(orcamentoTotal); // ATUALIZA O NOVO CAMPO
-        }
+      totalPagoNoivo.textContent = formatarMoeda(pagoNoivo);
+      totalPagoNoiva.textContent = formatarMoeda(pagoNoiva);
+      totalApagarNoivo.textContent = formatarMoeda(apagarNoivo);
+      totalApagarNoiva.textContent = formatarMoeda(apagarNoiva);
+      totalGeral.textContent = formatarMoeda(pagoNoivo + pagoNoiva + apagarNoivo + apagarNoiva);
+      orcamentoPlanejado.textContent = formatarMoeda(orcamentoTotal);
+    }
 
-        // NOVO: Função para editar o orçamento
-        function editarOrcamento() {
-            let novoOrcamento = prompt("Digite o novo valor do Orçamento Total (apenas números):", orcamentoTotal.toFixed(2));
-            
-            if (novoOrcamento !== null) {
-                // Tenta converter o valor digitado para um número
-                let valor = parseFloat(novoOrcamento.replace(',', '.')); 
-                
-                if (!isNaN(valor) && valor >= 0) {
-                    orcamentoTotal = valor;
-                    atualizarTabelaEContadores(); // Recalcula e atualiza a exibição
-                    alert("Orçamento atualizado com sucesso!");
-                } else {
-                    alert("Valor inválido. Por favor, digite apenas números.");
-                }
-            }
-        }
+    function removerGasto(index) {
+      gastos.splice(index, 1);
+      atualizarTabelaEContadores();
+    }
 
-        // Adiciona o evento de clique no novo botão
-        btnEditarOrcamento.addEventListener('click', editarOrcamento);
+    formGasto.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const item = document.getElementById('item').value;
+      const valor = parseFloat(document.getElementById('valor').value);
+      const status = document.getElementById('status').value;
+      const responsavel = document.getElementById('responsavel').value;
 
-        // Função para adicionar um novo gasto (Mantido)
-        formGasto.addEventListener('submit', function(e) {
-            e.preventDefault(); 
-            const item = document.getElementById('item').value;
-            const valor = parseFloat(document.getElementById('valor').value);
-            const status = document.getElementById('status').value;
-            const responsavel = document.getElementById('responsavel').value;
+      if (item && valor > 0 && status && responsavel) {
+        gastos.push({ item, valor, status, responsavel });
+        atualizarTabelaEContadores();
+        formGasto.reset();
+      }
+    });
 
-            if (item && valor > 0 && status && responsavel) {
-                const novoGasto = { item, valor, status, responsavel };
-                gastos.push(novoGasto);
-                atualizarTabelaEContadores();
-                formGasto.reset();
-                document.getElementById('status').value = "";
-                document.getElementById('responsavel').value = "";
-            } else {
-                alert("Por favor, preencha todos os campos corretamente.");
-            }
-        });
+    btnEditarOrcamento.addEventListener('click', () => {
+      const novoValor = prompt("Digite o novo valor do orçamento:", orcamentoTotal);
+      if (novoValor !== null && !isNaN(parseFloat(novoValor))) {
+        orcamentoTotal = parseFloat(novoValor);
+        atualizarTabelaEContadores();
+      }
+    });
 
-        // Função para remover um gasto (Mantido)
-        function removerGasto(index) {
-            gastos.splice(index, 1);
-            atualizarTabelaEContadores();
-        }
-
-        // Inicializa a tabela ao carregar a página
-        document.addEventListener('DOMContentLoaded', atualizarTabelaEContadores);
-    </script>
+    document.addEventListener('DOMContentLoaded', atualizarTabelaEContadores);
+  </script>
 </body>
 </html>
+
