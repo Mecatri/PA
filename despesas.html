@@ -121,37 +121,20 @@ td::before{content:attr(data-label);font-weight:700;color:var(--muted);margin-ri
 
 <script>
 /*
-  Implementação para compartilhamento em tempo real usando Firebase Firestore.
-  Como funciona:
-  - Todos os lançamentos são guardados na coleção "gastos".
-  - Um listener onSnapshot mantém a lista sincronizada em tempo real para todos os clientes.
-  - Ao adicionar/editar/remover, o app grava no Firestore; todas as pessoas verão a mudança automaticamente.
-  - Para testes rápidos você pode abrir regras do Firestore para public read/write (não recomendado para produção).
-  - Instruções para configurar logo abaixo do bloco firebaseConfig.
-*/
-
-/* 1) Crie um projeto no Firebase (https://console.firebase.google.com/)
-   2) No Project Overview -> Add app -> Web App -> copie as configurações e cole em firebaseConfig abaixo.
-   3) Vá em Firestore Database -> Create database (modo de teste é mais simples).
-   4) Se precisar de acesso aberto (teste), nas regras do Firestore:
-      service cloud.firestore {
-        match /databases/{database}/documents {
-          match /{document=**} {
-            allow read, write: if true;
-          }
-        }
-      }
-      IMPORTANTE: isso deixa seus dados públicos. Para produção, configure autenticação e regras.
+  Integração Firestore:
+  - Este script conecta a sua página ao Firestore e salva/edita/remove lançamentos na coleção "gastos".
+  - Substituí o placeholder do firebaseConfig pelo seu projeto (dispesas-9082a), use regras seguras no Firestore.
+  - Para testes rápidos, você pode permitir read/write temporariamente nas regras (não recomendado em produção).
 */
 
 const firebaseConfig = {
-    // substitua os valores abaixo pelas suas credenciais do Firebase Web App
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_PROJETO.firebaseapp.com",
-    projectId: "SEU_PROJETO",
-    storageBucket: "SEU_PROJETO.appspot.com",
-    messagingSenderId: "SENDER_ID",
-    appId: "APP_ID"
+  apiKey: "AIzaSyBjncnSGojzX6WumANGgQDrzYWnU696YCQ",
+  authDomain: "dispesas-9082a.firebaseapp.com",
+  projectId: "dispesas-9082a",
+  storageBucket: "dispesas-9082a.firebasestorage.app",
+  messagingSenderId: "574298243285",
+  appId: "1:574298243285:web:78f35eccfe8ae37a3ba25c",
+  measurementId: "G-EXMCETLB5N"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -245,10 +228,9 @@ function render(){
 }
 
 /* --- Firestore real-time listener --- */
-/* Observa coleção "gastos" e mantém variável local sincronizada */
-const gastosCollection = db.collection('gastos').orderBy('createdAt', 'asc');
+const gastosQuery = db.collection('gastos').orderBy('createdAt', 'asc');
 
-gastosCollection.onSnapshot(snapshot => {
+gastosQuery.onSnapshot(snapshot => {
     const arr = [];
     snapshot.forEach(doc => {
         const d = doc.data();
@@ -266,7 +248,6 @@ gastosCollection.onSnapshot(snapshot => {
     render();
 }, err => {
     console.error('Erro ao escutar Firestore:', err);
-    // em caso de erro, opcional: carregar backup local do localStorage (não implementado aqui)
 });
 
 /* Adicionar novo gasto (grava no Firestore) */
@@ -281,8 +262,7 @@ ids.form.addEventListener('submit', ev=>{
     if(!item || isNaN(valor) || valor <= 0 || !status || !resp) return alert('Preencha todos os campos.');
     if(status === 'A Pagar' && !data) return alert('Informe a data para "A Pagar".');
 
-    // grava no Firestore
-    gastosCollection.firestore.collection('gastos').add({
+    db.collection('gastos').add({
         item,
         valor: Number(valor.toFixed(2)),
         status,
@@ -291,7 +271,7 @@ ids.form.addEventListener('submit', ev=>{
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(()=>{
         ids.form.reset();
-        // a atualização do UI será feita pelo onSnapshot em tempo real
+        // UI será atualizado pelo listener onSnapshot
     }).catch(err=>{
         console.error('Erro ao adicionar:', err);
         alert('Não foi possível adicionar. Tente novamente.');
@@ -353,7 +333,6 @@ ids.saveEditBtn.onclick = ()=>{
         editingId = null;
         ids.modalBackdrop.style.display = 'none';
         ids.modalBackdrop.setAttribute('aria-hidden','true');
-        // onSnapshot fará o render automático
     }).catch(err=>{
         console.error('Erro ao salvar edição:', err);
         alert('Falha ao salvar alterações.');
@@ -384,10 +363,7 @@ ids.exportCsvBtn.onclick = ()=>{
     const a = document.createElement('a'); a.href = url; a.download = 'gastos_casamento_shared.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 };
 
-/* Limpar todos: opcionalmente apagar todos os docs da coleção.
-   Isso requer mais cuidado: aqui executamos leitura e exclusão em lote (costly em produção).
-   Perguntamos antes de executar.
-*/
+/* Limpar todos: apagar todos os docs da coleção (perigoso em produção) */
 ids.clearAllBtn.onclick = async ()=>{
     if(!confirm('Remover todos os lançamentos? Esta ação apagará todos os registros para todos os usuários.')) return;
     try{
