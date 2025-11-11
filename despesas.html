@@ -1,295 +1,353 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle de Gastos - Casamento 💍</title>
-  <style>
-    :root {
-      --cor-principal: #8B4513;
-      --cor-secundaria: #F0E68C;
-      --fundo-claro: #FFF8DC;
-      --fundo-escuro: #f4f4f4;
-      --sombra: 0 4px 8px rgba(0,0,0,0.1);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Gastos - Casamento 💍</title>
+    <style>
+        :root {
+            --cor-principal: #8B4513;
+            --cor-secundaria: #F0E68C;
+            --fundo-claro: #FFF8DC;
+            --fundo-escuro: #f4f4f4;
+            --sombra: 0 4px 8px rgba(0,0,0,0.1);
+        }
 
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: var(--fundo-claro);
-      color: #333;
-      margin: 0;
-      padding: 0;
-      background-image: url('https://recreio.com.br/wp-content/uploads/disney/carl_e_ellie.jpg'); /* Novo fundo elegante */
-      background-size: cover;
-      background-attachment: fixed;
-      background-position: center;
-      padding-top: 20px;
-    }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--fundo-claro);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://i.imgur.com/e2oWjXn.jpg'); 
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            padding-top: 10px;
+        }
+        
+        .container {
+            width: 95%;
+            max-width: 600px;
+            margin: auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: var(--sombra);
+        }
 
-    .container {
-      max-width: 90%;
-      margin: 0 auto;
-      background-color: rgba(255, 255, 255, 0.70);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: var(--sombra);
-    }
+        h1, h2 {
+            text-align: center;
+            color: var(--cor-principal);
+            border-bottom: 2px solid var(--cor-secundaria);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
 
-    h1, h2 {
-      text-align: center;
-      color: var(--cor-principal);
-      border-bottom: 2px solid var(--cor-secundaria);
-      padding-bottom: 10px;
-      margin-bottom: 20px;
-    }
+        .resumo {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
 
-    .resumo {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
+        .total-box {
+            background-color: var(--fundo-escuro);
+            padding: 12px;
+            border-radius: 5px;
+            box-shadow: var(--sombra);
+            text-align: center;
+            font-size: 1em;
+            font-weight: bold;
+        }
 
-    .total-box {
-      background-color: var(--fundo-escuro);
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: var(--sombra);
-      text-align: center;
-      font-size: 1.1em;
-      font-weight: bold;
-    }
+        .total-box strong {
+            display: block;
+            font-size: 1.3em;
+            color: var(--cor-principal);
+            margin-top: 5px;
+        }
 
-    .total-box strong {
-      display: block;
-      font-size: 1.4em;
-      margin-top: 5px;
-    }
+        .total-gasto strong { color: #d9534f; }
+        .total-apagar strong { color: #f0ad4e; }
 
-    .total-gasto-noivo strong { color: #007bff; }
-    .total-gasto-noiva strong { color: #e83e8c; }
-    .total-apagar-noivo strong { color: #0056b3; }
-    .total-apagar-noiva strong { color: #c2185b; }
+        .total-planejado {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    .total-geral strong { color: #5cb85c; }
+        .total-planejado span {
+            color: #5cb85c;
+            font-size: 1.3em;
+        }
 
-    .total-planejado {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        #btn-editar-orcamento {
+            background-color: var(--cor-principal);
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
 
-    #btn-editar-orcamento {
-      background-color: var(--cor-principal);
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.8em;
-      margin-left: 10px;
-    }
+        #btn-editar-orcamento:hover {
+            opacity: 0.9;
+        }
 
-    #form-gasto {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr 0.7fr;
-      gap: 10px;
-      padding: 15px;
-      background-color: var(--fundo-escuro);
-      border-radius: 5px;
-      margin-bottom: 20px;
-    }
+        #form-gasto {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            background-color: var(--fundo-escuro);
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
 
-    #form-gasto input, #form-gasto select, #form-gasto button {
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
+        #form-gasto input, 
+        #form-gasto select, 
+        #form-gasto button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
 
-    #form-gasto button {
-      background-color: var(--cor-principal);
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
+        #form-gasto button {
+            background-color: var(--cor-principal);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+        }
 
-    .tabela-container {
-      overflow-x: auto;
-    }
+        #form-gasto button:hover {
+            opacity: 0.9;
+        }
 
-    #tabela-gastos {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      min-width: 550px;
-    }
+        .tabela-container {
+            overflow-x: auto;
+        }
 
-    #tabela-gastos th, #tabela-gastos td {
-      padding: 8px 10px;
-      border: 1px solid #ddd;
-    }
+        #tabela-gastos {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9em;
+        }
 
-    #tabela-gastos th {
-      background-color: var(--cor-principal);
-      color: white;
-    }
+        #tabela-gastos th, #tabela-gastos td {
+            padding: 8px 6px;
+            border: 1px solid #ddd;
+        }
 
-    .btn-acao {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #d9534f;
-      font-weight: bold;
-    }
+        #tabela-gastos th {
+            background-color: var(--cor-principal);
+            color: white;
+        }
 
-    @media (min-width: 600px) {
-      .resumo {
-        flex-wrap: wrap;
-        flex-direction: row;
-        justify-content: space-around;
-      }
-    }
-  </style>
+        #tabela-gastos tr:nth-child(even) {
+            background-color: var(--fundo-escuro);
+        }
+
+        .btn-acao {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #d9534f;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .btn-acao:hover {
+            color: #c9302c;
+        }
+
+        /* Alertas visuais */
+        .alerta-laranja {
+            background-color: #fff4e5 !important;
+            color: #c87f00;
+            font-weight: bold;
+        }
+
+        .alerta-vermelho {
+            background-color: #ffe5e5 !important;
+            color: #c9302c;
+            font-weight: bold;
+        }
+
+        /* Mobile friendly */
+        @media (max-width: 600px) {
+            h1, h2 { font-size: 1em; }
+            .total-box { font-size: 0.9em; }
+            #form-gasto input, #form-gasto select, #form-gasto button {
+                font-size: 0.9em;
+            }
+            #tabela-gastos th, #tabela-gastos td {
+                font-size: 0.85em;
+                padding: 6px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>💍 Controle de Orçamento do Casamento 🥂</h1>
+    <div class="container">
+        <h1>💍 Controle de Orçamento do Casamento 🥂</h1>
 
-    <h2>Resumo Financeiro</h2>
-    <div class="resumo">
-      <div class="total-box total-gasto-noivo">
-        Já Gasto (Noivo): <strong id="total-pago-noivo">R$ 0,00</strong>
-      </div>
-      <div class="total-box total-gasto-noiva">
-        Já Gasto (Noiva): <strong id="total-pago-noiva">R$ 0,00</strong>
-      </div>
-      <div class="total-box total-apagar-noivo">
-        A Pagar (Noivo): <strong id="total-apagar-noivo">R$ 0,00</strong>
-      </div>
-      <div class="total-box total-apagar-noiva">
-        A Pagar (Noiva): <strong id="total-apagar-noiva">R$ 0,00</strong>
-      </div>
-      <div class="total-box total-geral">
-        Total Geral: <strong id="total-geral">R$ 0,00</strong>
-      </div>
-      <div class="total-box total-geral">
-        Orçamento Planejado:
-        <div class="total-planejado">
-          <span id="orcamento-planejado">R$ 60.000,00</span>
-          <button id="btn-editar-orcamento">Editar</button>
+        <h2>Resumo Financeiro</h2>
+        <div class="resumo">
+            <div class="total-box total-gasto">
+                Total Já Gasto (Pago): <strong id="total-pago">R$ 0,00</strong>
+            </div>
+            <div class="total-box total-apagar">
+                Total a Pagar (Futuro): <strong id="total-a-pagar">R$ 0,00</strong>
+            </div>
+            <div class="total-box total-geral">
+                Orçamento Planejado:
+                <div class="total-planejado">
+                    <span id="orcamento-planejado">R$ 60.000,00</span>
+                    <button id="btn-editar-orcamento">Editar</button>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <h2>Lançar Novo Gasto</h2>
+        <form id="form-gasto">
+            <input type="text" id="item" placeholder="Item (Ex: Buffet)" required>
+            <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" required>
+            <select id="status" required>
+                <option value="" disabled selected>Status</option>
+                <option value="Pago">Pago</option>
+                <option value="A Pagar">A Pagar</option>
+            </select>
+            <select id="responsavel" required>
+                <option value="" disabled selected>Responsável</option>
+                <option value="Noivo">Noivo</option>
+                <option value="Noiva">Noiva</option>
+            </select>
+            <input type="date" id="data-pagamento" placeholder="Data do pagamento (para futuros)">
+            <button type="submit">Adicionar Gasto</button>
+        </form>
+
+        <h2>Detalhes dos Gastos</h2>
+        <div class="tabela-container">
+            <table id="tabela-gastos">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Valor (R$)</th>
+                        <th>Status</th>
+                        <th>Responsável</th>
+                        <th>Data</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 
-    <h2>Lançar Novo Gasto</h2>
-    <form id="form-gasto">
-      <input type="text" id="item" placeholder="Item (Ex: Buffet)" required>
-      <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" required>
-      <select id="status" required>
-        <option value="" disabled selected>Status</option>
-        <option value="Pago">Pago</option>
-        <option value="A Pagar">A Pagar</option>
-      </select>
-      <select id="responsavel" required>
-        <option value="" disabled selected>Responsável</option>
-        <option value="Noivo">Noivo</option>
-        <option value="Noiva">Noiva</option>
-      </select>
-      <button type="submit">Adicionar Gasto</button>
-    </form>
+    <script>
+        let orcamentoTotal = 60000.00;
+        let gastos = [
+            { item: "Sinal do Buffet", valor: 7500.00, status: "Pago", responsavel: "Noivo", data: "" },
+            { item: "Vestido da Noiva", valor: 8500.00, status: "A Pagar", responsavel: "Noiva", data: "2025-11-15" },
+            { item: "Terno do Noivo", valor: 2500.00, status: "A Pagar", responsavel: "Noivo", data: "2025-11-05" }
+        ];
 
-    <h2>Detalhes dos Gastos</h2>
-    <div class="tabela-container">
-      <table id="tabela-gastos">
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>Valor (R$)</th>
-            <th>Status</th>
-            <th>Responsável</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
+        const tabelaBody = document.querySelector('#tabela-gastos tbody');
+        const totalPagoElement = document.getElementById('total-pago');
+        const totalAPagarElement = document.getElementById('total-a-pagar');
+        const orcamentoPlanejadoElement = document.getElementById('orcamento-planejado');
+        const btnEditarOrcamento = document.getElementById('btn-editar-orcamento');
+        const formGasto = document.getElementById('form-gasto');
 
-  <script>
-    let orcamentoTotal = 60000.00;
-    let gastos = [];
+        function formatarMoeda(valor) {
+            return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
 
-    const tabelaBody = document.querySelector('#tabela-gastos tbody');
-    const totalPagoNoivo = document.getElementById('total-pago-noivo');
-    const totalPagoNoiva = document.getElementById('total-pago-noiva');
-    const totalApagarNoivo = document.getElementById('total-apagar-noivo');
-    const totalApagarNoiva = document.getElementById('total-apagar-noiva');
-    const totalGeral = document.getElementById('total-geral');
-    const orcamentoPlanejado = document.getElementById('orcamento-planejado');
-    const formGasto = document.getElementById('form-gasto');
-    const btnEditarOrcamento = document.getElementById('btn-editar-orcamento');
+        function atualizarTabelaEContadores() {
+            let totalPago = 0;
+            let totalAPagar = 0;
 
-    function formatarMoeda(valor) {
-      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    }
+            tabelaBody.innerHTML = '';
+            const hoje = new Date();
 
-    function atualizarTabelaEContadores() {
-      let pagoNoivo = 0, pagoNoiva = 0, apagarNoivo = 0, apagarNoiva = 0;
+            gastos.forEach((gasto, index) => {
+                if (gasto.status === "Pago") totalPago += gasto.valor;
+                else totalAPagar += gasto.valor;
 
-      tabelaBody.innerHTML = '';
-      gastos.forEach((gasto, index) => {
-        const row = tabelaBody.insertRow();
-        row.innerHTML = `
-          <td>${gasto.item}</td>
-          <td>${formatarMoeda(gasto.valor)}</td>
-          <td>${gasto.status}</td>
-          <td>${gasto.responsavel}</td>
-          <td><button class="btn-acao" onclick="removerGasto(${index})">X</button></td>
-        `;
+                const row = tabelaBody.insertRow();
 
-        if (gasto.status === "Pago" && gasto.responsavel === "Noivo") pagoNoivo += gasto.valor;
-        if (gasto.status === "Pago" && gasto.responsavel === "Noiva") pagoNoiva += gasto.valor;
-        if (gasto.status === "A Pagar" && gasto.responsavel === "Noivo") apagarNoivo += gasto.valor;
-        if (gasto.status === "A Pagar" && gasto.responsavel === "Noiva") apagarNoiva += gasto.valor;
-      });
+                // Cálculo de alerta visual
+                let classe = '';
+                if (gasto.status === "A Pagar" && gasto.data) {
+                    const dataGasto = new Date(gasto.data);
+                    const diffDias = Math.ceil((dataGasto - hoje) / (1000 * 60 * 60 * 24));
+                    if (diffDias < 0) classe = 'alerta-vermelho';
+                    else if (diffDias <= 7) classe = 'alerta-laranja';
+                }
 
-      totalPagoNoivo.textContent = formatarMoeda(pagoNoivo);
-      totalPagoNoiva.textContent = formatarMoeda(pagoNoiva);
-      totalApagarNoivo.textContent = formatarMoeda(apagarNoivo);
-      totalApagarNoiva.textContent = formatarMoeda(apagarNoiva);
-      totalGeral.textContent = formatarMoeda(pagoNoivo + pagoNoiva + apagarNoivo + apagarNoiva);
-      orcamentoPlanejado.textContent = formatarMoeda(orcamentoTotal);
-    }
+                row.innerHTML = `
+                    <td>${gasto.item}</td>
+                    <td>${formatarMoeda(gasto.valor)}</td>
+                    <td>${gasto.status}</td>
+                    <td>${gasto.responsavel}</td>
+                    <td>${gasto.data ? new Date(gasto.data).toLocaleDateString('pt-BR') : '-'}</td>
+                    <td><button class="btn-acao" onclick="removerGasto(${index})">X</button></td>
+                `;
 
-    function removerGasto(index) {
-      gastos.splice(index, 1);
-      atualizarTabelaEContadores();
-    }
+                if (classe) row.classList.add(classe);
+            });
 
-    formGasto.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const item = document.getElementById('item').value;
-      const valor = parseFloat(document.getElementById('valor').value);
-      const status = document.getElementById('status').value;
-      const responsavel = document.getElementById('responsavel').value;
+            totalPagoElement.textContent = formatarMoeda(totalPago);
+            totalAPagarElement.textContent = formatarMoeda(totalAPagar);
+            orcamentoPlanejadoElement.textContent = formatarMoeda(orcamentoTotal);
+        }
 
-      if (item && valor > 0 && status && responsavel) {
-        gastos.push({ item, valor, status, responsavel });
-        atualizarTabelaEContadores();
-        formGasto.reset();
-      }
-    });
+        function editarOrcamento() {
+            let novoOrcamento = prompt("Digite o novo valor do Orçamento Total (apenas números):", orcamentoTotal.toFixed(2));
+            if (novoOrcamento !== null) {
+                let valor = parseFloat(novoOrcamento.replace(',', '.')); 
+                if (!isNaN(valor) && valor >= 0) {
+                    orcamentoTotal = valor;
+                    atualizarTabelaEContadores();
+                    alert("Orçamento atualizado com sucesso!");
+                } else {
+                    alert("Valor inválido. Por favor, digite apenas números.");
+                }
+            }
+        }
 
-    btnEditarOrcamento.addEventListener('click', () => {
-      const novoValor = prompt("Digite o novo valor do orçamento:", orcamentoTotal);
-      if (novoValor !== null && !isNaN(parseFloat(novoValor))) {
-        orcamentoTotal = parseFloat(novoValor);
-        atualizarTabelaEContadores();
-      }
-    });
+        btnEditarOrcamento.addEventListener('click', editarOrcamento);
 
-    document.addEventListener('DOMContentLoaded', atualizarTabelaEContadores);
-  </script>
+        formGasto.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const item = document.getElementById('item').value;
+            const valor = parseFloat(document.getElementById('valor').value);
+            const status = document.getElementById('status').value;
+            const responsavel = document.getElementById('responsavel').value;
+            const data = document.getElementById('data-pagamento').value;
+
+            if (item && valor > 0 && status && responsavel) {
+                gastos.push({ item, valor, status, responsavel, data });
+                atualizarTabelaEContadores();
+                formGasto.reset();
+            } else {
+                alert("Por favor, preencha todos os campos corretamente.");
+            }
+        });
+
+        function removerGasto(index) {
+            gastos.splice(index, 1);
+            atualizarTabelaEContadores();
+        }
+
+        document.addEventListener('DOMContentLoaded', atualizarTabelaEContadores);
+    </script>
 </body>
 </html>
-
