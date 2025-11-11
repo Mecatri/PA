@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Controle de Gastos - Casamento · Modern</title>
 
+<!-- Modern fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -26,8 +27,7 @@ html,body{height:100%;}
 body{
     margin:0;
     font-family:'Poppins',system-ui;
-    /* Usei uma cor sólida para garantir que a imagem não atrapalhe a comparação */
-    background-color: var(--bg);
+    background:linear-gradient(180deg,#fbfaf7 0%,#fffefc 100%);
     color:#222;
     padding:20px;
 }
@@ -121,7 +121,7 @@ th,td{padding:12px 10px;text-align:left;border-bottom:1px solid #f1f1f1;font-siz
 th{background:var(--accent);color:white;font-weight:700;}
 .row-action{
     display:flex;
-    flex-direction:column;
+    flex-direction:column; /* <-- Botões agora em coluna */
     gap:6px;
     justify-content:center;
     align-items:flex-end;
@@ -143,11 +143,10 @@ th{background:var(--accent);color:white;font-weight:700;}
 .alert-orange td{background:#fff7ee;color:var(--warn);font-weight:700;}
 .alert-red td{background:#fff0f0;color:var(--danger);font-weight:700;}
 
-/* MOBILE CORRIGIDO */
+/* MOBILE */
 @media (max-width:760px){
     table,thead,tbody,th,td,tr{display:block;}
     thead{display:none;}
-    /* O TR é o cartão */
     tr{margin:10px 0;background:#fff;border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(10,10,10,0.03);}
     td{border:none;padding:8px 6px;}
     td::before{
@@ -157,49 +156,31 @@ th{background:var(--accent);color:white;font-weight:700;}
         font-weight:700;
         color:var(--muted);
     }
-    
-    /* CORREÇÃO 1: Layout da célula de Ações */
     .row-action{
-        flex-direction:row; /* Alinha horizontalmente */
-        justify-content:center; /* Centraliza os botões */
-        gap:10px; /* Mais espaço entre os botões */
-        margin-top:10px;
-        align-items:center;
+        flex-direction:column; /* Mantém os botões um embaixo do outro no mobile */
+        align-items:stretch;
     }
     .btn-small{
         font-size:0.85rem;
     }
-
-    /* CORREÇÃO 2: Garante que a última célula (Ações) no mobile ocupe 100% da largura */
-    td:last-child {
-        text-align: center;
-        width: 100%; 
-    }
-
-    /* CORREÇÃO 3: Oculta a data no mobile, como na imagem */
-    td[data-label="Data"] {
-        display: none;
-    }
-
-    /* CORREÇÃO 4: Garante que as cores de alerta sejam aplicadas corretamente */
-    .alert-red {
-        background-color: var(--danger) !important; 
-        color: white !important; /* Texto branco no fundo vermelho */
-    }
-    .alert-orange {
-        background-color: var(--warn) !important;
-        color: #222 !important; /* Cor mais escura no fundo laranja */
-    }
-
-    .alert-red td, .alert-orange td {
-        background: transparent !important; /* Garante que a célula não sobreponha a cor do TR */
-        color: inherit !important;
-    }
-    .alert-red td::before, .alert-orange td::before {
-        color: inherit !important;
-    }
 }
-/* FIM MOBILE CORRIGIDO */
+
+/* MODAL */
+.modal-backdrop{
+    position:fixed;inset:0;background:rgba(10,10,10,0.45);
+    display:none;align-items:center;justify-content:center;z-index:999;
+}
+.modal{
+    background:var(--card);
+    border-radius:12px;
+    padding:18px;
+    width:clamp(320px,80%,720px);
+    box-shadow:0 12px 32px rgba(20,20,20,0.18);
+}
+.modal h3{margin:0 0 8px;color:var(--accent);font-family:'Playfair Display',serif;}
+.modal .row{display:grid;gap:8px;margin-bottom:10px;}
+@media(min-width:700px){.modal .row{grid-template-columns:1fr 1fr;}}
+.small{font-size:0.85rem;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -269,10 +250,7 @@ th{background:var(--accent);color:white;font-weight:700;}
 </div>
 
 <script>
-let gastos=[
-    {item:'Buffet',valor:40000.00,status:'A Pagar',responsavel:'Noivo',data:'2026-03-20'},
-    {item:'Vestido',valor:8000.00,status:'Pago',responsavel:'Noiva',data:''}
-]; // Adicionei dados de exemplo para teste
+let gastos=[];
 const ids={
     tabelaBody:document.querySelector('#tabela tbody'),
     totalPagoNoivo:document.getElementById('total-pago-noivo'),
@@ -309,22 +287,17 @@ function render(){
         const tr=document.createElement('tr');
         let alertClass='';
         if(g.status==="A Pagar"&&g.data){
-            // Adicionar 'T00:00:00' para evitar problemas de fuso horário
-            const dt=new Date(g.data + 'T00:00:00'); 
+            const dt=new Date(g.data);dt.setHours(0,0,0,0);
             const diffDays=Math.ceil((dt-hoje)/(1000*60*60*24));
             if(diffDays<0)alertClass='alert-red';else if(diffDays<=7)alertClass='alert-orange';
         }
         if(alertClass)tr.classList.add(alertClass);
-        
-        // Corrigido a formatação da data para o formato esperado (DD/MM/AAAA)
-        const dataFormatada = g.data ? (new Date(g.data + 'T00:00:00')).toLocaleDateString('pt-BR') : '-';
-        
         tr.innerHTML=`
         <td data-label="Item">${g.item}</td>
         <td data-label="Valor">${formatBRL(g.valor)}</td>
         <td data-label="Status">${g.status}</td>
         <td data-label="Responsável">${g.responsavel}</td>
-        <td data-label="Data">${dataFormatada}</td>
+        <td data-label="Data">${g.data?(new Date(g.data)).toLocaleDateString('pt-BR'):'-'}</td>
         <td data-label="Ações"><div class="row-action">
             <button class="btn-small btn-edit" type="button" onclick="openEditModal(${idx})">Editar</button>
             <button class="btn-small btn-delete" type="button" onclick="removeItem(${idx})">Remover</button>
@@ -358,26 +331,15 @@ function openEditModal(i){
 ids.cancelEditBtn.onclick=()=>ids.modalBackdrop.style.display='none';
 ids.saveEditBtn.onclick=()=>{
     const i=editingIndex;if(i===null)return;
-    
-    const novoItem = ids.editItem.value.trim();
-    const novoValor = parseFloat(ids.editValor.value);
-    const novoStatus = ids.editStatus.value;
-    const novaData = ids.editData.value;
-    
-    // Revalidações
-    if(!novoItem || isNaN(novoValor) || novoValor <= 0) return alert('Verifique os campos Item e Valor.');
-    if(novoStatus === 'A Pagar' && !novaData) return alert('Informe a data para status "A Pagar".');
-    
-    gastos[i].item=novoItem;
-    gastos[i].valor=novoValor;
-    gastos[i].status=novoStatus;
+    gastos[i].item=ids.editItem.value.trim();
+    gastos[i].valor=parseFloat(ids.editValor.value)||0;
+    gastos[i].status=ids.editStatus.value;
     gastos[i].responsavel=ids.editResp.value;
-    gastos[i].data=novaData;
-    
+    gastos[i].data=ids.editData.value;
     ids.modalBackdrop.style.display='none';
     render();
 };
 render();
 </script>
 </body>
-</html>
+</html>                                                este codigo ainda está ficando fora de padrao no mobile, gostaria que no mibile ficasse tudu ajsutado tambem
