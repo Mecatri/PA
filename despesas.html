@@ -1,295 +1,425 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle de Gastos - Casamento 💍</title>
-  <style>
-    :root {
-      --cor-principal: #8B4513;
-      --cor-secundaria: #F0E68C;
-      --fundo-claro: #FFF8DC;
-      --fundo-escuro: #f4f4f4;
-      --sombra: 0 4px 8px rgba(0,0,0,0.1);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Gastos - Casamento 💍</title>
+  <style>
+    /* 🛠️ CORREÇÃO DE TRANSPARÊNCIA E CORES */
+    :root {
+      --cor-principal: #8B4513; /* Marrom Rústico */
+      --cor-secundaria: #F0E68C; /* Dourado Suave */
+      --fundo-claro: #FFF8DC; /* Creme */
+      /* Usando RGBA para transparência (Branco com 70% de opacidade) */
+      --fundo-escuro: rgba(255, 255, 255, 0.7); 
+      --sombra: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: var(--fundo-claro);
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-image: url('https://recreio.com.br/wp-content/uploads/disney/carl_e_ellie.jpg'); 
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      padding-top: 20px;
+    }
+
+    .container {
+      max-width: 90%;
+      margin: 0 auto;
+      /* Fundo do container ligeiramente transparente para mostrar o fundo */
+      background-color: rgba(255, 255, 255, 0.85); 
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: var(--sombra);
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: var(--cor-principal);
+      border-bottom: 2px solid var(--cor-secundaria);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .resumo {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .total-box {
+      /* Aplica a nova cor transparente */
+      background-color: var(--fundo-escuro); 
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: var(--sombra);
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+
+    .total-box strong {
+      display: block;
+      font-size: 1.4em;
+      margin-top: 5px;
+    }
+
+    /* Cores de Texto */
+    .total-gasto-noivo strong { color: #007bff; }
+    .total-gasto-noiva strong { color: #e83e8c; }
+    .total-apagar-noivo strong { color: #0056b3; }
+    .total-apagar-noiva strong { color: #c2185b; }
+    .total-geral strong { color: var(--cor-principal); } 
+    .total-diferenca.positivo strong { color: #28a745; } 
+    .total-diferenca.negativo strong { color: #dc3545; } 
+
+
+    .total-planejado {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #btn-editar-orcamento {
+      background-color: var(--cor-principal);
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.8em;
+      margin-left: 10px;
+    }
+
+    #form-gasto {
+      display: grid;
+      /* Novo layout para 5 campos + botão */
+      grid-template-columns: repeat(3, 1fr) 1fr 1fr 0.7fr; 
+      gap: 10px;
+      /* Aplica a nova cor transparente */
+      background-color: var(--fundo-escuro); 
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    /* Ajusta o layout do formulário para telas menores */
+    @media (max-width: 600px) {
+        #form-gasto {
+             grid-template-columns: 1fr 1fr;
+        }
+        #form-gasto button {
+            grid-column: 1 / 3;
+        }
+    }
+    
+
+    #form-gasto input, #form-gasto select, #form-gasto button {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    #form-gasto button {
+      background-color: var(--cor-principal);
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tabela-container {
+      overflow-x: auto;
+    }
+
+    #tabela-gastos {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      min-width: 650px; /* Aumenta a largura mínima devido à nova coluna */
+    }
+
+    #tabela-gastos th, #tabela-gastos td {
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+    }
+
+    #tabela-gastos th {
+      background-color: var(--cor-principal);
+      color: white;
+    }
+    
+    /* Linhas da tabela com transparência para alternância de cores */
+    #tabela-gastos tbody tr:nth-child(even) {
+        background-color: rgba(255, 255, 255, 0.5); 
+    }
+    #tabela-gastos tbody tr:nth-child(odd) {
+        background-color: rgba(255, 255, 255, 0.8);
     }
 
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: var(--fundo-claro);
-      color: #333;
-      margin: 0;
-      padding: 0;
-      background-image: url('https://recreio.com.br/wp-content/uploads/disney/carl_e_ellie.jpg'); /* Novo fundo elegante */
-      background-size: cover;
-      background-attachment: fixed;
-      background-position: center;
-      padding-top: 20px;
+    /* 🚨 ESTILOS DE ALERTA */
+    /* Alerta Amarelo/Laranja (Menos de 7 dias) */
+    .alerta-amarelo td {
+        background-color: rgba(255, 193, 7, 0.8) !important; 
+    }
+    /* Alerta Vermelho (Atrasado) */
+    .alerta-vermelho td {
+        background-color: rgba(220, 53, 69, 0.8) !important; 
+        color: #333; /* Garante que o texto fique escuro em fundo claro */
     }
 
-    .container {
-      max-width: 90%;
-      margin: 0 auto;
-      background-color: rgba(255, 255, 255, 0.70);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: var(--sombra);
-    }
+    .btn-acao {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #d9534f;
+      font-weight: bold;
+    }
 
-    h1, h2 {
-      text-align: center;
-      color: var(--cor-principal);
-      border-bottom: 2px solid var(--cor-secundaria);
-      padding-bottom: 10px;
-      margin-bottom: 20px;
-    }
-
-    .resumo {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .total-box {
-      background-color: var(--fundo-escuro);
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: var(--sombra);
-      text-align: center;
-      font-size: 1.1em;
-      font-weight: bold;
-    }
-
-    .total-box strong {
-      display: block;
-      font-size: 1.4em;
-      margin-top: 5px;
-    }
-
-    .total-gasto-noivo strong { color: #007bff; }
-    .total-gasto-noiva strong { color: #e83e8c; }
-    .total-apagar-noivo strong { color: #0056b3; }
-    .total-apagar-noiva strong { color: #c2185b; }
-
-    .total-geral strong { color: #5cb85c; }
-
-    .total-planejado {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    #btn-editar-orcamento {
-      background-color: var(--cor-principal);
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.8em;
-      margin-left: 10px;
-    }
-
-    #form-gasto {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr 0.7fr;
-      gap: 10px;
-      padding: 15px;
-      background-color: var(--fundo-escuro);
-      border-radius: 5px;
-      margin-bottom: 20px;
-    }
-
-    #form-gasto input, #form-gasto select, #form-gasto button {
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    #form-gasto button {
-      background-color: var(--cor-principal);
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .tabela-container {
-      overflow-x: auto;
-    }
-
-    #tabela-gastos {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      min-width: 550px;
-    }
-
-    #tabela-gastos th, #tabela-gastos td {
-      padding: 8px 10px;
-      border: 1px solid #ddd;
-    }
-
-    #tabela-gastos th {
-      background-color: var(--cor-principal);
-      color: white;
-    }
-
-    .btn-acao {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #d9534f;
-      font-weight: bold;
-    }
-
-    @media (min-width: 600px) {
-      .resumo {
-        flex-wrap: wrap;
-        flex-direction: row;
-        justify-content: space-around;
-      }
-    }
-  </style>
+    @media (min-width: 600px) {
+      .resumo {
+        /* 3 Colunas no Desktop para melhor visualização */
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 10px;
+      }
+      .resumo > div:nth-last-child(2), .resumo > div:last-child {
+        grid-column: span 3; /* Orçamento e Diferença ocupam a linha toda */
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>💍 Controle de Orçamento do Casamento 🥂</h1>
+  <div class="container">
+    <h1>💍 Controle de Orçamento do Casamento 🥂</h1>
 
-    <h2>Resumo Financeiro</h2>
-    <div class="resumo">
-      <div class="total-box total-gasto-noivo">
-        Já Gasto (Noivo): <strong id="total-pago-noivo">R$ 0,00</strong>
-      </div>
-      <div class="total-box total-gasto-noiva">
-        Já Gasto (Noiva): <strong id="total-pago-noiva">R$ 0,00</strong>
-      </div>
-      <div class="total-box total-apagar-noivo">
-        A Pagar (Noivo): <strong id="total-apagar-noivo">R$ 0,00</strong>
-      </div>
-      <div class="total-box total-apagar-noiva">
-        A Pagar (Noiva): <strong id="total-apagar-noiva">R$ 0,00</strong>
-      </div>
-      <div class="total-box total-geral">
-        Total Geral: <strong id="total-geral">R$ 0,00</strong>
-      </div>
-      <div class="total-box total-geral">
-        Orçamento Planejado:
-        <div class="total-planejado">
-          <span id="orcamento-planejado">R$ 60.000,00</span>
-          <button id="btn-editar-orcamento">Editar</button>
-        </div>
-      </div>
-    </div>
+    <h2>Resumo Financeiro</h2>
+    <div class="resumo">
+      <div class="total-box total-gasto-noivo">
+        Já Gasto (Noivo): <strong id="total-pago-noivo">R$ 0,00</strong>
+      </div>
+      <div class="total-box total-gasto-noiva">
+        Já Gasto (Noiva): <strong id="total-pago-noiva">R$ 0,00</strong>
+      </div>
+      <div class="total-box total-apagar-noivo">
+        A Pagar (Noivo): <strong id="total-apagar-noivo">R$ 0,00</strong>
+      </div>
+      <div class="total-box total-apagar-noiva">
+        A Pagar (Noiva): <strong id="total-apagar-noiva">R$ 0,00</strong>
+      </div>
+      <div class="total-box total-geral">
+        Total Gasto/Comprometido: <strong id="total-geral">R$ 0,00</strong>
+      </div>
+      <div class="total-box total-geral">
+        Orçamento Planejado:
+        <div class="total-planejado">
+          <strong id="orcamento-planejado">R$ 60.000,00</strong>
+          <button id="btn-editar-orcamento">Editar</button>
+        </div>
+      </div>
+      <div class="total-box total-diferenca">
+        Diferença (Caixa): <strong id="total-diferenca">R$ 0,00</strong>
+      </div>
+    </div>
 
-    <h2>Lançar Novo Gasto</h2>
-    <form id="form-gasto">
-      <input type="text" id="item" placeholder="Item (Ex: Buffet)" required>
-      <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" required>
-      <select id="status" required>
-        <option value="" disabled selected>Status</option>
-        <option value="Pago">Pago</option>
-        <option value="A Pagar">A Pagar</option>
-      </select>
-      <select id="responsavel" required>
-        <option value="" disabled selected>Responsável</option>
-        <option value="Noivo">Noivo</option>
-        <option value="Noiva">Noiva</option>
-      </select>
-      <button type="submit">Adicionar Gasto</button>
-    </form>
+    <h2>Lançar Novo Gasto</h2>
+    <form id="form-gasto">
+      <input type="text" id="item" placeholder="Item (Ex: Buffet)" required>
+      <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" required>
+      <select id="status" required>
+        <option value="" disabled selected>Status</option>
+        <option value="Pago">Pago</option>
+        <option value="A Pagar">A Pagar</option>
+      </select>
+      <input type="date" id="data-vencimento" placeholder="Vencimento (A Pagar)">
+      <select id="responsavel" required>
+        <option value="" disabled selected>Responsável</option>
+        <option value="Noivo">Noivo</option>
+        <option value="Noiva">Noiva</option>
+      </select>
+      <button type="submit">Adicionar Gasto</button>
+    </form>
 
-    <h2>Detalhes dos Gastos</h2>
-    <div class="tabela-container">
-      <table id="tabela-gastos">
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>Valor (R$)</th>
-            <th>Status</th>
-            <th>Responsável</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
+    <h2>Detalhes dos Gastos</h2>
+    <div class="tabela-container">
+      <table id="tabela-gastos">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Valor (R$)</th>
+            <th>Status</th>
+              <th>Vencimento</th>
+            <th>Responsável</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
-  <script>
-    let orcamentoTotal = 60000.00;
-    let gastos = [];
+  <script>
+    // Configurando data de hoje para simulação e lógica de atraso
+    const hoje = new Date();
+    // Usei a data atual do sistema (2025-11-10) como referência para os exemplos:
+    const dataAtrasada = '2025-10-30'; // Atrasado
+    const dataPerto = '2025-11-15'; // 5 dias restantes (Alerta Amarelo)
+    const dataFutura = '2026-01-20'; // Longe
 
-    const tabelaBody = document.querySelector('#tabela-gastos tbody');
-    const totalPagoNoivo = document.getElementById('total-pago-noivo');
-    const totalPagoNoiva = document.getElementById('total-pago-noiva');
-    const totalApagarNoivo = document.getElementById('total-apagar-noivo');
-    const totalApagarNoiva = document.getElementById('total-apagar-noiva');
-    const totalGeral = document.getElementById('total-geral');
-    const orcamentoPlanejado = document.getElementById('orcamento-planejado');
-    const formGasto = document.getElementById('form-gasto');
-    const btnEditarOrcamento = document.getElementById('btn-editar-orcamento');
+    let orcamentoTotal = 60000.00;
+    let gastos = [];
+    // Adicionando dados de exemplo (incluindo datas)
+    gastos.push({ item: "Buffet (Sinal)", valor: 7500.00, status: "Pago", responsavel: "Noivo" });
+    gastos.push({ item: "Vestido da Noiva", valor: 8500.00, status: "A Pagar", responsavel: "Noiva", data_vencimento: dataPerto });
+    gastos.push({ item: "Fotografia (Contrato)", valor: 5000.00, status: "A Pagar", responsavel: "Noivo", data_vencimento: dataFutura });
+    gastos.push({ item: "Decoração (Última Parcela)", valor: 2000.00, status: "A Pagar", responsavel: "Noiva", data_vencimento: dataAtrasada });
 
-    function formatarMoeda(valor) {
-      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    const tabelaBody = document.querySelector('#tabela-gastos tbody');
+    const totalPagoNoivo = document.getElementById('total-pago-noivo');
+    const totalPagoNoiva = document.getElementById('total-pago-noiva');
+    const totalApagarNoivo = document.getElementById('total-apagar-noivo');
+    const totalApagarNoiva = document.getElementById('total-apagar-noiva');
+    const totalGeral = document.getElementById('total-geral');
+    const orcamentoPlanejado = document.getElementById('orcamento-planejado');
+    const totalDiferencaElement = document.getElementById('total-diferenca');
+    const totalDiferencaBox = totalDiferencaElement.closest('.total-box');
+
+    const formGasto = document.getElementById('form-gasto');
+    const btnEditarOrcamento = document.getElementById('btn-editar-orcamento');
+    const inputDataVencimento = document.getElementById('data-vencimento');
+
+
+    function formatarMoeda(valor) {
+      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // Função auxiliar para formatar a data (AAAA-MM-DD para DD/MM/AAAA)
+    function formatarData(dataString) {
+        if (!dataString) return '-';
+        const [ano, mes, dia] = dataString.split('-');
+        return `${dia}/${mes}/${ano}`;
     }
 
-    function atualizarTabelaEContadores() {
-      let pagoNoivo = 0, pagoNoiva = 0, apagarNoivo = 0, apagarNoiva = 0;
+    function atualizarTabelaEContadores() {
+      let pagoNoivo = 0, pagoNoiva = 0, apagarNoivo = 0, apagarNoiva = 0;
+      let totalComprometido = 0;
 
-      tabelaBody.innerHTML = '';
-      gastos.forEach((gasto, index) => {
-        const row = tabelaBody.insertRow();
-        row.innerHTML = `
-          <td>${gasto.item}</td>
-          <td>${formatarMoeda(gasto.valor)}</td>
-          <td>${gasto.status}</td>
-          <td>${gasto.responsavel}</td>
-          <td><button class="btn-acao" onclick="removerGasto(${index})">X</button></td>
-        `;
+      // Limpa a hora da data de hoje para que a comparação seja apenas por dia
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0); 
 
-        if (gasto.status === "Pago" && gasto.responsavel === "Noivo") pagoNoivo += gasto.valor;
-        if (gasto.status === "Pago" && gasto.responsavel === "Noiva") pagoNoiva += gasto.valor;
-        if (gasto.status === "A Pagar" && gasto.responsavel === "Noivo") apagarNoivo += gasto.valor;
-        if (gasto.status === "A Pagar" && gasto.responsavel === "Noiva") apagarNoiva += gasto.valor;
-      });
+      tabelaBody.innerHTML = '';
+      gastos.forEach((gasto, index) => {
+        const row = tabelaBody.insertRow();
+        let dataVencimentoFormatada = '-';
+        let dataEhValida = false;
+        
+        // Lógica de cálculo dos totais
+        if (gasto.status === "Pago" && gasto.responsavel === "Noivo") pagoNoivo += gasto.valor;
+        else if (gasto.status === "Pago" && gasto.responsavel === "Noiva") pagoNoiva += gasto.valor;
+        else if (gasto.status === "A Pagar" && gasto.responsavel === "Noivo") apagarNoivo += gasto.valor;
+        else if (gasto.status === "A Pagar" && gasto.responsavel === "Noiva") apagarNoiva += gasto.valor;
 
-      totalPagoNoivo.textContent = formatarMoeda(pagoNoivo);
-      totalPagoNoiva.textContent = formatarMoeda(pagoNoiva);
-      totalApagarNoivo.textContent = formatarMoeda(apagarNoivo);
-      totalApagarNoiva.textContent = formatarMoeda(apagarNoiva);
-      totalGeral.textContent = formatarMoeda(pagoNoivo + pagoNoiva + apagarNoivo + apagarNoiva);
-      orcamentoPlanejado.textContent = formatarMoeda(orcamentoTotal);
-    }
+        // Lógica de alerta e formatação de data
+        if (gasto.status === "A Pagar" && gasto.data_vencimento) {
+            dataVencimentoFormatada = formatarData(gasto.data_vencimento);
+            
+            // Cria um objeto Date do vencimento e limpa a hora
+            const vencimento = new Date(gasto.data_vencimento + 'T00:00:00');
+            vencimento.setHours(0, 0, 0, 0);
 
-    function removerGasto(index) {
-      gastos.splice(index, 1);
-      atualizarTabelaEContadores();
-    }
+            // Calcula a diferença em dias
+            const diferencaMs = vencimento - hoje;
+            const diasRestantes = Math.ceil(diferencaMs / (1000 * 60 * 60 * 24)); // ms em um dia
 
-    formGasto.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const item = document.getElementById('item').value;
-      const valor = parseFloat(document.getElementById('valor').value);
-      const status = document.getElementById('status').value;
-      const responsavel = document.getElementById('responsavel').value;
+            if (diasRestantes < 0) {
+                row.classList.add('alerta-vermelho'); // Atrasado
+            } else if (diasRestantes <= 7) {
+                row.classList.add('alerta-amarelo'); // Menos de uma semana
+            }
+        }
+        
+        // Insere os dados na linha da tabela
+        row.innerHTML = `
+          <td>${gasto.item}</td>
+          <td>${formatarMoeda(gasto.valor)}</td>
+          <td>${gasto.status}</td>
+          <td>${dataVencimentoFormatada}</td>
+          <td>${gasto.responsavel}</td>
+          <td><button class="btn-acao" onclick="removerGasto(${index})">X</button></td>
+        `;
+      });
+      
+      totalComprometido = pagoNoivo + pagoNoiva + apagarNoivo + apagarNoiva;
+      let diferenca = orcamentoTotal - totalComprometido;
 
-      if (item && valor > 0 && status && responsavel) {
-        gastos.push({ item, valor, status, responsavel });
-        atualizarTabelaEContadores();
-        formGasto.reset();
+      totalPagoNoivo.textContent = formatarMoeda(pagoNoivo);
+      totalPagoNoiva.textContent = formatarMoeda(pagoNoiva);
+      totalApagarNoivo.textContent = formatarMoeda(apagarNoivo);
+      totalApagarNoiva.textContent = formatarMoeda(apagarNoiva);
+      totalGeral.textContent = formatarMoeda(totalComprometido);
+      orcamentoPlanejado.textContent = formatarMoeda(orcamentoTotal);
+      
+      // Atualiza a Diferença
+      totalDiferencaElement.textContent = formatarMoeda(diferenca);
+      totalDiferencaBox.classList.remove('positivo', 'negativo');
+      if (diferenca >= 0) {
+          totalDiferencaBox.classList.add('positivo');
+      } else {
+          totalDiferencaBox.classList.add('negativo');
       }
-    });
+    }
 
-    btnEditarOrcamento.addEventListener('click', () => {
-      const novoValor = prompt("Digite o novo valor do orçamento:", orcamentoTotal);
-      if (novoValor !== null && !isNaN(parseFloat(novoValor))) {
-        orcamentoTotal = parseFloat(novoValor);
-        atualizarTabelaEContadores();
+    function removerGasto(index) {
+      gastos.splice(index, 1);
+      atualizarTabelaEContadores();
+    }
+
+    formGasto.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const item = document.getElementById('item').value;
+      const valor = parseFloat(document.getElementById('valor').value);
+      const status = document.getElementById('status').value;
+      const dataVencimento = inputDataVencimento.value; // Captura a nova data
+      const responsavel = document.getElementById('responsavel').value;
+      
+      // Validação básica para pagamentos futuros com data
+      if (status === "A Pagar" && !dataVencimento) {
+          alert("Por favor, insira uma data de vencimento para pagamentos futuros ('A Pagar').");
+          return;
       }
-    });
+      
+      // Cria o objeto de gasto, incluindo a data (que será vazia se for "Pago")
+      if (item && valor > 0 && status && responsavel) {
+        gastos.push({ item, valor, status, responsavel, data_vencimento: dataVencimento });
+        atualizarTabelaEContadores();
+        formGasto.reset();
+      }
+    });
+    
+    // Adiciona o evento de clique para o botão "Editar" (Mantido)
+    btnEditarOrcamento.addEventListener('click', () => {
+      const novoValor = prompt("Digite o novo valor do orçamento (somente números):", orcamentoTotal); 
+      
+      if (novoValor !== null) {
+          const valorLimpo = novoValor.replace(',', '.');
+          const valorNumerico = parseFloat(valorLimpo);
+          
+          if (!isNaN(valorNumerico) && valorNumerico >= 0) {
+            orcamentoTotal = valorNumerico;
+            atualizarTabelaEContadores();
+          } else {
+              alert("Valor inválido. Por favor, digite um número positivo.");
+          }
+      }
+    });
 
-    document.addEventListener('DOMContentLoaded', atualizarTabelaEContadores);
-  </script>
+    // Inicializa a tabela
+    document.addEventListener('DOMContentLoaded', atualizarTabelaEContadores);
+  </script>
 </body>
 </html>
-
