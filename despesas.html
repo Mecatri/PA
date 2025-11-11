@@ -5,70 +5,70 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Controle de Gastos - Casamento · Modern</title>
 
-<!-- Modern fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
-    --bg:#fbfaf7;
-    --card:#ffffff;
-    --muted:#7a7a7a;
-    --accent:#8B5E3C;
-    --accent-2:#D9B873;
-    --success:#3a9d56;
-    --danger:#c9302c;
-    --warn:#c87f00;
-    --shadow:0 8px 24px rgba(22,22,22,0.08);
-    --radius:14px;
+    --bg:#fbfaf7;
+    --card:#ffffff;
+    --muted:#7a7a7a;
+    --accent:#8B5E3C;
+    --accent-2:#D9B873;
+    --success:#3a9d56;
+    --danger:#c9302c;
+    --warn:#c87f00;
+    --shadow:0 8px 24px rgba(22,22,22,0.08);
+    --radius:14px;
 }
 
 *{box-sizing:border-box;}
 html,body{height:100%;}
 body{
-    margin:0;
-    font-family:'Poppins',system-ui;
-    background:linear-gradient(180deg,#fbfaf7 0%,#fffefc 100%);
-    color:#222;
-    padding:20px;
+    margin:0;
+    font-family:'Poppins',system-ui;
+    /* Usei uma cor sólida para garantir que a imagem não atrapalhe a comparação */
+    background-color: var(--bg);
+    color:#222;
+    padding:20px;
 }
 
 /* container */
 .container{
-    max-width:1100px;
-    margin:0 auto;
-    background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.96));
-    border-radius:18px;
-    padding:20px;
-    box-shadow:var(--shadow);
+    max-width:1100px;
+    margin:0 auto;
+    background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.96));
+    border-radius:18px;
+    padding:20px;
+    box-shadow:var(--shadow);
 }
 
 /* header */
 .header{text-align:center;margin-bottom:14px;}
 .header h1{
-    margin:0;
-    font-family:'Playfair Display',serif;
-    font-size:1.6rem;
-    color:var(--accent);
+    margin:0;
+    font-family:'Playfair Display',serif;
+    font-size:1.6rem;
+    color:var(--accent);
 }
 .header p{margin:6px 0 0;color:var(--muted);}
 
 /* SUMMARY */
 .summary{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
-    margin:18px 0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:18px 0;
 }
 .card{
-    background:var(--card);
-    border-radius:12px;
-    padding:12px 14px;
-    box-shadow:0 6px 18px rgba(20,20,20,0.05);
-    flex:1 1 30%;
-    min-width:180px;
-    display:flex;
-    flex-direction:column;
-    gap:6px;
+    background:var(--card);
+    border-radius:12px;
+    padding:12px 14px;
+    box-shadow:0 6px 18px rgba(20,20,20,0.05);
+    flex:1 1 30%;
+    min-width:180px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
 }
 .card .label{font-weight:600;color:var(--muted);font-size:0.9rem;}
 .card .value{font-weight:800;font-size:1.15rem;color:var(--accent);}
@@ -76,19 +76,19 @@ body{
 .card.apagar .value{color:var(--accent-2);}
 .card.geral .value{color:var(--success);}
 .btn-edit-orc{
-    background:linear-gradient(90deg,var(--accent),#6f4a2f);
-    color:white;border:none;padding:8px 10px;border-radius:10px;cursor:pointer;
-    box-shadow:0 6px 12px rgba(139,94,60,0.12);font-weight:700;
+    background:linear-gradient(90deg,var(--accent),#6f4a2f);
+    color:white;border:none;padding:8px 10px;border-radius:10px;cursor:pointer;
+    box-shadow:0 6px 12px rgba(139,94,60,0.12);font-weight:700;
 }
 
 /* FORM */
 .form{
-    background:linear-gradient(180deg,#fff,#fbfbfb);
-    border-radius:12px;
-    padding:14px;
-    display:grid;
-    gap:10px;
-    box-shadow:0 6px 14px rgba(18,18,18,0.03);
+    background:linear-gradient(180deg,#fff,#fbfbfb);
+    border-radius:12px;
+    padding:14px;
+    display:grid;
+    gap:10px;
+    box-shadow:0 6px 14px rgba(18,18,18,0.03);
 }
 .form-grid{display:grid;gap:10px;}
 @media (min-width:900px){.form-grid{grid-template-columns:1fr 1fr 1fr 1fr 200px;}}
@@ -96,22 +96,22 @@ body{
 @media (max-width:520px){.form-grid{grid-template-columns:1fr;}}
 
 .input, select{
-    padding:10px 12px;
-    border-radius:10px;
-    border:1px solid #e6e6e6;
-    font-size:0.95rem;
-    background:#fff;
-    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid #e6e6e6;
+    font-size:0.95rem;
+    background:#fff;
+    width:100%;
 }
 .btn-primary{
-    background:linear-gradient(90deg,var(--accent-2),#cd9f52);
-    border:none;
-    color:#fff;
-    padding:10px 12px;
-    border-radius:12px;
-    font-weight:800;
-    cursor:pointer;
-    box-shadow:0 6px 14px rgba(205,159,82,0.16);
+    background:linear-gradient(90deg,var(--accent-2),#cd9f52);
+    border:none;
+    color:#fff;
+    padding:10px 12px;
+    border-radius:12px;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:0 6px 14px rgba(205,159,82,0.16);
 }
 
 /* TABLE */
@@ -120,21 +120,21 @@ table{width:100%;border-collapse:collapse;min-width:720px;}
 th,td{padding:12px 10px;text-align:left;border-bottom:1px solid #f1f1f1;font-size:0.95rem;}
 th{background:var(--accent);color:white;font-weight:700;}
 .row-action{
-    display:flex;
-    flex-direction:column; /* <-- Botões agora em coluna */
-    gap:6px;
-    justify-content:center;
-    align-items:flex-end;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    justify-content:center;
+    align-items:flex-end;
 }
 .btn-small{
-    padding:6px 10px;
-    border-radius:8px;
-    border:none;
-    cursor:pointer;
-    font-weight:700;
-    font-size:0.9rem;
-    min-width:70px;
-    text-align:center;
+    padding:6px 10px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+    font-weight:700;
+    font-size:0.9rem;
+    min-width:70px;
+    text-align:center;
 }
 .btn-edit{background:#fff7ec;color:#8b5e3c;}
 .btn-delete{background:#fff0f0;color:var(--danger);}
@@ -143,201 +143,239 @@ th{background:var(--accent);color:white;font-weight:700;}
 .alert-orange td{background:#fff7ee;color:var(--warn);font-weight:700;}
 .alert-red td{background:#fff0f0;color:var(--danger);font-weight:700;}
 
-/* MOBILE */
+/* MOBILE CORRIGIDO */
 @media (max-width:760px){
-    table,thead,tbody,th,td,tr{display:block;}
-    thead{display:none;}
-    tr{margin:10px 0;background:#fff;border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(10,10,10,0.03);}
-    td{border:none;padding:8px 6px;}
-    td::before{
-        content:attr(data-label);
-        display:inline-block;
-        width:120px;
-        font-weight:700;
-        color:var(--muted);
-    }
-    .row-action{
-        flex-direction:column; /* Mantém os botões um embaixo do outro no mobile */
-        align-items:stretch;
-    }
-    .btn-small{
-        font-size:0.85rem;
-    }
-}
+    table,thead,tbody,th,td,tr{display:block;}
+    thead{display:none;}
+    /* O TR é o cartão */
+    tr{margin:10px 0;background:#fff;border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(10,10,10,0.03);}
+    td{border:none;padding:8px 6px;}
+    td::before{
+        content:attr(data-label);
+        display:inline-block;
+        width:120px;
+        font-weight:700;
+        color:var(--muted);
+    }
+    
+    /* CORREÇÃO 1: Layout da célula de Ações */
+    .row-action{
+        flex-direction:row; /* Alinha horizontalmente */
+        justify-content:center; /* Centraliza os botões */
+        gap:10px; /* Mais espaço entre os botões */
+        margin-top:10px;
+        align-items:center;
+    }
+    .btn-small{
+        font-size:0.85rem;
+    }
 
-/* MODAL */
-.modal-backdrop{
-    position:fixed;inset:0;background:rgba(10,10,10,0.45);
-    display:none;align-items:center;justify-content:center;z-index:999;
+    /* CORREÇÃO 2: Garante que a última célula (Ações) no mobile ocupe 100% da largura */
+    td:last-child {
+        text-align: center;
+        width: 100%; 
+    }
+
+    /* CORREÇÃO 3: Oculta a data no mobile, como na imagem */
+    td[data-label="Data"] {
+        display: none;
+    }
+
+    /* CORREÇÃO 4: Garante que as cores de alerta sejam aplicadas corretamente */
+    .alert-red {
+        background-color: var(--danger) !important; 
+        color: white !important; /* Texto branco no fundo vermelho */
+    }
+    .alert-orange {
+        background-color: var(--warn) !important;
+        color: #222 !important; /* Cor mais escura no fundo laranja */
+    }
+
+    .alert-red td, .alert-orange td {
+        background: transparent !important; /* Garante que a célula não sobreponha a cor do TR */
+        color: inherit !important;
+    }
+    .alert-red td::before, .alert-orange td::before {
+        color: inherit !important;
+    }
 }
-.modal{
-    background:var(--card);
-    border-radius:12px;
-    padding:18px;
-    width:clamp(320px,80%,720px);
-    box-shadow:0 12px 32px rgba(20,20,20,0.18);
-}
-.modal h3{margin:0 0 8px;color:var(--accent);font-family:'Playfair Display',serif;}
-.modal .row{display:grid;gap:8px;margin-bottom:10px;}
-@media(min-width:700px){.modal .row{grid-template-columns:1fr 1fr;}}
-.small{font-size:0.85rem;color:var(--muted);}
+/* FIM MOBILE CORRIGIDO */
 </style>
 </head>
 <body>
 <div class="container">
-    <div class="header">
-        <h1>💍 Controle de Gastos do Casamento</h1>
-        <p class="small">Resumo financeiro, vencimentos e gerenciamento — moderno e responsivo.</p>
-    </div>
+    <div class="header">
+        <h1>💍 Controle de Gastos do Casamento</h1>
+        <p class="small">Resumo financeiro, vencimentos e gerenciamento — moderno e responsivo.</p>
+    </div>
 
-    <section class="summary">
-        <div class="card pago"><div class="label">Pago — Noivo</div><div class="value" id="total-pago-noivo">R$ 0,00</div></div>
-        <div class="card pago"><div class="label">Pago — Noiva</div><div class="value" id="total-pago-noiva">R$ 0,00</div></div>
-        <div class="card geral"><div class="label">Total Pago</div><div class="value" id="total-pago-geral">R$ 0,00</div></div>
-        <div class="card apagar"><div class="label">A Pagar — Noivo</div><div class="value" id="total-apagar-noivo">R$ 0,00</div></div>
-        <div class="card apagar"><div class="label">A Pagar — Noiva</div><div class="value" id="total-apagar-noiva">R$ 0,00</div></div>
-        <div class="card apagar"><div class="label">Total a Pagar</div><div class="value" id="total-apagar-geral">R$ 0,00</div></div>
-    </section>
+    <section class="summary">
+        <div class="card pago"><div class="label">Pago — Noivo</div><div class="value" id="total-pago-noivo">R$ 0,00</div></div>
+        <div class="card pago"><div class="label">Pago — Noiva</div><div class="value" id="total-pago-noiva">R$ 0,00</div></div>
+        <div class="card geral"><div class="label">Total Pago</div><div class="value" id="total-pago-geral">R$ 0,00</div></div>
+        <div class="card apagar"><div class="label">A Pagar — Noivo</div><div class="value" id="total-apagar-noivo">R$ 0,00</div></div>
+        <div class="card apagar"><div class="label">A Pagar — Noiva</div><div class="value" id="total-apagar-noiva">R$ 0,00</div></div>
+        <div class="card apagar"><div class="label">Total a Pagar</div><div class="value" id="total-apagar-geral">R$ 0,00</div></div>
+    </section>
 
-    <form id="form" class="form">
-        <div class="form-grid">
-            <input id="item" class="input" type="text" placeholder="Item" required />
-            <input id="valor" class="input" type="number" min="0" step="0.01" placeholder="Valor (R$)" required />
-            <select id="status" class="input" required>
-                <option value="" disabled selected>Status</option>
-                <option value="Pago">Pago</option>
-                <option value="A Pagar">A Pagar</option>
-            </select>
-            <select id="responsavel" class="input" required>
-                <option value="" disabled selected>Responsável</option>
-                <option value="Noivo">Noivo</option>
-                <option value="Noiva">Noiva</option>
-            </select>
-            <input id="data" class="input" type="date" placeholder="Data" />
-        </div>
-        <button type="submit" class="btn-primary">Adicionar Gasto</button>
-    </form>
+    <form id="form" class="form">
+        <div class="form-grid">
+            <input id="item" class="input" type="text" placeholder="Item" required />
+            <input id="valor" class="input" type="number" min="0" step="0.01" placeholder="Valor (R$)" required />
+            <select id="status" class="input" required>
+                <option value="" disabled selected>Status</option>
+                <option value="Pago">Pago</option>
+                <option value="A Pagar">A Pagar</option>
+            </select>
+            <select id="responsavel" class="input" required>
+                <option value="" disabled selected>Responsável</option>
+                <option value="Noivo">Noivo</option>
+                <option value="Noiva">Noiva</option>
+            </select>
+            <input id="data" class="input" type="date" placeholder="Data" />
+        </div>
+        <button type="submit" class="btn-primary">Adicionar Gasto</button>
+    </form>
 
-    <div class="table-wrap">
-        <table id="tabela">
-            <thead>
-                <tr><th>Item</th><th>Valor</th><th>Status</th><th>Responsável</th><th>Data</th><th>Ações</th></tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+    <div class="table-wrap">
+        <table id="tabela">
+            <thead>
+                <tr><th>Item</th><th>Valor</th><th>Status</th><th>Responsável</th><th>Data</th><th>Ações</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 </div>
 
 <div class="modal-backdrop" id="modal-backdrop">
-    <div class="modal">
-        <h3>Editar Lançamento</h3>
-        <div class="row">
-            <div><label class="small">Item</label><input id="edit-item" class="input" type="text" /></div>
-            <div><label class="small">Valor</label><input id="edit-valor" class="input" type="number" min="0" step="0.01" /></div>
-        </div>
-        <div class="row">
-            <div><label class="small">Status</label>
-                <select id="edit-status" class="input"><option>Pago</option><option>A Pagar</option></select></div>
-            <div><label class="small">Responsável</label>
-                <select id="edit-resp" class="input"><option>Noivo</option><option>Noiva</option></select></div>
-        </div>
-        <label class="small">Data</label><input id="edit-data" class="input" type="date" />
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
-            <button id="cancel-edit" class="btn-small" style="background:#f0f0f0;">Cancelar</button>
-            <button id="save-edit" class="btn-primary">Salvar</button>
-        </div>
-    </div>
+    <div class="modal">
+        <h3>Editar Lançamento</h3>
+        <div class="row">
+            <div><label class="small">Item</label><input id="edit-item" class="input" type="text" /></div>
+            <div><label class="small">Valor</label><input id="edit-valor" class="input" type="number" min="0" step="0.01" /></div>
+        </div>
+        <div class="row">
+            <div><label class="small">Status</label>
+                <select id="edit-status" class="input"><option>Pago</option><option>A Pagar</option></select></div>
+            <div><label class="small">Responsável</label>
+                <select id="edit-resp" class="input"><option>Noivo</option><option>Noiva</option></select></div>
+        </div>
+        <label class="small">Data</label><input id="edit-data" class="input" type="date" />
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+            <button id="cancel-edit" class="btn-small" style="background:#f0f0f0;">Cancelar</button>
+            <button id="save-edit" class="btn-primary">Salvar</button>
+        </div>
+    </div>
 </div>
 
 <script>
-let gastos=[];
+let gastos=[
+    {item:'Buffet',valor:40000.00,status:'A Pagar',responsavel:'Noivo',data:'2026-03-20'},
+    {item:'Vestido',valor:8000.00,status:'Pago',responsavel:'Noiva',data:''}
+]; // Adicionei dados de exemplo para teste
 const ids={
-    tabelaBody:document.querySelector('#tabela tbody'),
-    totalPagoNoivo:document.getElementById('total-pago-noivo'),
-    totalPagoNoiva:document.getElementById('total-pago-noiva'),
-    totalPagoGeral:document.getElementById('total-pago-geral'),
-    totalApagarNoivo:document.getElementById('total-apagar-noivo'),
-    totalApagarNoiva:document.getElementById('total-apagar-noiva'),
-    totalApagarGeral:document.getElementById('total-apagar-geral'),
-    form:document.getElementById('form'),
-    itemIn:document.getElementById('item'),
-    valorIn:document.getElementById('valor'),
-    statusIn:document.getElementById('status'),
-    respIn:document.getElementById('responsavel'),
-    dataIn:document.getElementById('data'),
-    modalBackdrop:document.getElementById('modal-backdrop'),
-    editItem:document.getElementById('edit-item'),
-    editValor:document.getElementById('edit-valor'),
-    editStatus:document.getElementById('edit-status'),
-    editResp:document.getElementById('edit-resp'),
-    editData:document.getElementById('edit-data'),
-    saveEditBtn:document.getElementById('save-edit'),
-    cancelEditBtn:document.getElementById('cancel-edit')
+    tabelaBody:document.querySelector('#tabela tbody'),
+    totalPagoNoivo:document.getElementById('total-pago-noivo'),
+    totalPagoNoiva:document.getElementById('total-pago-noiva'),
+    totalPagoGeral:document.getElementById('total-pago-geral'),
+    totalApagarNoivo:document.getElementById('total-apagar-noivo'),
+    totalApagarNoiva:document.getElementById('total-apagar-noiva'),
+    totalApagarGeral:document.getElementById('total-apagar-geral'),
+    form:document.getElementById('form'),
+    itemIn:document.getElementById('item'),
+    valorIn:document.getElementById('valor'),
+    statusIn:document.getElementById('status'),
+    respIn:document.getElementById('responsavel'),
+    dataIn:document.getElementById('data'),
+    modalBackdrop:document.getElementById('modal-backdrop'),
+    editItem:document.getElementById('edit-item'),
+    editValor:document.getElementById('edit-valor'),
+    editStatus:document.getElementById('edit-status'),
+    editResp:document.getElementById('edit-resp'),
+    editData:document.getElementById('edit-data'),
+    saveEditBtn:document.getElementById('save-edit'),
+    cancelEditBtn:document.getElementById('cancel-edit')
 };
 
 function formatBRL(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 function render(){
-    ids.tabelaBody.innerHTML='';
-    let pagoNoivo=0,pagoNoiva=0,apagarNoivo=0,apagarNoiva=0;
-    const hoje=new Date();hoje.setHours(0,0,0,0);
-    gastos.forEach((g,idx)=>{
-        const val=Number(g.valor||0);
-        if(g.status==="Pago"){g.responsavel==="Noivo"?pagoNoivo+=val:pagoNoiva+=val;}
-        else{g.responsavel==="Noivo"?apagarNoivo+=val:apagarNoiva+=val;}
-        const tr=document.createElement('tr');
-        let alertClass='';
-        if(g.status==="A Pagar"&&g.data){
-            const dt=new Date(g.data);dt.setHours(0,0,0,0);
-            const diffDays=Math.ceil((dt-hoje)/(1000*60*60*24));
-            if(diffDays<0)alertClass='alert-red';else if(diffDays<=7)alertClass='alert-orange';
-        }
-        if(alertClass)tr.classList.add(alertClass);
-        tr.innerHTML=`
-        <td data-label="Item">${g.item}</td>
-        <td data-label="Valor">${formatBRL(g.valor)}</td>
-        <td data-label="Status">${g.status}</td>
-        <td data-label="Responsável">${g.responsavel}</td>
-        <td data-label="Data">${g.data?(new Date(g.data)).toLocaleDateString('pt-BR'):'-'}</td>
-        <td data-label="Ações"><div class="row-action">
-            <button class="btn-small btn-edit" type="button" onclick="openEditModal(${idx})">Editar</button>
-            <button class="btn-small btn-delete" type="button" onclick="removeItem(${idx})">Remover</button>
-        </div></td>`;
-        ids.tabelaBody.appendChild(tr);
-    });
-    ids.totalPagoNoivo.textContent=formatBRL(pagoNoivo);
-    ids.totalPagoNoiva.textContent=formatBRL(pagoNoiva);
-    ids.totalPagoGeral.textContent=formatBRL(pagoNoivo+pagoNoiva);
-    ids.totalApagarNoivo.textContent=formatBRL(apagarNoivo);
-    ids.totalApagarNoiva.textContent=formatBRL(apagarNoiva);
-    ids.totalApagarGeral.textContent=formatBRL(apagarNoivo+apagarNoiva);
+    ids.tabelaBody.innerHTML='';
+    let pagoNoivo=0,pagoNoiva=0,apagarNoivo=0,apagarNoiva=0;
+    const hoje=new Date();hoje.setHours(0,0,0,0);
+    gastos.forEach((g,idx)=>{
+        const val=Number(g.valor||0);
+        if(g.status==="Pago"){g.responsavel==="Noivo"?pagoNoivo+=val:pagoNoiva+=val;}
+        else{g.responsavel==="Noivo"?apagarNoivo+=val:apagarNoiva+=val;}
+        const tr=document.createElement('tr');
+        let alertClass='';
+        if(g.status==="A Pagar"&&g.data){
+            // Adicionar 'T00:00:00' para evitar problemas de fuso horário
+            const dt=new Date(g.data + 'T00:00:00'); 
+            const diffDays=Math.ceil((dt-hoje)/(1000*60*60*24));
+            if(diffDays<0)alertClass='alert-red';else if(diffDays<=7)alertClass='alert-orange';
+        }
+        if(alertClass)tr.classList.add(alertClass);
+        
+        // Corrigido a formatação da data para o formato esperado (DD/MM/AAAA)
+        const dataFormatada = g.data ? (new Date(g.data + 'T00:00:00')).toLocaleDateString('pt-BR') : '-';
+        
+        tr.innerHTML=`
+        <td data-label="Item">${g.item}</td>
+        <td data-label="Valor">${formatBRL(g.valor)}</td>
+        <td data-label="Status">${g.status}</td>
+        <td data-label="Responsável">${g.responsavel}</td>
+        <td data-label="Data">${dataFormatada}</td>
+        <td data-label="Ações"><div class="row-action">
+            <button class="btn-small btn-edit" type="button" onclick="openEditModal(${idx})">Editar</button>
+            <button class="btn-small btn-delete" type="button" onclick="removeItem(${idx})">Remover</button>
+        </div></td>`;
+        ids.tabelaBody.appendChild(tr);
+    });
+    ids.totalPagoNoivo.textContent=formatBRL(pagoNoivo);
+    ids.totalPagoNoiva.textContent=formatBRL(pagoNoiva);
+    ids.totalPagoGeral.textContent=formatBRL(pagoNoivo+pagoNoiva);
+    ids.totalApagarNoivo.textContent=formatBRL(apagarNoivo);
+    ids.totalApagarNoiva.textContent=formatBRL(apagarNoiva);
+    ids.totalApagarGeral.textContent=formatBRL(apagarNoivo+apagarNoiva);
 }
 
 ids.form.addEventListener('submit',ev=>{
-    ev.preventDefault();
-    const item=ids.itemIn.value.trim(),valor=parseFloat(ids.valorIn.value),
-    status=ids.statusIn.value,resp=ids.respIn.value,data=ids.dataIn.value||'';
-    if(!item||isNaN(valor)||valor<=0||!status||!resp)return alert('Preencha todos os campos.');
-    if(status==='A Pagar'&&!data)return alert('Informe a data para "A Pagar".');
-    gastos.push({item,valor,status,responsavel:resp,data});
-    ids.form.reset();render();
+    ev.preventDefault();
+    const item=ids.itemIn.value.trim(),valor=parseFloat(ids.valorIn.value),
+    status=ids.statusIn.value,resp=ids.respIn.value,data=ids.dataIn.value||'';
+    if(!item||isNaN(valor)||valor<=0||!status||!resp)return alert('Preencha todos os campos.');
+    if(status==='A Pagar'&&!data)return alert('Informe a data para "A Pagar".');
+    gastos.push({item,valor,status,responsavel:resp,data});
+    ids.form.reset();render();
 });
 function removeItem(i){if(confirm('Remover este lançamento?')){gastos.splice(i,1);render();}}
 let editingIndex=null;
 function openEditModal(i){
-    editingIndex=i;const g=gastos[i];
-    ids.editItem.value=g.item;ids.editValor.value=g.valor;ids.editStatus.value=g.status;ids.editResp.value=g.responsavel;ids.editData.value=g.data;
-    ids.modalBackdrop.style.display='flex';
+    editingIndex=i;const g=gastos[i];
+    ids.editItem.value=g.item;ids.editValor.value=g.valor;ids.editStatus.value=g.status;ids.editResp.value=g.responsavel;ids.editData.value=g.data;
+    ids.modalBackdrop.style.display='flex';
 }
 ids.cancelEditBtn.onclick=()=>ids.modalBackdrop.style.display='none';
 ids.saveEditBtn.onclick=()=>{
-    const i=editingIndex;if(i===null)return;
-    gastos[i].item=ids.editItem.value.trim();
-    gastos[i].valor=parseFloat(ids.editValor.value)||0;
-    gastos[i].status=ids.editStatus.value;
-    gastos[i].responsavel=ids.editResp.value;
-    gastos[i].data=ids.editData.value;
-    ids.modalBackdrop.style.display='none';
-    render();
+    const i=editingIndex;if(i===null)return;
+    
+    const novoItem = ids.editItem.value.trim();
+    const novoValor = parseFloat(ids.editValor.value);
+    const novoStatus = ids.editStatus.value;
+    const novaData = ids.editData.value;
+    
+    // Revalidações
+    if(!novoItem || isNaN(novoValor) || novoValor <= 0) return alert('Verifique os campos Item e Valor.');
+    if(novoStatus === 'A Pagar' && !novaData) return alert('Informe a data para status "A Pagar".');
+    
+    gastos[i].item=novoItem;
+    gastos[i].valor=novoValor;
+    gastos[i].status=novoStatus;
+    gastos[i].responsavel=ids.editResp.value;
+    gastos[i].data=novaData;
+    
+    ids.modalBackdrop.style.display='none';
+    render();
 };
 render();
 </script>
