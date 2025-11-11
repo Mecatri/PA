@@ -10,28 +10,25 @@
 
 <style>
 :root{
-    --bg: #fbfaf7;
-    --card: #ffffff;
-    --muted: #7a7a7a;
-    --accent: #8B5E3C;      /* warm brown */
-    --accent-2: #D9B873;    /* gold */
-    --success: #3a9d56;
-    --danger: #c9302c;
-    --warn: #c87f00;
-    --shadow: 0 8px 24px rgba(22,22,22,0.08);
-    --radius: 14px;
+    --bg:#fbfaf7;
+    --card:#ffffff;
+    --muted:#7a7a7a;
+    --accent:#8B5E3C;
+    --accent-2:#D9B873;
+    --success:#3a9d56;
+    --danger:#c9302c;
+    --warn:#c87f00;
+    --shadow:0 8px 24px rgba(22,22,22,0.08);
+    --radius:14px;
 }
 
-/* Reset / base */
-*{ box-sizing: border-box; }
-html,body{ height:100%; }
+*{box-sizing:border-box;}
+html,body{height:100%;}
 body{
     margin:0;
-    font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-    background: linear-gradient(180deg, #fbfaf7 0%, #fffefc 100%);
+    font-family:'Poppins',system-ui;
+    background:linear-gradient(180deg,#fbfaf7 0%,#fffefc 100%);
     color:#222;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
     padding:20px;
 }
 
@@ -39,282 +36,187 @@ body{
 .container{
     max-width:1100px;
     margin:0 auto;
-    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
-    border-radius: 18px;
+    background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.96));
+    border-radius:18px;
     padding:20px;
-    box-shadow: var(--shadow);
+    box-shadow:var(--shadow);
 }
 
 /* header */
-.header {
-    text-align:center;
-    margin-bottom:14px;
-}
+.header{text-align:center;margin-bottom:14px;}
 .header h1{
     margin:0;
-    font-family: 'Playfair Display', serif;
+    font-family:'Playfair Display',serif;
     font-size:1.6rem;
     color:var(--accent);
 }
-.header p{
-    margin:6px 0 0 0;
-    color:var(--muted);
-}
+.header p{margin:6px 0 0;color:var(--muted);}
 
-/* SUMMARY CARDS - fluid responsive layout */
-.summary {
+/* SUMMARY */
+.summary{
     display:flex;
     flex-wrap:wrap;
     gap:12px;
     margin:18px 0;
-    align-items:stretch;
 }
-
-/* each card: flexible basis so they auto-fit (3 per row on large) */
-.card {
-    background: var(--card);
-    border-radius: 12px;
+.card{
+    background:var(--card);
+    border-radius:12px;
     padding:12px 14px;
-    box-shadow: 0 6px 18px rgba(20,20,20,0.05);
-    flex: 1 1 30%;
-    min-width: 180px;
+    box-shadow:0 6px 18px rgba(20,20,20,0.05);
+    flex:1 1 30%;
+    min-width:180px;
     display:flex;
     flex-direction:column;
-    justify-content:center;
-    align-items:flex-start;
     gap:6px;
 }
-.card .label { font-weight:600; color:var(--muted); font-size:0.9rem; }
-.card .value {
-    font-weight:800;
-    font-size:1.15rem;
-    color:var(--accent);
-}
-
-/* Variants */
-.card.pago .value { color: #d9534f; }     /* redish for paid (visual) */
-.card.apagar .value { color: var(--accent-2); } /* gold for a pagar */
-.card.geral .value { color: var(--success); }
-
-/* Orçamento card should stand out (spans full row on small screens) */
-.orcamento-card{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-}
-
-/* Edit button in orcamento */
+.card .label{font-weight:600;color:var(--muted);font-size:0.9rem;}
+.card .value{font-weight:800;font-size:1.15rem;color:var(--accent);}
+.card.pago .value{color:#d9534f;}
+.card.apagar .value{color:var(--accent-2);}
+.card.geral .value{color:var(--success);}
+.orcamento-card{display:flex;justify-content:space-between;align-items:center;gap:10px;}
 .btn-edit-orc{
-    background: linear-gradient(90deg, var(--accent), #6f4a2f);
-    color:white;
-    border:none;
-    padding:8px 10px;
-    border-radius:10px;
-    cursor:pointer;
-    box-shadow: 0 6px 12px rgba(139,94,60,0.12);
-    font-weight:700;
+    background:linear-gradient(90deg,var(--accent),#6f4a2f);
+    color:white;border:none;padding:8px 10px;border-radius:10px;cursor:pointer;
+    box-shadow:0 6px 12px rgba(139,94,60,0.12);font-weight:700;
 }
 
-/* Form */
-.form {
-    background: linear-gradient(180deg, #fff, #fbfbfb);
-    border-radius: 12px;
+/* FORM */
+.form{
+    background:linear-gradient(180deg,#fff,#fbfbfb);
+    border-radius:12px;
     padding:14px;
     display:grid;
     gap:10px;
-    box-shadow: 0 6px 14px rgba(18,18,18,0.03);
-    align-items:center;
+    box-shadow:0 6px 14px rgba(18,18,18,0.03);
 }
+.form-grid{display:grid;gap:10px;}
+@media (min-width:900px){.form-grid{grid-template-columns:1fr 1fr 1fr 1fr 200px;}}
+@media (max-width:899px){.form-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:520px){.form-grid{grid-template-columns:1fr;}}
 
-/* grid columns adapt */
-.form-grid{
-    display:grid;
-    gap:10px;
-}
-@media (min-width:900px){
-    .form-grid{ grid-template-columns: 1fr 1fr 1fr 1fr 200px; }
-}
-@media (max-width:899px){
-    .form-grid{ grid-template-columns: 1fr 1fr; }
-}
-@media (max-width:520px){
-    .form-grid{ grid-template-columns: 1fr; }
-}
-
-.input, select {
+.input, select{
     padding:10px 12px;
-    border-radius: 10px;
-    border: 1px solid #e6e6e6;
+    border-radius:10px;
+    border:1px solid #e6e6e6;
     font-size:0.95rem;
-    background: #fff;
+    background:#fff;
     width:100%;
 }
-
-/* main action button */
 .btn-primary{
-    background: linear-gradient(90deg, var(--accent-2), #cd9f52);
-    border: none;
-    color: #fff;
+    background:linear-gradient(90deg,var(--accent-2),#cd9f52);
+    border:none;
+    color:#fff;
     padding:10px 12px;
-    border-radius: 12px;
+    border-radius:12px;
     font-weight:800;
     cursor:pointer;
-    box-shadow: 0 6px 14px rgba(205,159,82,0.16);
+    box-shadow:0 6px 14px rgba(205,159,82,0.16);
 }
 
-/* TABLE / CARD LIST */
-.table-wrap {
-    margin-top:18px;
-}
-table {
-    width:100%;
-    border-collapse:collapse;
-    min-width:720px;
-}
-th, td{
-    padding:12px 10px;
-    text-align:left;
-    border-bottom:1px solid #f1f1f1;
-    font-size:0.95rem;
-}
-th{
-    background: var(--accent);
-    color:white;
-    font-weight:700;
-}
-.row-action {
+/* TABLE */
+.table-wrap{margin-top:18px;}
+table{width:100%;border-collapse:collapse;min-width:720px;}
+th,td{padding:12px 10px;text-align:left;border-bottom:1px solid #f1f1f1;font-size:0.95rem;}
+th{background:var(--accent);color:white;font-weight:700;}
+.row-action{
     display:flex;
-    gap:8px;
-    align-items:center;
+    flex-wrap:wrap;
+    gap:6px;
+    justify-content:flex-end;
 }
-
-/* action buttons */
 .btn-small{
-    padding:6px 8px;
+    padding:6px 10px;
     border-radius:8px;
-    border: none;
+    border:none;
     cursor:pointer;
     font-weight:700;
+    font-size:0.9rem;
+    flex:1 1 auto;
+    min-width:70px;
+    text-align:center;
 }
-.btn-edit{
-    background: #fff7ec;
-    color: #8b5e3c;
-}
-.btn-delete{
-    background:#fff0f0;
-    color: var(--danger);
-}
+.btn-edit{background:#fff7ec;color:#8b5e3c;}
+.btn-delete{background:#fff0f0;color:var(--danger);}
 
-/* alert classes (color whole row) */
-.alert-orange td{ background: #fff7ee; color: var(--warn); font-weight:700; }
-.alert-red td{ background: #fff0f0; color: var(--danger); font-weight:700; }
+/* alert */
+.alert-orange td{background:#fff7ee;color:var(--warn);font-weight:700;}
+.alert-red td{background:#fff0f0;color:var(--danger);font-weight:700;}
 
-/* MOBILE: convert rows to cards (stacked) */
+/* MOBILE */
 @media (max-width:760px){
-    table, thead, tbody, th, td, tr { display:block; }
-    thead { display:none; }
-    tr { margin:10px 0; background: #fff; border-radius:12px; padding:12px; box-shadow: 0 6px 18px rgba(10,10,10,0.03); border:1px solid #f4f4f4; }
-    td { border:none; padding:8px 6px; position:relative; }
+    table,thead,tbody,th,td,tr{display:block;}
+    thead{display:none;}
+    tr{margin:10px 0;background:#fff;border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(10,10,10,0.03);}
+    td{border:none;padding:8px 6px;}
     td::before{
-        content: attr(data-label);
+        content:attr(data-label);
         display:inline-block;
         width:120px;
         font-weight:700;
         color:var(--muted);
     }
-    .row-action{ justify-content:flex-end; }
+    .row-action{
+        display:flex;
+        justify-content:space-between;
+        gap:8px;
+        flex-wrap:nowrap;
+        margin-top:8px;
+    }
+    .btn-small{
+        flex:1;
+        min-width:auto;
+        font-size:0.85rem;
+    }
 }
 
-/* modal (edit) */
+/* MODAL */
 .modal-backdrop{
-    position:fixed;
-    inset:0;
-    background: rgba(10,10,10,0.45);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:999;
+    position:fixed;inset:0;background:rgba(10,10,10,0.45);
+    display:none;align-items:center;justify-content:center;z-index:999;
 }
 .modal{
     background:var(--card);
     border-radius:12px;
     padding:18px;
-    width:clamp(320px, 80%, 720px);
-    box-shadow: 0 12px 32px rgba(20,20,20,0.18);
+    width:clamp(320px,80%,720px);
+    box-shadow:0 12px 32px rgba(20,20,20,0.18);
 }
-.modal h3{ margin:0 0 8px 0; color:var(--accent); font-family: 'Playfair Display', serif; }
-.modal .row{ display:grid; gap:8px; margin-bottom:10px; }
-@media(min-width:700px){ .modal .row { grid-template-columns: 1fr 1fr; } }
+.modal h3{margin:0 0 8px;color:var(--accent);font-family:'Playfair Display',serif;}
+.modal .row{display:grid;gap:8px;margin-bottom:10px;}
+@media(min-width:700px){.modal .row{grid-template-columns:1fr 1fr;}}
+.note{font-size:0.85rem;color:var(--muted);margin-top:8px;}
+.small{font-size:0.85rem;color:var(--muted);}
 
-/* small helpers */
-.note { font-size:0.85rem; color:var(--muted); margin-top:8px; }
-.small { font-size:0.85rem; color:var(--muted); }
-
-/* responsive: summary card widths adjust to 3/2/1 */
-@media (min-width:1000px){
-    .card { flex-basis: 30%; } /* ~3 cols */
-}
-@media (min-width:700px) and (max-width:999px){
-    .card { flex-basis: 48%; } /* 2 cols */
-}
-@media (max-width:699px){
-    .card { flex-basis: 100%; } /* 1 col */
-}
-
+@media (min-width:1000px){.card{flex-basis:30%;}}
+@media (min-width:700px) and (max-width:999px){.card{flex-basis:48%;}}
+@media (max-width:699px){.card{flex-basis:100%;}}
 </style>
 </head>
 <body>
-<div class="container" role="main">
+<div class="container">
     <div class="header">
         <h1>💍 Controle de Gastos do Casamento</h1>
         <p class="small">Resumo financeiro, vencimentos e gerenciamento — moderno e responsivo.</p>
     </div>
 
-    <!-- SUMMARY CARDS -->
-    <section class="summary" aria-label="Resumo financeiro">
-        <div class="card pago">
-            <div class="label">Pago — Noivo</div>
-            <div class="value" id="total-pago-noivo">R$ 0,00</div>
-        </div>
-        <div class="card pago">
-            <div class="label">Pago — Noiva</div>
-            <div class="value" id="total-pago-noiva">R$ 0,00</div>
-        </div>
-        <div class="card geral">
-            <div class="label">Total Pago</div>
-            <div class="value" id="total-pago-geral">R$ 0,00</div>
-        </div>
-
-        <div class="card apagar">
-            <div class="label">A Pagar — Noivo</div>
-            <div class="value" id="total-apagar-noivo">R$ 0,00</div>
-        </div>
-        <div class="card apagar">
-            <div class="label">A Pagar — Noiva</div>
-            <div class="value" id="total-apagar-noiva">R$ 0,00</div>
-        </div>
-        <div class="card apagar">
-            <div class="label">Total a Pagar</div>
-            <div class="value" id="total-apagar-geral">R$ 0,00</div>
-        </div>
-
-        <!-- Orçamento card (will flow with others) -->
-        <div class="card geral" style="display:flex; align-items:center; justify-content:space-between;">
-            <div>
-                <div class="label">Orçamento Planejado</div>
-                <div class="value" id="orcamento-planejado">R$ 60.000,00</div>
-            </div>
-            <div style="margin-left:12px;">
-                <button id="edit-orc" class="btn-edit-orc" title="Editar orçamento">Editar</button>
-            </div>
+    <section class="summary">
+        <div class="card pago"><div class="label">Pago — Noivo</div><div class="value" id="total-pago-noivo">R$ 0,00</div></div>
+        <div class="card pago"><div class="label">Pago — Noiva</div><div class="value" id="total-pago-noiva">R$ 0,00</div></div>
+        <div class="card geral"><div class="label">Total Pago</div><div class="value" id="total-pago-geral">R$ 0,00</div></div>
+        <div class="card apagar"><div class="label">A Pagar — Noivo</div><div class="value" id="total-apagar-noivo">R$ 0,00</div></div>
+        <div class="card apagar"><div class="label">A Pagar — Noiva</div><div class="value" id="total-apagar-noiva">R$ 0,00</div></div>
+        <div class="card apagar"><div class="label">Total a Pagar</div><div class="value" id="total-apagar-geral">R$ 0,00</div></div>
+        <div class="card geral" style="display:flex;align-items:center;justify-content:space-between;">
+            <div><div class="label">Orçamento Planejado</div><div class="value" id="orcamento-planejado">R$ 60.000,00</div></div>
+            <button id="edit-orc" class="btn-edit-orc">Editar</button>
         </div>
     </section>
 
-    <!-- FORM -->
-    <form id="form" class="form" aria-label="Formulário de gastos">
+    <form id="form" class="form">
         <div class="form-grid">
-            <input id="item" class="input" type="text" placeholder="Item (Ex: Buffet)" required />
+            <input id="item" class="input" type="text" placeholder="Item" required />
             <input id="valor" class="input" type="number" min="0" step="0.01" placeholder="Valor (R$)" required />
             <select id="status" class="input" required>
                 <option value="" disabled selected>Status</option>
@@ -326,299 +228,148 @@ th{
                 <option value="Noivo">Noivo</option>
                 <option value="Noiva">Noiva</option>
             </select>
-            <input id="data" class="input" type="date" placeholder="Data (obrigatória se A Pagar)" />
+            <input id="data" class="input" type="date" placeholder="Data" />
         </div>
-
-        <div style="display:flex; gap:10px; align-items:center; margin-top:6px;">
-            <button type="submit" class="btn-primary">Adicionar Gasto</button>
-            <div class="note">Se escolher <strong>"A Pagar"</strong>, informe a data para alertas.</div>
-        </div>
+        <button type="submit" class="btn-primary">Adicionar Gasto</button>
     </form>
 
-    <!-- Table / List -->
-    <div class="table-wrap" aria-live="polite">
-        <table id="tabela" aria-label="Tabela de gastos">
+    <div class="table-wrap">
+        <table id="tabela">
             <thead>
-                <tr>
-                    <th>Item</th>
-                    <th>Valor</th>
-                    <th>Status</th>
-                    <th>Responsável</th>
-                    <th>Data</th>
-                    <th>Ações</th>
-                </tr>
+                <tr><th>Item</th><th>Valor</th><th>Status</th><th>Responsável</th><th>Data</th><th>Ações</th></tr>
             </thead>
             <tbody></tbody>
         </table>
     </div>
 </div>
 
-<!-- EDIT MODAL -->
-<div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-hidden="true">
-    <div class="modal" role="document" aria-modal="true" aria-labelledby="modal-title">
-        <h3 id="modal-title">Editar Lançamento</h3>
+<div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal">
+        <h3>Editar Lançamento</h3>
         <div class="row">
-            <div style="display:grid; gap:8px;">
-                <label class="small">Item</label>
-                <input id="edit-item" class="input" type="text" />
-            </div>
-            <div style="display:grid; gap:8px;">
-                <label class="small">Valor (R$)</label>
-                <input id="edit-valor" class="input" type="number" min="0" step="0.01" />
-            </div>
+            <div><label class="small">Item</label><input id="edit-item" class="input" type="text" /></div>
+            <div><label class="small">Valor</label><input id="edit-valor" class="input" type="number" min="0" step="0.01" /></div>
         </div>
         <div class="row">
-            <div style="display:grid; gap:8px;">
-                <label class="small">Status</label>
-                <select id="edit-status" class="input">
-                    <option value="Pago">Pago</option>
-                    <option value="A Pagar">A Pagar</option>
-                </select>
-            </div>
-            <div style="display:grid; gap:8px;">
-                <label class="small">Responsável</label>
-                <select id="edit-resp" class="input">
-                    <option value="Noivo">Noivo</option>
-                    <option value="Noiva">Noiva</option>
-                </select>
-            </div>
+            <div><label class="small">Status</label>
+                <select id="edit-status" class="input"><option>Pago</option><option>A Pagar</option></select></div>
+            <div><label class="small">Responsável</label>
+                <select id="edit-resp" class="input"><option>Noivo</option><option>Noiva</option></select></div>
         </div>
-        <div style="display:grid; gap:8px; margin-top:10px;">
-            <label class="small">Data (obrigatório se A Pagar)</label>
-            <input id="edit-data" class="input" type="date" />
-        </div>
-
-        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
+        <label class="small">Data</label><input id="edit-data" class="input" type="date" />
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
             <button id="cancel-edit" class="btn-small" style="background:#f0f0f0;">Cancelar</button>
-            <button id="save-edit" class="btn-primary">Salvar alterações</button>
+            <button id="save-edit" class="btn-primary">Salvar</button>
         </div>
     </div>
 </div>
 
 <script>
-/* Data and DOM */
-let orcamento = 60000.00;
-let gastos = [
-    { item: "Sinal do Buffet", valor: 7500.00, status: "Pago", responsavel: "Noivo", data: "" },
-    { item: "Vestido da Noiva", valor: 8500.00, status: "A Pagar", responsavel: "Noiva", data: "2025-11-15" },
-    { item: "Terno do Noivo", valor: 2500.00, status: "A Pagar", responsavel: "Noivo", data: "2025-11-05" }
+let orcamento=60000;
+let gastos=[
+    {item:"Sinal do Buffet",valor:7500,status:"Pago",responsavel:"Noivo",data:""},
+    {item:"Vestido da Noiva",valor:8500,status:"A Pagar",responsavel:"Noiva",data:"2025-11-15"},
+    {item:"Terno do Noivo",valor:2500,status:"A Pagar",responsavel:"Noivo",data:"2025-11-05"}
 ];
-
-const ids = {
-    tabelaBody: document.querySelector('#tabela tbody'),
-    totalPagoNoivo: document.getElementById('total-pago-noivo'),
-    totalPagoNoiva: document.getElementById('total-pago-noiva'),
-    totalPagoGeral: document.getElementById('total-pago-geral'),
-    totalApagarNoivo: document.getElementById('total-apagar-noivo'),
-    totalApagarNoiva: document.getElementById('total-apagar-noiva'),
-    totalApagarGeral: document.getElementById('total-apagar-geral'),
-    orcamentoEl: document.getElementById('orcamento-planejado'),
-    form: document.getElementById('form'),
-    editOrcBtn: document.getElementById('edit-orc'),
-    modalBackdrop: document.getElementById('modal-backdrop'),
-    // inputs
-    itemIn: document.getElementById('item'),
-    valorIn: document.getElementById('valor'),
-    statusIn: document.getElementById('status'),
-    respIn: document.getElementById('responsavel'),
-    dataIn: document.getElementById('data'),
-    // modal inputs
-    editItem: document.getElementById('edit-item'),
-    editValor: document.getElementById('edit-valor'),
-    editStatus: document.getElementById('edit-status'),
-    editResp: document.getElementById('edit-resp'),
-    editData: document.getElementById('edit-data'),
-    saveEditBtn: document.getElementById('save-edit'),
-    cancelEditBtn: document.getElementById('cancel-edit')
+const ids={
+    tabelaBody:document.querySelector('#tabela tbody'),
+    totalPagoNoivo:document.getElementById('total-pago-noivo'),
+    totalPagoNoiva:document.getElementById('total-pago-noiva'),
+    totalPagoGeral:document.getElementById('total-pago-geral'),
+    totalApagarNoivo:document.getElementById('total-apagar-noivo'),
+    totalApagarNoiva:document.getElementById('total-apagar-noiva'),
+    totalApagarGeral:document.getElementById('total-apagar-geral'),
+    orcamentoEl:document.getElementById('orcamento-planejado'),
+    form:document.getElementById('form'),
+    editOrcBtn:document.getElementById('edit-orc'),
+    modalBackdrop:document.getElementById('modal-backdrop'),
+    itemIn:document.getElementById('item'),
+    valorIn:document.getElementById('valor'),
+    statusIn:document.getElementById('status'),
+    respIn:document.getElementById('responsavel'),
+    dataIn:document.getElementById('data'),
+    editItem:document.getElementById('edit-item'),
+    editValor:document.getElementById('edit-valor'),
+    editStatus:document.getElementById('edit-status'),
+    editResp:document.getElementById('edit-resp'),
+    editData:document.getElementById('edit-data'),
+    saveEditBtn:document.getElementById('save-edit'),
+    cancelEditBtn:document.getElementById('cancel-edit')
 };
 
-/* Utils */
-function formatBRL(v){
-    return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-/* Render function */
+function formatBRL(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 function render(){
-    // reset table
-    ids.tabelaBody.innerHTML = '';
-
-    let pagoNoivo = 0, pagoNoiva = 0, apagarNoivo = 0, apagarNoiva = 0;
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-
-    gastos.forEach((gasto, idx) => {
-        // accumulate totals
-        const val = Number(gasto.valor || 0);
-        if (gasto.status === 'Pago'){
-            if (gasto.responsavel === 'Noivo') pagoNoivo += val; else pagoNoiva += val;
-        } else {
-            if (gasto.responsavel === 'Noivo') apagarNoivo += val; else apagarNoiva += val;
+    ids.tabelaBody.innerHTML='';
+    let pagoNoivo=0,pagoNoiva=0,apagarNoivo=0,apagarNoiva=0;
+    const hoje=new Date();hoje.setHours(0,0,0,0);
+    gastos.forEach((g,idx)=>{
+        const val=Number(g.valor||0);
+        if(g.status==="Pago"){g.responsavel==="Noivo"?pagoNoivo+=val:pagoNoiva+=val;}
+        else{g.responsavel==="Noivo"?apagarNoivo+=val:apagarNoiva+=val;}
+        const tr=document.createElement('tr');
+        let alertClass='';
+        if(g.status==="A Pagar"&&g.data){
+            const dt=new Date(g.data);dt.setHours(0,0,0,0);
+            const diffDays=Math.ceil((dt-hoje)/(1000*60*60*24));
+            if(diffDays<0)alertClass='alert-red';else if(diffDays<=7)alertClass='alert-orange';
         }
-
-        // create row
-        const tr = document.createElement('tr');
-
-        // compute alert classes for A Pagar with date
-        let alertClass = '';
-        if (gasto.status === 'A Pagar' && gasto.data){
-            const dt = new Date(gasto.data); dt.setHours(0,0,0,0);
-            const diffMs = dt - hoje;
-            const diffDays = Math.ceil(diffMs / (1000*60*60*24));
-            if (diffDays < 0) alertClass = 'alert-red';
-            else if (diffDays <= 7) alertClass = 'alert-orange';
-        }
-        if (alertClass) tr.classList.add(alertClass);
-
-        // cells
-        const tdItem = document.createElement('td'); tdItem.setAttribute('data-label','Item'); tdItem.textContent = gasto.item || '-';
-        const tdValor = document.createElement('td'); tdValor.setAttribute('data-label','Valor'); tdValor.textContent = formatBRL(gasto.valor);
-        const tdStatus = document.createElement('td'); tdStatus.setAttribute('data-label','Status'); tdStatus.textContent = gasto.status;
-        const tdResp = document.createElement('td'); tdResp.setAttribute('data-label','Responsável'); tdResp.textContent = gasto.responsavel;
-        const tdData = document.createElement('td'); tdData.setAttribute('data-label','Data'); tdData.textContent = gasto.data ? (new Date(gasto.data)).toLocaleDateString('pt-BR') : '-';
-
-        const tdActions = document.createElement('td'); tdActions.setAttribute('data-label','Ações');
-        const rowAction = document.createElement('div'); rowAction.className = 'row-action';
-
-        // edit button
-        const btnEdit = document.createElement('button');
-        btnEdit.className = 'btn-small btn-edit';
-        btnEdit.textContent = 'Editar';
-        btnEdit.type = 'button';
-        btnEdit.addEventListener('click', () => openEditModal(idx));
-
-        // delete button
-        const btnDelete = document.createElement('button');
-        btnDelete.className = 'btn-small btn-delete';
-        btnDelete.textContent = 'Remover';
-        btnDelete.type = 'button';
-        btnDelete.addEventListener('click', () => removeItem(idx));
-
-        rowAction.appendChild(btnEdit);
-        rowAction.appendChild(btnDelete);
-        tdActions.appendChild(rowAction);
-
-        tr.appendChild(tdItem);
-        tr.appendChild(tdValor);
-        tr.appendChild(tdStatus);
-        tr.appendChild(tdResp);
-        tr.appendChild(tdData);
-        tr.appendChild(tdActions);
-
+        if(alertClass)tr.classList.add(alertClass);
+        tr.innerHTML=`
+        <td data-label="Item">${g.item}</td>
+        <td data-label="Valor">${formatBRL(g.valor)}</td>
+        <td data-label="Status">${g.status}</td>
+        <td data-label="Responsável">${g.responsavel}</td>
+        <td data-label="Data">${g.data?(new Date(g.data)).toLocaleDateString('pt-BR'):'-'}</td>
+        <td data-label="Ações"><div class="row-action">
+            <button class="btn-small btn-edit" type="button" onclick="openEditModal(${idx})">Editar</button>
+            <button class="btn-small btn-delete" type="button" onclick="removeItem(${idx})">Remover</button>
+        </div></td>`;
         ids.tabelaBody.appendChild(tr);
     });
-
-    // update totals
-    ids.totalPagoNoivo.textContent = formatBRL(pagoNoivo);
-    ids.totalPagoNoiva.textContent = formatBRL(pagoNoiva);
-    ids.totalPagoGeral.textContent = formatBRL(pagoNoivo + pagoNoiva);
-    ids.totalApagarNoivo.textContent = formatBRL(apagarNoivo);
-    ids.totalApagarNoiva.textContent = formatBRL(apagarNoiva);
-    ids.totalApagarGeral.textContent = formatBRL(apagarNoivo + apagarNoiva);
-    ids.orcamentoEl.textContent = formatBRL(orcamento);
+    ids.totalPagoNoivo.textContent=formatBRL(pagoNoivo);
+    ids.totalPagoNoiva.textContent=formatBRL(pagoNoiva);
+    ids.totalPagoGeral.textContent=formatBRL(pagoNoivo+pagoNoiva);
+    ids.totalApagarNoivo.textContent=formatBRL(apagarNoivo);
+    ids.totalApagarNoiva.textContent=formatBRL(apagarNoiva);
+    ids.totalApagarGeral.textContent=formatBRL(apagarNoivo+apagarNoiva);
+    ids.orcamentoEl.textContent=formatBRL(orcamento);
 }
 
-/* Add item */
-ids.form.addEventListener('submit', function(ev){
+ids.form.addEventListener('submit',ev=>{
     ev.preventDefault();
-    const item = ids.itemIn.value.trim();
-    const valor = parseFloat(ids.valorIn.value);
-    const status = ids.statusIn.value;
-    const resp = ids.respIn.value;
-    const data = ids.dataIn.value || '';
-
-    if (!item || isNaN(valor) || valor <= 0 || !status || !resp){
-        alert('Preencha todos os campos corretamente.');
-        return;
-    }
-    if (status === 'A Pagar' && !data){
-        alert('Para itens "A Pagar" informe a data de pagamento.');
-        return;
-    }
-
-    gastos.push({ item, valor, status, responsavel: resp, data });
-    // reset
-    ids.form.reset();
-    ids.statusIn.value = '';
-    ids.respIn.value = '';
-    render();
+    const item=ids.itemIn.value.trim(),valor=parseFloat(ids.valorIn.value),
+    status=ids.statusIn.value,resp=ids.respIn.value,data=ids.dataIn.value||'';
+    if(!item||isNaN(valor)||valor<=0||!status||!resp)return alert('Preencha todos os campos.');
+    if(status==='A Pagar'&&!data)return alert('Informe a data para "A Pagar".');
+    gastos.push({item,valor,status,responsavel:resp,data});
+    ids.form.reset();render();
 });
-
-/* Remove item */
-function removeItem(index){
-    if (!confirm('Remover este lançamento?')) return;
-    gastos.splice(index,1);
-    render();
+function removeItem(i){if(confirm('Remover este lançamento?')){gastos.splice(i,1);render();}}
+let editingIndex=null;
+function openEditModal(i){
+    editingIndex=i;const g=gastos[i];
+    ids.editItem.value=g.item;ids.editValor.value=g.valor;ids.editStatus.value=g.status;ids.editResp.value=g.responsavel;ids.editData.value=g.data;
+    ids.modalBackdrop.style.display='flex';
 }
-
-/* Edit modal behavior */
-let editingIndex = null;
-function openEditModal(index){
-    editingIndex = index;
-    const g = gastos[index];
-    ids.editItem.value = g.item || '';
-    ids.editValor.value = g.valor || '';
-    ids.editStatus.value = g.status || 'Pago';
-    ids.editResp.value = g.responsavel || 'Noivo';
-    ids.editData.value = g.data || '';
-
-    ids.modalBackdrop.style.display = 'flex';
-    ids.modalBackdrop.setAttribute('aria-hidden', 'false');
-    // focus first field
-    setTimeout(()=> ids.editItem.focus(), 120);
-}
-
-function closeEditModal(){
-    ids.modalBackdrop.style.display = 'none';
-    ids.modalBackdrop.setAttribute('aria-hidden', 'true');
-    editingIndex = null;
-}
-
-ids.cancelEditBtn.addEventListener('click', closeEditModal);
-ids.modalBackdrop.addEventListener('click', (ev) => {
-    if (ev.target === ids.modalBackdrop) closeEditModal();
-});
-
-/* Save edit */
-ids.saveEditBtn.addEventListener('click', () => {
-    if (editingIndex === null) return;
-    const item = ids.editItem.value.trim();
-    const valor = parseFloat(ids.editValor.value);
-    const status = ids.editStatus.value;
-    const resp = ids.editResp.value;
-    const data = ids.editData.value || '';
-
-    if (!item || isNaN(valor) || valor <= 0 || !status || !resp){
-        alert('Preencha todos os campos corretamente no formulário de edição.');
-        return;
-    }
-    if (status === 'A Pagar' && !data){
-        alert('Para itens "A Pagar" informe a data de pagamento.');
-        return;
-    }
-
-    gastos[editingIndex] = { item, valor, status, responsavel: resp, data };
-    closeEditModal();
+ids.cancelEditBtn.onclick=()=>ids.modalBackdrop.style.display='none';
+ids.saveEditBtn.onclick=()=>{
+    const i=editingIndex;if(i===null)return;
+    gastos[i].item=ids.editItem.value.trim();
+    gastos[i].valor=parseFloat(ids.editValor.value)||0;
+    gastos[i].status=ids.editStatus.value;
+    gastos[i].responsavel=ids.editResp.value;
+    gastos[i].data=ids.editData.value;
+    ids.modalBackdrop.style.display='none';
     render();
-});
-
-/* Edit Orçamento */
-ids.editOrcBtn.addEventListener('click', () => {
-    const novo = prompt('Digite o novo valor do Orçamento Planejado (apenas números):', orcamento.toFixed(2));
-    if (novo === null) return;
-    const parsed = parseFloat(String(novo).replace(',', '.'));
-    if (isNaN(parsed) || parsed < 0) { alert('Valor inválido'); return; }
-    orcamento = parsed;
-    render();
-});
-
-/* Initialize */
-document.addEventListener('DOMContentLoaded', render);
-
-/* Keyboard: Esc closes modal */
-document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Escape') {
-        if (ids.modalBackdrop.style.display === 'flex') closeEditModal();
-    }
-});
+};
+ids.editOrcBtn.onclick=()=>{
+    const novo=prompt('Informe o novo valor do orçamento planejado:',orcamento);
+    if(!novo)return;
+    const n=parseFloat(novo.replace(',','.'));
+    if(isNaN(n)||n<=0)return alert('Valor inválido.');
+    orcamento=n;render();
+};
+render();
 </script>
 </body>
 </html>
