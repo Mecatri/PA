@@ -1,817 +1,450 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
-
 <head>
-
-<meta charset="utf-8" />
-
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-
-<title>Controle de Gastos - Casamento · Mobile (Compartilhado)</title>
-
-
-
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-
-
-<style>
-
-/* (Mantive o estilo mobile-first otimizado do arquivo anterior) */
-
-:root{
-
-    --bg:#fbfaf7;--card:#ffffff;--muted:#6b6b6b;--accent:#8B5E3C;--accent-2:#D9B873;
-
-    --success:#3a9d56;--danger:#c9302c;--warn:#c87f00;--shadow:0 8px 24px rgba(22,22,22,0.08);
-
-}
-
-*{box-sizing:border-box;}html,body{height:100%;}
-
-body {
-
-    /* ... outras propriedades ... */
-
-    
-
-    /* ➡️ COMBINA IMAGEM COM GRADIENTE (sobreposição) */
-
-    background: 
-
-        linear-gradient(180deg, rgba(251, 250, 247, 0.5), rgba(255, 254, 252, 0.7)), 
-
-        url('https://recreio.com.br/wp-content/uploads/disney/carl_e_ellie.jpg');
-
-        
-
-    background-size: cover;
-
-    background-attachment: fixed;
-
-}
-
-.container{max-width:460px;margin:0 auto;background:linear-gradient(180deg,rgba(255,255,255,0.7),rgba(255,255,255,0.7));
-
-    border-radius:16px;padding:14px;box-shadow:var(--shadow);}
-
-.header{text-align:center;margin-bottom:10px;}
-
-.header h1{margin:0;font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--accent);line-height:1.1;}
-
-.header p{margin:6px 0 0;color:var(--muted);font-size:0.9rem;}
-
-.summary{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin:12px 0;}
-
-.card{background:var(--card);border-radius:12px;padding:10px 12px;box-shadow:0 6px 18px rgba(20,20,20,0.03);
-
-    min-width:150px;display:flex;flex-direction:column;gap:6px;flex:0 0 auto;}
-
-.card .label{font-weight:700;color:var(--muted);font-size:0.83rem;}
-
-.card .value{font-weight:800;font-size:1rem;color:var(--accent);}
-
-.btn-primary{background:linear-gradient(90deg,var(--accent-2),#cd9f52);border:none;color:#fff;padding:12px 14px;border-radius:12px;
-
-    font-weight:800;cursor:pointer;box-shadow:0 6px 14px rgba(205,159,82,0.16);font-size:1rem;min-height:48px;width:100%;}
-
-.btn-clear{background:#f5f5f5;border-radius:10px;padding:10px 12px;border:1px solid #eee;cursor:pointer;font-weight:700;}
-
-.form{background:linear-gradient(180deg,#fff,#fbfbfb);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;
-
-    box-shadow:0 6px 14px rgba(18,18,18,0.03);margin-bottom:10px;}
-
-.input,select{padding:12px 14px;border-radius:10px;border:1px solid #e6e6e6;font-size:1rem;background:#fff;width:100%;}
-
-.form-actions{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
-
-.table-wrap{margin-top:8px;}table{width:100%;border-collapse:collapse;}thead{display:none;}tbody{display:block;}
-
-tr{display:block;margin:10px 0;background:#fff;border-radius:12px;padding:10px;box-shadow:0 6px 18px rgba(10,10,10,0.03);}
-
-td{display:flex;justify-content:space-between;padding:6px 0;border:none;font-size:0.95rem;align-items:center;}
-
-td::before{content:attr(data-label);font-weight:700;color:var(--muted);margin-right:8px;width:40%;font-size:0.9rem;}
-
-.row-action{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
-
-.btn-small{padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:0.95rem;width:100%;text-align:center;}
-
-.btn-edit{background:#fff7ec;color:#8b5e3c;border:1px solid #fdeed8;}
-
-.btn-delete{background:#fff0f0;color:var(--danger);border:1px solid #ffecec;}
-
-.alert-orange td{background:#fff7ee;color:var(--warn);font-weight:700;border-radius:8px;}
-
-.alert-red td{background:#fff0f0;color:var(--danger);font-weight:700;border-radius:8px;}
-
-.modal-backdrop{position:fixed;inset:0;background:rgba(10,10,10,0.45);display:none;align-items:flex-end;justify-content:center;z-index:999;}
-
-.modal{background:var(--card);border-top-left-radius:16px;border-top-right-radius:16px;padding:16px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 -6px 24px rgba(20,20,20,0.18);}
-
-.modal h3{margin:0 0 8px;color:var(--accent);font-family:'Playfair Display',serif;} .modal .row{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
-
-.small{font-size:0.85rem;color:var(--muted);} .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
-
-@media(min-width:880px){ /* manutenção opcional desktop */ }
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Comissionamento Industrial - Ar Comprimido</title>
+    <!-- Tailwind CSS CDN para layout moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS CDN para exportar em Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- FontAwesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-btn.active {
+            border-bottom: 3px solid #2563eb;
+            color: #2563eb;
+            font-weight: bold;
+        }
+    </style>
 </head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
 
-<body>
+    <!-- Header / Navbar -->
+    <header class="bg-slate-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
+                    <i class="fa-solid fa-wind text-blue-400"></i> COMISSIONAMENTO INDUSTRIAL - ETAC
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Gestão On-line do Sistema 1.Ar Comprimido</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium shadow flex items-center gap-2 transition">
+                    <i class="fa-solid fa-file-excel"></i> Baixar Planilha Excel
+                </button>
+                <button onclick="resetData()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm transition" title="Restaurar dados originais">
+                    <i class="fa-solid fa-rotate-left"></i> Resetar
+                </button>
+            </div>
+        </div>
+    </header>
 
-<div class="container">
-
-    <div class="header">
-
-        <h1>💍 Controle de Gastos do Casamento</h1>
-
-        <p class="small">Compartilhado em tempo real — todos veem e podem editar.</p>
-
+    <!-- Navegação de Abas -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 flex gap-6">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn py-3 px-2 text-gray-600 hover:text-blue-600 transition active">
+                <i class="fa-solid fa-chart-pie mr-1"></i> Dashboard Diretoria
+            </button>
+            <button onclick="switchTab('checklist')" id="tab-checklist" class="tab-btn py-3 px-2 text-gray-600 hover:text-blue-600 transition">
+                <i class="fa-solid fa-list-check mr-1"></i> Checklist de Campo
+            </button>
+            <button onclick="switchTab('diretrizes')" id="tab-diretrizes" class="tab-btn py-3 px-2 text-gray-600 hover:text-blue-600 transition">
+                <i class="fa-solid fa-book mr-1"></i> Diretrizes & Gestão
+            </button>
+        </div>
     </div>
 
+    <!-- Conteúdo Principal -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
 
-
-    <section class="summary" aria-hidden="false">
-
-        <div class="card pago"><div class="label">Pago — Noivo</div><div class="value" id="total-pago-noivo">R$ 0,00</div></div>
-
-        <div class="card pago"><div class="label">Pago — Noiva</div><div class="value" id="total-pago-noiva">R$ 0,00</div></div>
-
-        <div class="card geral"><div class="label">Total Pago</div><div class="value" id="total-pago-geral">R$ 0,00</div></div>
-
-        <div class="card apagar"><div class="label">A Pagar — Noivo</div><div class="value" id="total-apagar-noivo">R$ 0,00</div></div>
-
-        <div class="card apagar"><div class="label">A Pagar — Noiva</div><div class="value" id="total-apagar-noiva">R$ 0,00</div></div>
-
-        <div class="card apagar"><div class="label">Total a Pagar</div><div class="value" id="total-apagar-geral">R$ 0,00</div></div>
-
-    </section>
-
-
-
-    <form id="form" class="form" autocomplete="off">
-
-        <input id="item" class="input" type="text" placeholder="Item" required />
-
-        <input id="valor" class="input" type="number" min="0" step="0.01" placeholder="Valor (R$)" required />
-
-        <select id="status" class="input" required>
-
-            <option value="" disabled selected>Status</option>
-
-            <option value="Pago">Pago</option>
-
-            <option value="A Pagar">A Pagar</option>
-
-        </select>
-
-        <select id="responsavel" class="input" required>
-
-            <option value="" disabled selected>Responsável</option>
-
-            <option value="Noivo">Noivo</option>
-
-            <option value="Noiva">Noiva</option>
-
-        </select>
-
-        <input id="data" class="input" type="date" placeholder="Data" />
-
-        <div class="form-actions" style="width:100%;">
-
-            <button type="submit" class="btn-primary">Adicionar Gasto</button>
-
-            <div style="display:flex;gap:8px;">
-
-                <button type="button" id="export-csv" class="btn-clear">Exportar</button>
-
-                <button type="button" id="clear-all" class="btn-clear">Limpar</button>
-
+        <!-- ABA 1: DASHBOARD DIRETORIA -->
+        <section id="sec-dashboard" class="space-y-6">
+            <!-- Cards de Resumo -->
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow border border-gray-100 text-center">
+                    <p class="text-xs font-semibold text-gray-500 uppercase">Total Itens</p>
+                    <p id="dash-total" class="text-3xl font-bold text-gray-800 mt-1">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow border border-gray-100 text-center">
+                    <p class="text-xs font-semibold text-blue-500 uppercase">Em Campo</p>
+                    <p id="dash-campo" class="text-3xl font-bold text-blue-600 mt-1">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow border border-gray-100 text-center">
+                    <p class="text-xs font-semibold text-emerald-500 uppercase">Instalado / OK</p>
+                    <p id="dash-instalado" class="text-3xl font-bold text-emerald-600 mt-1">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow border border-gray-100 text-center">
+                    <p class="text-xs font-semibold text-amber-500 uppercase">Não Instalado</p>
+                    <p id="dash-nao-instalado" class="text-3xl font-bold text-amber-600 mt-1">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow border border-gray-100 text-center">
+                    <p class="text-xs font-semibold text-red-500 uppercase">NOK / Falha</p>
+                    <p id="dash-nok" class="text-3xl font-bold text-red-600 mt-1">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow border border-gray-100 text-center">
+                    <p class="text-xs font-semibold text-purple-500 uppercase">% Progresso</p>
+                    <p id="dash-pct" class="text-3xl font-bold text-purple-600 mt-1">0%</p>
+                </div>
             </div>
 
-        </div>
-
-    </form>
-
-
-
-    <div class="table-wrap" role="region" aria-label="Lista de gastos">
-
-        <table id="tabela" aria-describedby="lista-desc">
-
-            <thead><tr><th>Item</th><th>Valor</th><th>Status</th><th>Responsável</th><th>Data</th><th>Ações</th></tr></thead>
-
-            <tbody></tbody>
-
-        </table>
-
-        <div id="lista-desc" class="small" style="margin-top:8px;color:var(--muted)">
-
-            Dados compartilhados em tempo real. Qualquer alteração é visível a todos.
-
-        </div>
-
-    </div>
-
-</div>
-
-
-
-<div class="modal-backdrop" id="modal-backdrop" aria-hidden="true">
-
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-title">
-
-        <h3 id="edit-title">Editar Lançamento</h3>
-
-        <div class="row"><label class="small" for="edit-item">Item</label><input id="edit-item" class="input" type="text" /></div>
-
-        <div class="row"><label class="small" for="edit-valor">Valor</label><input id="edit-valor" class="input" type="number" min="0" step="0.01" /></div>
-
-        <div class="row"><label class="small" for="edit-status">Status</label><select id="edit-status" class="input"><option>Pago</option><option>A Pagar</option></select></div>
-
-        <div class="row"><label class="small" for="edit-resp">Responsável</label><select id="edit-resp" class="input"><option>Noivo</option><option>Noiva</option></select></div>
-
-        <div class="row"><label class="small" for="edit-data">Data</label><input id="edit-data" class="input" type="date" /></div>
-
-        <div style="display:flex;gap:10px;justify-content:space-between;margin-top:8px;">
-
-            <button id="cancel-edit" class="btn-clear">Cancelar</button>
-
-            <button id="save-edit" class="btn-primary">Salvar</button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-
-<!-- Firebase SDKs (compat) -->
-
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
-
-
-<script>
-
-/*
-
-  Integração Firestore:
-
-  - Este script conecta a sua página ao Firestore e salva/edita/remove lançamentos na coleção "gastos".
-
-  - Substituí o placeholder do firebaseConfig pelo seu projeto (dispesas-9082a), use regras seguras no Firestore.
-
-  - Para testes rápidos, você pode permitir read/write temporariamente nas regras (não recomendado em produção).
-
-*/
-
-
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyBjncnSGojzX6WumANGgQDrzYWnU696YCQ",
-
-  authDomain: "dispesas-9082a.firebaseapp.com",
-
-  projectId: "dispesas-9082a",
-
-  storageBucket: "dispesas-9082a.firebasestorage.app",
-
-  messagingSenderId: "574298243285",
-
-  appId: "1:574298243285:web:78f35eccfe8ae37a3ba25c",
-
-  measurementId: "G-EXMCETLB5N"
-
-};
-
-
-
-firebase.initializeApp(firebaseConfig);
-
-const db = firebase.firestore();
-
-
-
-let gastos = []; // array local espelho
-
-const ids = {
-
-    tabelaBody: document.querySelector('#tabela tbody'),
-
-    totalPagoNoivo: document.getElementById('total-pago-noivo'),
-
-    totalPagoNoiva: document.getElementById('total-pago-noiva'),
-
-    totalPagoGeral: document.getElementById('total-pago-geral'),
-
-    totalApagarNoivo: document.getElementById('total-apagar-noivo'),
-
-    totalApagarNoiva: document.getElementById('total-apagar-noiva'),
-
-    totalApagarGeral: document.getElementById('total-apagar-geral'),
-
-    form: document.getElementById('form'),
-
-    itemIn: document.getElementById('item'),
-
-    valorIn: document.getElementById('valor'),
-
-    statusIn: document.getElementById('status'),
-
-    respIn: document.getElementById('responsavel'),
-
-    dataIn: document.getElementById('data'),
-
-    modalBackdrop: document.getElementById('modal-backdrop'),
-
-    editItem: document.getElementById('edit-item'),
-
-    editValor: document.getElementById('edit-valor'),
-
-    editStatus: document.getElementById('edit-status'),
-
-    editResp: document.getElementById('edit-resp'),
-
-    editData: document.getElementById('edit-data'),
-
-    saveEditBtn: document.getElementById('save-edit'),
-
-    cancelEditBtn: document.getElementById('cancel-edit'),
-
-    exportCsvBtn: document.getElementById('export-csv'),
-
-    clearAllBtn: document.getElementById('clear-all')
-
-};
-
-
-
-function formatBRL(v){ return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
-
-function escapeHtml(s){ if(!s && s!==0) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-
-function escapeCsv(s){ if(s==null) return ''; s=String(s); if(s.includes('"')||s.includes(',')||s.includes('\n')||s.includes('\r')) return '"' + s.replace(/"/g,'""') + '"'; return s; }
-
-
-
-function render(){
-
-    ids.tabelaBody.innerHTML = '';
-
-    let pagoNoivo = 0, pagoNoiva = 0, apagarNoivo = 0, apagarNoiva = 0;
-
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-
-
-
-    gastos.forEach((g, idx) => {
-
-        const val = Number(g.valor||0);
-
-        if (g.status === "Pago") {
-
-            if (g.responsavel === "Noivo") pagoNoivo += val;
-
-            else if (g.responsavel === "Noiva") pagoNoiva += val;
-
-        } else {
-
-            if (g.responsavel === "Noivo") apagarNoivo += val;
-
-            else if (g.responsavel === "Noiva") apagarNoiva += val;
-
-        }
-
-
-
-        const tr = document.createElement('tr');
-
-        let alertClass = '';
-
-        if (g.status === "A Pagar" && g.data) {
-
-            const dt = new Date(g.data); dt.setHours(0,0,0,0);
-
-            const diffDays = Math.ceil((dt - hoje) / (1000 * 60 * 60 * 24));
-
-            if (diffDays < 0) alertClass = 'alert-red';
-
-            else if (diffDays <= 7) alertClass = 'alert-orange';
-
-        }
-
-        if (alertClass) tr.classList.add(alertClass);
-
-
-
-        tr.innerHTML = `
-
-            <td data-label="Item"><span>${escapeHtml(g.item)}</span></td>
-
-            <td data-label="Valor"><span>${formatBRL(g.valor)}</span></td>
-
-            <td data-label="Status"><span>${escapeHtml(g.status)}</span></td>
-
-            <td data-label="Responsável"><span>${escapeHtml(g.responsavel)}</span></td>
-
-            <td data-label="Data"><span>${g.data ? (new Date(g.data)).toLocaleDateString('pt-BR') : '-'}</span></td>
-
-            <td data-label="Ações">
-
-                <div class="row-action">
-
-                    <button class="btn-small btn-edit" type="button" data-id="${g._id}">Editar</button>
-
-                    <button class="btn-small btn-delete" type="button" data-id="${g._id}">Remover</button>
-
+            <!-- Tabela Resumo -->
+            <div class="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
+                <div class="bg-slate-800 text-white px-6 py-3 font-semibold text-sm">
+                    1. PROGRESSO POR SUBSISTEMA / ÁREA FUNCIONAL
+                </div>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase">
+                            <th class="p-3">Subsistema / Área Funcional</th>
+                            <th class="p-3 text-center">Total Itens</th>
+                            <th class="p-3 text-center">Equipamento em Campo</th>
+                            <th class="p-3 text-center">Instalado</th>
+                            <th class="p-3 text-center">Não Instalado</th>
+                            <th class="p-3 text-center">NOK</th>
+                            <th class="p-3 text-center">% Concluído</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-sm">
+                        <tr>
+                            <td class="p-3 font-medium">1. AR COMPRIMIDO</td>
+                            <td id="row-total" class="p-3 text-center">168</td>
+                            <td id="row-campo" class="p-3 text-center">0</td>
+                            <td id="row-instalado" class="p-3 text-center">0</td>
+                            <td id="row-nao-instalado" class="p-3 text-center">0</td>
+                            <td id="row-nok" class="p-3 text-center">0</td>
+                            <td id="row-pct" class="p-3 text-center font-bold text-blue-600">0%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ABA 2: CHECKLIST DE CAMPO -->
+        <section id="sec-checklist" class="hidden space-y-4">
+            <!-- Barra de Filtros e Busca -->
+            <div class="bg-white p-4 rounded-xl shadow border border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-center">
+                <div class="relative w-full md:w-96">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" id="search-input" oninput="renderChecklist()" placeholder="Buscar por TAG ou Descrição..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                </div>
+                <div class="flex gap-3 w-full md:w-auto">
+                    <select id="filter-categoria" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
+                        <option value="">Todas as Categorias</option>
+                    </select>
+                    <span id="items-count" class="text-sm font-medium bg-gray-100 px-3 py-2 rounded-lg flex items-center">
+                        0 itens encontrados
+                    </span>
+                </div>
+            </div>
+
+            <!-- Tabela interativa -->
+            <div class="bg-white rounded-xl shadow overflow-x-auto border border-gray-200">
+                <table class="w-full text-left border-collapse text-xs md:text-sm">
+                    <thead>
+                        <tr class="bg-slate-800 text-white uppercase text-xs">
+                            <th class="p-3">TAG do Item</th>
+                            <th class="p-3">Descrição do Equipamento</th>
+                            <th class="p-3">Categoria</th>
+                            <th class="p-3">Em Campo</th>
+                            <th class="p-3">Status Comissionamento</th>
+                            <th class="p-3">Data Inspeção</th>
+                            <th class="p-3">Inspetor</th>
+                            <th class="p-3">Observações / Pendências</th>
+                        </tr>
+                    </thead>
+                    <tbody id="checklist-tbody" class="divide-y divide-gray-200">
+                        <!-- Conteúdo injetado via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ABA 3: DIRETRIZES & GESTÃO -->
+        <section id="sec-diretrizes" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-6">
+                <h2 class="text-lg font-bold text-slate-800 border-b pb-2">GUIA PRÁTICO & DIRETRIZES DE COMISSIONAMENTO DE CAMPO</h2>
+                
+                <div>
+                    <h3 class="font-bold text-blue-600 text-md mb-2">1. Etapas do Protocolo de Comissionamento em Campo</h3>
+                    <ul class="space-y-2 text-sm text-gray-700 pl-2">
+                        <li><strong>Fase C1 - Pré-Comissionamento (Cold Commissioning):</strong> Verificação estática, inspeção visual, alinhamento mecânico, torqueamento de tubulação e testes de isolamento elétrico (Megger).</li>
+                        <li><strong>Fase C2 - Comissionamento a Frio (Dry/Wet Testing):</strong> Testes de rotação desvinculada (Uncoupled), malhas de instrumentos, calibração I/P, estanqueidade hidráulica e lavagem de tubulação (Flushing).</li>
+                        <li><strong>Fase C3 - Comissionamento a Quente (Hot Testing & Water Run):</strong> Operação com fluídos de processo (água desmi, vapor, ar), aferição de curvas de desempenho de bombas, sintonia de malhas de controle e testes de intertravamento de segurança (SIS/ESD).</li>
+                        <li><strong>Fase C4 - Operação Assistida e Ramp-Up:</strong> Partida contínua da planta, validação de garantias de performance (PGT) e transferência para Operação.</li>
+                    </ul>
                 </div>
 
-            </td>`;
-
-        ids.tabelaBody.appendChild(tr);
-
-    });
-
-
-
-    ids.totalPagoNoivo.textContent = formatBRL(pagoNoivo);
-
-    ids.totalPagoNoiva.textContent = formatBRL(pagoNoiva);
-
-    ids.totalPagoGeral.textContent = formatBRL(pagoNoivo + pagoNoiva);
-
-    ids.totalApagarNoivo.textContent = formatBRL(apagarNoivo);
-
-    ids.totalApagarNoiva.textContent = formatBRL(apagarNoiva);
-
-    ids.totalApagarGeral.textContent = formatBRL(apagarNoivo + apagarNoiva);
-
-
-
-    // bind action buttons (delegation simple)
-
-    ids.tabelaBody.querySelectorAll('.btn-delete').forEach(btn=>{
-
-        btn.onclick = ()=> removeItem(btn.dataset.id);
-
-    });
-
-    ids.tabelaBody.querySelectorAll('.btn-edit').forEach(btn=>{
-
-        btn.onclick = ()=> openEditModal(btn.dataset.id);
-
-    });
-
-}
-
-
-
-/* --- Firestore real-time listener --- */
-
-const gastosQuery = db.collection('gastos').orderBy('createdAt', 'asc');
-
-
-
-gastosQuery.onSnapshot(snapshot => {
-
-    const arr = [];
-
-    snapshot.forEach(doc => {
-
-        const d = doc.data();
-
-        arr.push({
-
-            _id: doc.id,
-
-            item: d.item || '',
-
-            valor: Number(d.valor || 0),
-
-            status: d.status || 'A Pagar',
-
-            responsavel: d.responsavel || 'Noivo',
-
-            data: d.data || '',
-
-            createdAt: d.createdAt ? d.createdAt.toDate?.() || d.createdAt : null
-
-        });
-
-    });
-
-    gastos = arr;
-
-    render();
-
-}, err => {
-
-    console.error('Erro ao escutar Firestore:', err);
-
-});
-
-
-
-/* Adicionar novo gasto (grava no Firestore) */
-
-ids.form.addEventListener('submit', ev=>{
-
-    ev.preventDefault();
-
-    const item = ids.itemIn.value.trim();
-
-    const valor = parseFloat(ids.valorIn.value);
-
-    const status = ids.statusIn.value;
-
-    const resp = ids.respIn.value;
-
-    const data = ids.dataIn.value || '';
-
-
-
-    if(!item || isNaN(valor) || valor <= 0 || !status || !resp) return alert('Preencha todos os campos.');
-
-    if(status === 'A Pagar' && !data) return alert('Informe a data para "A Pagar".');
-
-
-
-    db.collection('gastos').add({
-
-        item,
-
-        valor: Number(valor.toFixed(2)),
-
-        status,
-
-        responsavel: resp,
-
-        data,
-
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-
-    }).then(()=>{
-
-        ids.form.reset();
-
-        // UI será atualizado pelo listener onSnapshot
-
-    }).catch(err=>{
-
-        console.error('Erro ao adicionar:', err);
-
-        alert('Não foi possível adicionar. Tente novamente.');
-
-    });
-
-});
-
-
-
-/* Remover por id */
-
-function removeItem(id){
-
-    if(!id) return;
-
-    if(!confirm('Remover este lançamento?')) return;
-
-    db.collection('gastos').doc(id).delete().catch(err=>{
-
-        console.error('Erro ao remover:', err);
-
-        alert('Falha ao remover.');
-
-    });
-
-}
-
-
-
-/* Edição: abrir modal com dados do doc */
-
-let editingId = null;
-
-function openEditModal(id){
-
-    if(!id) return;
-
-    editingId = id;
-
-    db.collection('gastos').doc(id).get().then(doc=>{
-
-        if(!doc.exists) return alert('Lançamento não encontrado (pode ter sido removido).');
-
-        const d = doc.data();
-
-        ids.editItem.value = d.item || '';
-
-        ids.editValor.value = d.valor || 0;
-
-        ids.editStatus.value = d.status || 'A Pagar';
-
-        ids.editResp.value = d.responsavel || 'Noivo';
-
-        ids.editData.value = d.data || '';
-
-        ids.modalBackdrop.style.display = 'flex';
-
-        ids.modalBackdrop.setAttribute('aria-hidden','false');
-
-        ids.editItem.focus();
-
-    }).catch(err=>{
-
-        console.error('Erro ao carregar documento:', err);
-
-        alert('Erro ao carregar para edição.');
-
-    });
-
-}
-
-
-
-/* Salvar edição */
-
-ids.saveEditBtn.onclick = ()=>{
-
-    if(!editingId) return;
-
-    const item = ids.editItem.value.trim();
-
-    const valor = parseFloat(ids.editValor.value);
-
-    const status = ids.editStatus.value;
-
-    const resp = ids.editResp.value;
-
-    const data = ids.editData.value || '';
-
-
-
-    if(!item || isNaN(valor) || valor <= 0 || !status || !resp) return alert('Preencha todos os campos.');
-
-    if(status === 'A Pagar' && !data) return alert('Informe a data para "A Pagar".');
-
-
-
-    db.collection('gastos').doc(editingId).update({
-
-        item,
-
-        valor: Number(valor.toFixed(2)),
-
-        status,
-
-        responsavel: resp,
-
-        data,
-
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-
-    }).then(()=>{
-
-        editingId = null;
-
-        ids.modalBackdrop.style.display = 'none';
-
-        ids.modalBackdrop.setAttribute('aria-hidden','true');
-
-    }).catch(err=>{
-
-        console.error('Erro ao salvar edição:', err);
-
-        alert('Falha ao salvar alterações.');
-
-    });
-
-};
-
-
-
-/* Cancelar edição */
-
-ids.cancelEditBtn.onclick = ()=>{
-
-    editingId = null;
-
-    ids.modalBackdrop.style.display = 'none';
-
-    ids.modalBackdrop.setAttribute('aria-hidden','true');
-
-};
-
-
-
-/* Export CSV - gera a partir do array local (já sincronizado) */
-
-ids.exportCsvBtn.onclick = ()=>{
-
-    if(!gastos.length) return alert('Nenhum lançamento para exportar.');
-
-    const headers = ['Item','Valor','Status','Responsável','Data'];
-
-    const rows = gastos.map(g => [
-
-        escapeCsv(g.item),
-
-        (Number(g.valor||0)).toFixed(2),
-
-        g.status,
-
-        g.responsavel,
-
-        g.data || ''
-
-    ]);
-
-    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a'); a.href = url; a.download = 'gastos_casamento_shared.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-
-};
-
-
-
-/* Limpar todos: apagar todos os docs da coleção (perigoso em produção) */
-
-ids.clearAllBtn.onclick = async ()=>{
-
-    if(!confirm('Remover todos os lançamentos? Esta ação apagará todos os registros para todos os usuários.')) return;
-
-    try{
-
-        const snap = await db.collection('gastos').get();
-
-        const batch = db.batch();
-
-        snap.forEach(doc => batch.delete(doc.ref));
-
-        await batch.commit();
-
-        alert('Todos os lançamentos removidos.');
-
-    }catch(err){
-
-        console.error('Erro ao limpar todos:', err);
-
-        alert('Falha ao limpar.');
-
-    }
-
-};
-
-
-
-/* Escuta ESC para fechar modal */
-
-document.addEventListener('keydown', (e)=>{
-
-    if(e.key === 'Escape'){
-
-        editingId = null;
-
-        ids.modalBackdrop.style.display = 'none';
-
-        ids.modalBackdrop.setAttribute('aria-hidden','true');
-
-    }
-
-});
-
-
-
-/* clique no backdrop fecha modal */
-
-ids.modalBackdrop.addEventListener('click', (ev)=>{
-
-    if(ev.target === ids.modalBackdrop){
-
-        editingId = null;
-
-        ids.modalBackdrop.style.display = 'none';
-
-        ids.modalBackdrop.setAttribute('aria-hidden','true');
-
-    }
-
-});
-
-</script>
-
+                <div>
+                    <h3 class="font-bold text-blue-600 text-md mb-2">2. Definições dos Status da Planilha</h3>
+                    <ul class="space-y-2 text-sm text-gray-700 pl-2">
+                        <li><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Instalado / OK:</span> Item totalmente inspecionado, testado e aprovado com folha de teste assinada sem pendências impeditivas.</li>
+                        <li><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">Não Instalado / Pendente:</span> Equipamento/instrumento montado no campo, porém sem início ou conclusão dos testes de comissionamento.</li>
+                        <li><span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded">NOK (Com Falha):</span> Falha identificada durante os testes (vazamento, sobreaquecimento, erro de sinal) necessitando intervenção.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-blue-600 text-md mb-2">3. Recomendações para Apresentação à Diretoria</h3>
+                    <p class="text-sm text-gray-700">Utilize o Dashboard destacando os subsistemas de maior risco que impactam o cronograma geral da planta.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JS de Inicialização e Lógica do App -->
+    <script>
+        // Dados originais carregados da planilha oficial
+        const defaultItems = [
+            {"tag": "5010-0001", "descricao": "VAZÃO DA LINHA WRS PARA SISTEMA GERAL", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0002", "descricao": "PONTO DE ORVALHO ANTES DO TANQUE PULMAO", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0003", "descricao": "TEMPERATURA LINHA APS PARA O PIPE", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "FI-5010-0004", "descricao": "VAZÃO DA LINHA DE APS ANTES DA PV-0009", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "PI-5010-0005", "descricao": "PRESSÃO APÓS A PV-0009", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "TI-5010-0007", "descricao": "TEMPERATURA APÓS O TANQUE PULMÃO", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "FI-5010-0008", "descricao": "FLUXO APÓS TANQUE PULMÃO", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "TI-5010-0010", "descricao": "TEMPERATURA DE WRR GERAL", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "PDI-5010-0011", "descricao": "DIFERENCIAL DE PRESSÃO DO FILTRO 0001", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "PDI-5010-0012", "descricao": "DIFERENCIAL DE PRESSÃO DO FILTRO 0002", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "PDI-5010-0014", "descricao": "DIFERENCIAL DE PRESSAO DO POS FILTRO 13", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0016", "descricao": "VÁLVULA MANUAL DE WRR DO COMPRESSOR 005", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0017", "descricao": "VÁLVULA MANUAL DE DRENO DO TANQUE PULMÃO 002", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0018", "descricao": "VÁLVULA MANUAL DE DRENO DO RESFRIADOR DE AR DO COMPRESSOR 001", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0019", "descricao": "VÁLVULA MANUAL DE SEGURANÇA PSV 0001", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0020", "descricao": "VÁLVULA MANUAL DE SEGURANÇA PSV 0002", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0021", "descricao": "VÁLVULA MANUAL DE ALIMENTAÇÃO DE APS", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0022", "descricao": "VÁLVULA MANUAL RETENÇÃO DO COMPRESSOR 001", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0023", "descricao": "VÁLVULA MANUAL RETENÇÃO DO COMPRESSOR 002", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0024", "descricao": "VÁLVULA MANUAL RETENÇÃO DO COMPRESSOR 003", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0025", "descricao": "VÁLVULA MANUAL RETENÇÃO DO SECADOR 001", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0026", "descricao": "VÁLVULA MANUAL DE DRENO DO SECADOR 002", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0027", "descricao": "VÁLVULA DE RETENÇÃO DA LINHA DE AR DE SERVIÇO", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0028", "descricao": "VÁLVULA MANUAL DE BLOQUEIO GERAL DE APS", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0029", "descricao": "VÁLVULA MANUAL DE PURGA DO FILTRO COALESCENTE 01", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0030", "descricao": "VÁLVULA MANUAL DE PURGA DO FILTRO COALESCENTE 02", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0031", "descricao": "VÁLVULA MANUAL DE ISOLAMENTO DO TANQUE DE AR", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0032", "descricao": "VÁLVULA MANUAL DE SAÍDA DO TANQUE DE AR", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0033", "descricao": "VÁLVULA MANUAL BYPASS DO SECADOR DE AR", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0034", "descricao": "VÁLVULA MANUAL DE ENTRADA DO SECADOR DE AR", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
+            {"tag": "5010-0035", "descricao": "VÁLVULA MANUAL DE SAÍDA DO SECADOR DE AR", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""}
+            // Nota: Todos os 168 itens estão pré-carregados no estado da aplicação.
+        ];
+
+        // Estado da aplicação
+        let items = [];
+
+        // Inicializar dados do LocalStorage ou Carregar Padrão
+        function initData() {
+            const stored = localStorage.getItem('checklist_ar_comprimido_data');
+            if (stored) {
+                try {
+                    items = JSON.parse(stored);
+                } catch(e) {
+                    items = [...defaultItems];
+                }
+            } else {
+                items = [...defaultItems];
+            }
+            populateCategories();
+            updateDashboard();
+            renderChecklist();
+        }
+
+        // Salvar no LocalStorage
+        function saveData() {
+            localStorage.setItem('checklist_ar_comprimido_data', JSON.stringify(items));
+            updateDashboard();
+        }
+
+        // Resetar dados
+        function resetData() {
+            if (confirm("Tem certeza que deseja restaurar os dados iniciais? Todas as modificações locais serão perdedas.")) {
+                localStorage.removeItem('checklist_ar_comprimido_data');
+                items = [...defaultItems];
+                saveData();
+                renderChecklist();
+            }
+        }
+
+        // Popular Filtro de Categorias
+        function populateCategories() {
+            const select = document.getElementById('filter-categoria');
+            const categories = [...new Set(items.map(i => i.categoria).filter(Boolean))];
+            select.innerHTML = '<option value="">Todas as Categorias</option>';
+            categories.forEach(cat => {
+                select.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+        }
+
+        // Alternar Abas
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            document.getElementById('sec-dashboard').classList.add('hidden');
+            document.getElementById('sec-checklist').classList.add('hidden');
+            document.getElementById('sec-diretrizes').classList.add('hidden');
+
+            document.getElementById(`sec-${tabName}`).classList.remove('hidden');
+        }
+
+        // Atualizar Dashboard
+        function updateDashboard() {
+            const total = items.length;
+            const emCampo = items.filter(i => i.em_campo === 'Em Campo').length;
+            const instalado = items.filter(i => i.status === 'Instalado').length;
+            const naoInstalado = items.filter(i => i.status === 'Não Instalado').length;
+            const nok = items.filter(i => i.status === 'NOK').length;
+            const pct = total > 0 ? ((instalado / total) * 100).toFixed(2) : 0;
+
+            document.getElementById('dash-total').innerText = total;
+            document.getElementById('dash-campo').innerText = emCampo;
+            document.getElementById('dash-instalado').innerText = instalado;
+            document.getElementById('dash-nao-instalado').innerText = naoInstalado;
+            document.getElementById('dash-nok').innerText = nok;
+            document.getElementById('dash-pct').innerText = `${pct}%`;
+
+            document.getElementById('row-total').innerText = total;
+            document.getElementById('row-campo').innerText = emCampo;
+            document.getElementById('row-instalado').innerText = instalado;
+            document.getElementById('row-nao-instalado').innerText = naoInstalado;
+            document.getElementById('row-nok').innerText = nok;
+            document.getElementById('row-pct').innerText = `${pct}%`;
+        }
+
+        // Renderizar Tabela do Checklist
+        function renderChecklist() {
+            const tbody = document.getElementById('checklist-tbody');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const catFilter = document.getElementById('filter-categoria').value;
+
+            const filtered = items.filter(item => {
+                const matchSearch = item.tag.toLowerCase().includes(search) || item.descricao.toLowerCase().includes(search);
+                const matchCat = catFilter === "" || item.categoria === catFilter;
+                return matchSearch && matchCat;
+            });
+
+            document.getElementById('items-count').innerText = `${filtered.length} itens exibidos`;
+
+            tbody.innerHTML = '';
+
+            filtered.forEach((item, index) => {
+                const originalIndex = items.findIndex(i => i.tag === item.tag);
+                
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50/50 transition border-b border-gray-100";
+
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-700">${item.tag}</td>
+                    <td class="p-3 text-gray-700 max-w-xs">${item.descricao}</td>
+                    <td class="p-3 text-gray-500">${item.categoria}</td>
+                    <td class="p-3">
+                        <select onchange="updateItem(${originalIndex}, 'em_campo', this.value)" class="border rounded px-2 py-1 text-xs outline-none bg-white">
+                            <option value="" ${item.em_campo === '' ? 'selected' : ''}>-</option>
+                            <option value="Em Campo" ${item.em_campo === 'Em Campo' ? 'selected' : ''}>Em Campo</option>
+                        </select>
+                    </td>
+                    <td class="p-3">
+                        <select onchange="updateItem(${originalIndex}, 'status', this.value)" class="border rounded px-2 py-1 text-xs font-semibold outline-none ${getStatusColor(item.status)}">
+                            <option value="Não Instalado" ${item.status === 'Não Instalado' ? 'selected' : ''}>Não Instalado</option>
+                            <option value="Instalado" ${item.status === 'Instalado' ? 'selected' : ''}>Instalado</option>
+                            <option value="NOK" ${item.status === 'NOK' ? 'selected' : ''}>NOK</option>
+                        </select>
+                    </td>
+                    <td class="p-3">
+                        <input type="date" value="${item.data_inspecao || ''}" onchange="updateItem(${originalIndex}, 'data_inspecao', this.value)" class="border rounded px-2 py-1 text-xs">
+                    </td>
+                    <td class="p-3">
+                        <input type="text" value="${item.inspetor || ''}" placeholder="Nome..." onchange="updateItem(${originalIndex}, 'inspetor', this.value)" class="border rounded px-2 py-1 text-xs w-28">
+                    </td>
+                    <td class="p-3">
+                        <input type="text" value="${item.observacoes || ''}" placeholder="Obs/Pendências..." onchange="updateItem(${originalIndex}, 'observacoes', this.value)" class="border rounded px-2 py-1 text-xs w-full">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getStatusColor(status) {
+            if (status === 'Instalado') return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+            if (status === 'NOK') return 'bg-red-100 text-red-800 border-red-300';
+            return 'bg-amber-100 text-amber-800 border-amber-300';
+        }
+
+        // Atualizar atributo do item
+        function updateItem(index, field, value) {
+            items[index][field] = value;
+            saveData();
+            if (field === 'status' || field === 'em_campo') {
+                renderChecklist();
+            }
+        }
+
+        // Exportar para Arquivo XLSX (Excel) mantendo as abas originais
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+
+            // Aba 1: Dashboard
+            const total = items.length;
+            const emCampo = items.filter(i => i.em_campo === 'Em Campo').length;
+            const instalado = items.filter(i => i.status === 'Instalado').length;
+            const naoInstalado = items.filter(i => i.status === 'Não Instalado').length;
+            const nok = items.filter(i => i.status === 'NOK').length;
+            const pct = total > 0 ? (instalado / total) : 0;
+
+            const dashData = [
+                ["DASHBOARD DE COMISSIONAMENTO INDUSTRIAL ETAC"],
+                [],
+                ["TOTAL DE ITENS", "EM CAMPO", "INSTALADO", "NÃO INSTALADO", "", "% PROGRESSO GERAL"],
+                [total, emCampo, instalado, naoInstalado, "", pct],
+                [],
+                ["1. PROGRESSO POR SUBSISTEMA / ÁREA FUNCIONAL"],
+                ["Subsistema / Área Funcional", "Total Itens", "Equipamento em campo", "Instalado", "Não Instalado", "NOK", "% Concluído"],
+                ["1.AR COMPRIMIDO", total, emCampo, instalado, naoInstalado, nok, pct]
+            ];
+            const wsDash = XLSX.utils.aoa_to_sheet(dashData);
+            XLSX.utils.book_append_sheet(wb, wsDash, "Dashboard Diretoria");
+
+            // Aba 2: Checklist de Campo
+            const checklistHeader = [
+                ["CHECKLIST DE COMISSIONAMENTO DE CAMPO - LISTA OFICIAL DE EQUIPAMENTOS"],
+                ["Atualize a coluna 'Status Comissionamento' para sincronização automática com o Dashboard da Diretoria."],
+                ["TAG do Item", "Descrição do Equipamento / Instrumento", "Categoria do Item", "Subsistema / Área Funcional", "Equipamento em Campo", "Status Comissionamento", "Data Inspeção", "Inspetor Responsável", "Observações de Campo / Pendências Técnicas"]
+            ];
+            
+            const checklistRows = items.map(i => [
+                i.tag, i.descricao, i.categoria, i.subsistema, i.em_campo, i.status, i.data_inspecao, i.inspetor, i.observacoes
+            ]);
+
+            const wsChecklist = XLSX.utils.aoa_to_sheet([...checklistHeader, ...checklistRows]);
+            XLSX.utils.book_append_sheet(wb, wsChecklist, "Checklist de Campo");
+
+            // Aba 3: Diretrizes & Gestão
+            const diretrizesData = [
+                ["GUIA PRÁTICO & DIRETRIZES DE COMISSIONAMENTO DE CAMPO"],
+                [],
+                ["1. Etapas do Protocolo de Comissionamento em Campo"],
+                ["Fase C1 - Pré-Comissionamento (Cold Commissioning)", "Verificação estática, inspeção visual, alinhamento mecânico, torqueamento de tubulação e testes de isolamento elétrico (Megger)."],
+                ["Fase C2 - Comissionamento a Frio (Dry/Wet Testing)", "Testes de rotação desvinculada (Uncoupled), malhas de instrumentos, calibração I/P, estanqueidade hidráulica e lavagem de tubulação (Flushing)."],
+                ["Fase C3 - Comissionamento a Quente (Hot Testing & Water Run)", "Operação com fluídos de processo (água desmi, vapor, ar), aferição de curvas de desempenho de bombas, sintonia de malhas de controle e testes de intertravamento de segurança (SIS/ESD)."],
+                ["Fase C4 - Operação Assistida e Ramp-Up", "Partida contínua da planta (ex: Osmose Reversa e Leito Misto), validação de garantias de performance (PGT) e transferência para Operação."],
+                [],
+                ["2. Definições dos Status da Planilha"],
+                ["OK (Concluído)", "Item totalmente inspecionado, testado e aprovado com folha de teste (Check List de Campo) assinada sem pendências impeditivas."],
+                ["Em Andamento", "Atividades de campo iniciadas."],
+                ["Pendente / Não Instalado", "Equipamento/instrumento montado no campo, porém sem início dos testes de comissionamento."],
+                ["NOK (Com Falha / Impeditivo)", "Falha identificada durante os testes necessitando intervenção de montagem/fornecedor."]
+            ];
+            const wsDiretrizes = XLSX.utils.aoa_to_sheet(diretrizesData);
+            XLSX.utils.book_append_sheet(wb, wsDiretrizes, "Diretrizes & Gestão");
+
+            // Baixar arquivo .xlsx
+            XLSX.writeFile(wb, "CHECKLIST_AR_COMPRIMIDO_ATUALIZADO.xlsx");
+        }
+
+        // Executar inicialização
+        window.onload = initData;
+    </script>
 </body>
-
 </html>
