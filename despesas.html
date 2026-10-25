@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Comissionamento Industrial - Ar Comprimido</title>
-    <!-- Tailwind CSS CDN para layout moderno -->
+    <title>Sistema de Comissionamento Industrial - Multi-Sistemas</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS CDN para exportar em Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- FontAwesome para Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .tab-btn.active {
+        .main-tab.active {
             border-bottom: 3px solid #2563eb;
             color: #2563eb;
             font-weight: bold;
+        }
+        .subsys-tab.active {
+            background-color: #2563eb;
+            color: white;
         }
     </style>
 </head>
@@ -25,12 +29,15 @@
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
-                    <i class="fa-solid fa-wind text-blue-400"></i> COMISSIONAMENTO INDUSTRIAL - ETAC
+                    <i class="fa-solid fa-industry text-blue-400"></i> COMISSIONAMENTO INDUSTRIAL - ETAC
                 </h1>
-                <p class="text-xs text-slate-400 mt-1">Gestão On-line do Sistema 1.Ar Comprimido</p>
+                <p class="text-xs text-slate-400 mt-1">Gestão Multi-Sistemas de Comissionamento</p>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium shadow flex items-center gap-2 transition">
+            <div class="flex items-center gap-3 flex-wrap">
+                <button onclick="openNewSubsystemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
+                    <i class="fa-solid fa-plus"></i> Novo Sistema
+                </button>
+                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
                     <i class="fa-solid fa-file-excel"></i> Baixar Planilha Excel
                 </button>
                 <button onclick="resetData()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm transition" title="Restaurar dados originais">
@@ -40,16 +47,16 @@
         </div>
     </header>
 
-    <!-- Navegação de Abas -->
+    <!-- Navegação Principal (Abas do Sistema) -->
     <div class="bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 flex gap-6">
-            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn py-3 px-2 text-gray-600 hover:text-blue-600 transition active">
+            <button onclick="switchMainTab('dashboard')" id="main-tab-dashboard" class="main-tab py-3 px-2 text-gray-600 hover:text-blue-600 transition active">
                 <i class="fa-solid fa-chart-pie mr-1"></i> Dashboard Diretoria
             </button>
-            <button onclick="switchTab('checklist')" id="tab-checklist" class="tab-btn py-3 px-2 text-gray-600 hover:text-blue-600 transition">
+            <button onclick="switchMainTab('checklist')" id="main-tab-checklist" class="main-tab py-3 px-2 text-gray-600 hover:text-blue-600 transition">
                 <i class="fa-solid fa-list-check mr-1"></i> Checklist de Campo
             </button>
-            <button onclick="switchTab('diretrizes')" id="tab-diretrizes" class="tab-btn py-3 px-2 text-gray-600 hover:text-blue-600 transition">
+            <button onclick="switchMainTab('diretrizes')" id="main-tab-diretrizes" class="main-tab py-3 px-2 text-gray-600 hover:text-blue-600 transition">
                 <i class="fa-solid fa-book mr-1"></i> Diretrizes & Gestão
             </button>
         </div>
@@ -60,7 +67,7 @@
 
         <!-- ABA 1: DASHBOARD DIRETORIA -->
         <section id="sec-dashboard" class="space-y-6">
-            <!-- Cards de Resumo -->
+            <!-- Cards de Resumo Geral -->
             <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow border border-gray-100 text-center">
                     <p class="text-xs font-semibold text-gray-500 uppercase">Total Itens</p>
@@ -88,7 +95,7 @@
                 </div>
             </div>
 
-            <!-- Tabela Resumo -->
+            <!-- Tabela Resumo por Subsistema -->
             <div class="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
                 <div class="bg-slate-800 text-white px-6 py-3 font-semibold text-sm">
                     1. PROGRESSO POR SUBSISTEMA / ÁREA FUNCIONAL
@@ -98,23 +105,15 @@
                         <tr class="bg-gray-100 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase">
                             <th class="p-3">Subsistema / Área Funcional</th>
                             <th class="p-3 text-center">Total Itens</th>
-                            <th class="p-3 text-center">Equipamento em Campo</th>
+                            <th class="p-3 text-center">Equipamento em campo</th>
                             <th class="p-3 text-center">Instalado</th>
                             <th class="p-3 text-center">Não Instalado</th>
                             <th class="p-3 text-center">NOK</th>
                             <th class="p-3 text-center">% Concluído</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 text-sm">
-                        <tr>
-                            <td class="p-3 font-medium">1. AR COMPRIMIDO</td>
-                            <td id="row-total" class="p-3 text-center">168</td>
-                            <td id="row-campo" class="p-3 text-center">0</td>
-                            <td id="row-instalado" class="p-3 text-center">0</td>
-                            <td id="row-nao-instalado" class="p-3 text-center">0</td>
-                            <td id="row-nok" class="p-3 text-center">0</td>
-                            <td id="row-pct" class="p-3 text-center font-bold text-blue-600">0%</td>
-                        </tr>
+                    <tbody id="dashboard-subsystems-tbody" class="divide-y divide-gray-100 text-sm">
+                        <!-- Gerado via JS -->
                     </tbody>
                 </table>
             </div>
@@ -122,19 +121,28 @@
 
         <!-- ABA 2: CHECKLIST DE CAMPO -->
         <section id="sec-checklist" class="hidden space-y-4">
-            <!-- Barra de Filtros e Busca -->
+            
+            <!-- Abas dos Subsistemas (Filtro por Subsistema) -->
+            <div id="subsystem-tabs-container" class="flex gap-2 overflow-x-auto pb-2 border-b border-gray-200">
+                <!-- Preenchido via JS -->
+            </div>
+
+            <!-- Barra de Ações, Filtros e Busca -->
             <div class="bg-white p-4 rounded-xl shadow border border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-center">
-                <div class="relative w-full md:w-96">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
-                    <input type="text" id="search-input" oninput="renderChecklist()" placeholder="Buscar por TAG ou Descrição..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-                </div>
-                <div class="flex gap-3 w-full md:w-auto">
+                <div class="flex gap-2 w-full md:w-auto flex-1">
+                    <div class="relative flex-1 md:max-w-sm">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
+                        <input type="text" id="search-input" oninput="renderChecklist()" placeholder="Buscar por TAG ou Descrição..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    </div>
                     <select id="filter-categoria" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
-                        <option value="">Todas as Categorias</option>
+                        <option value="">Todas Categorias</option>
                     </select>
-                    <span id="items-count" class="text-sm font-medium bg-gray-100 px-3 py-2 rounded-lg flex items-center">
-                        0 itens encontrados
-                    </span>
+                </div>
+                <div class="flex gap-3 w-full md:w-auto justify-between items-center">
+                    <span id="items-count" class="text-sm font-medium bg-gray-100 px-3 py-2 rounded-lg">0 itens</span>
+                    <button onclick="openAddItemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition whitespace-nowrap">
+                        <i class="fa-solid fa-plus"></i> Novo Item
+                    </button>
                 </div>
             </div>
 
@@ -151,6 +159,7 @@
                             <th class="p-3">Data Inspeção</th>
                             <th class="p-3">Inspetor</th>
                             <th class="p-3">Observações / Pendências</th>
+                            <th class="p-3 text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="checklist-tbody" class="divide-y divide-gray-200">
@@ -168,75 +177,97 @@
                 <div>
                     <h3 class="font-bold text-blue-600 text-md mb-2">1. Etapas do Protocolo de Comissionamento em Campo</h3>
                     <ul class="space-y-2 text-sm text-gray-700 pl-2">
-                        <li><strong>Fase C1 - Pré-Comissionamento (Cold Commissioning):</strong> Verificação estática, inspeção visual, alinhamento mecânico, torqueamento de tubulação e testes de isolamento elétrico (Megger).</li>
-                        <li><strong>Fase C2 - Comissionamento a Frio (Dry/Wet Testing):</strong> Testes de rotação desvinculada (Uncoupled), malhas de instrumentos, calibração I/P, estanqueidade hidráulica e lavagem de tubulação (Flushing).</li>
-                        <li><strong>Fase C3 - Comissionamento a Quente (Hot Testing & Water Run):</strong> Operação com fluídos de processo (água desmi, vapor, ar), aferição de curvas de desempenho de bombas, sintonia de malhas de controle e testes de intertravamento de segurança (SIS/ESD).</li>
-                        <li><strong>Fase C4 - Operação Assistida e Ramp-Up:</strong> Partida contínua da planta, validação de garantias de performance (PGT) e transferência para Operação.</li>
+                        <li><strong>Fase C1 - Pré-Comissionamento (Cold Commissioning):</strong> Verificação estática, inspeção visual, alinhamento mecânico, torqueamento e isolamento elétrico.</li>
+                        <li><strong>Fase C2 - Comissionamento a Frio (Dry/Wet Testing):</strong> Testes de malhas, calibração, estanqueidade e flushing.</li>
+                        <li><strong>Fase C3 - Comissionamento a Quente (Hot Testing):</strong> Operação com fluidos de processo (água, vapor, ar), sintonia de malhas e intertravamentos SIS/ESD.</li>
+                        <li><strong>Fase C4 - Operação Assistida e Ramp-Up:</strong> Partida contínua da planta e validação de garantias (PGT).</li>
                     </ul>
                 </div>
 
                 <div>
-                    <h3 class="font-bold text-blue-600 text-md mb-2">2. Definições dos Status da Planilha</h3>
+                    <h3 class="font-bold text-blue-600 text-md mb-2">2. Definições dos Status</h3>
                     <ul class="space-y-2 text-sm text-gray-700 pl-2">
-                        <li><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Instalado / OK:</span> Item totalmente inspecionado, testado e aprovado com folha de teste assinada sem pendências impeditivas.</li>
-                        <li><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">Não Instalado / Pendente:</span> Equipamento/instrumento montado no campo, porém sem início ou conclusão dos testes de comissionamento.</li>
-                        <li><span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded">NOK (Com Falha):</span> Falha identificada durante os testes (vazamento, sobreaquecimento, erro de sinal) necessitando intervenção.</li>
+                        <li><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Instalado:</span> Inspecionado e aprovado sem pendências.</li>
+                        <li><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">Não Instalado:</span> Equipamento montado, porém testes pendentes.</li>
+                        <li><span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded">NOK:</span> Falha identificada necessitando correção.</li>
                     </ul>
-                </div>
-
-                <div>
-                    <h3 class="font-bold text-blue-600 text-md mb-2">3. Recomendações para Apresentação à Diretoria</h3>
-                    <p class="text-sm text-gray-700">Utilize o Dashboard destacando os subsistemas de maior risco que impactam o cronograma geral da planta.</p>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- JS de Inicialização e Lógica do App -->
+    <!-- Modal Adicionar Novo Item -->
+    <div id="modal-add-item" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-lg text-slate-800">Adicionar Novo Item ao Checklist</h3>
+                <button onclick="closeAddItemModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Subsistema / Área</label>
+                    <input type="text" id="new-item-subsys" readonly class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-700">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">TAG do Item *</label>
+                    <input type="text" id="new-item-tag" placeholder="Ex: PI-5010-9999" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Descrição do Equipamento / Instrumento *</label>
+                    <input type="text" id="new-item-desc" placeholder="Ex: Pressostato da linha principal" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Categoria do Item</label>
+                    <select id="new-item-cat" class="w-full border rounded-lg px-3 py-2 text-sm outline-none bg-white">
+                        <option value="Instrumento">Instrumento</option>
+                        <option value="Equipamento">Equipamento</option>
+                        <option value="Válvula Manual">Válvula Manual</option>
+                        <option value="Válvula automática">Válvula automática</option>
+                        <option value="Válvula de segurança">Válvula de segurança</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t">
+                <button onclick="closeAddItemModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
+                <button onclick="saveNewItem()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Salvar Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Novo Subsistema / Sistema -->
+    <div id="modal-add-subsys" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-lg text-slate-800">Criar Novo Sistema de Inspeção</h3>
+                <button onclick="closeNewSubsystemModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Nome do Sistema / Subsistema *</label>
+                <input type="text" id="new-subsys-name" placeholder="Ex: 2.ETA/ETE, 3.CALDEIRA, 4.SISTEMA DE VAPOR" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t">
+                <button onclick="closeNewSubsystemModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
+                <button onclick="createNewSubsystem()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Criar Sistema</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script da Aplicação -->
     <script>
-        // Dados originais carregados da planilha oficial
         const defaultItems = [
             {"tag": "5010-0001", "descricao": "VAZÃO DA LINHA WRS PARA SISTEMA GERAL", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
             {"tag": "5010-0002", "descricao": "PONTO DE ORVALHO ANTES DO TANQUE PULMAO", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0003", "descricao": "TEMPERATURA LINHA APS PARA O PIPE", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "FI-5010-0004", "descricao": "VAZÃO DA LINHA DE APS ANTES DA PV-0009", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "PI-5010-0005", "descricao": "PRESSÃO APÓS A PV-0009", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "TI-5010-0007", "descricao": "TEMPERATURA APÓS O TANQUE PULMÃO", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "FI-5010-0008", "descricao": "FLUXO APÓS TANQUE PULMÃO", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "TI-5010-0010", "descricao": "TEMPERATURA DE WRR GERAL", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "PDI-5010-0011", "descricao": "DIFERENCIAL DE PRESSÃO DO FILTRO 0001", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "PDI-5010-0012", "descricao": "DIFERENCIAL DE PRESSÃO DO FILTRO 0002", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "PDI-5010-0014", "descricao": "DIFERENCIAL DE PRESSAO DO POS FILTRO 13", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0016", "descricao": "VÁLVULA MANUAL DE WRR DO COMPRESSOR 005", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0017", "descricao": "VÁLVULA MANUAL DE DRENO DO TANQUE PULMÃO 002", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0018", "descricao": "VÁLVULA MANUAL DE DRENO DO RESFRIADOR DE AR DO COMPRESSOR 001", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0019", "descricao": "VÁLVULA MANUAL DE SEGURANÇA PSV 0001", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0020", "descricao": "VÁLVULA MANUAL DE SEGURANÇA PSV 0002", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0021", "descricao": "VÁLVULA MANUAL DE ALIMENTAÇÃO DE APS", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0022", "descricao": "VÁLVULA MANUAL RETENÇÃO DO COMPRESSOR 001", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0023", "descricao": "VÁLVULA MANUAL RETENÇÃO DO COMPRESSOR 002", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0024", "descricao": "VÁLVULA MANUAL RETENÇÃO DO COMPRESSOR 003", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0025", "descricao": "VÁLVULA MANUAL RETENÇÃO DO SECADOR 001", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0026", "descricao": "VÁLVULA MANUAL DE DRENO DO SECADOR 002", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0027", "descricao": "VÁLVULA DE RETENÇÃO DA LINHA DE AR DE SERVIÇO", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0028", "descricao": "VÁLVULA MANUAL DE BLOQUEIO GERAL DE APS", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0029", "descricao": "VÁLVULA MANUAL DE PURGA DO FILTRO COALESCENTE 01", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0030", "descricao": "VÁLVULA MANUAL DE PURGA DO FILTRO COALESCENTE 02", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0031", "descricao": "VÁLVULA MANUAL DE ISOLAMENTO DO TANQUE DE AR", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0032", "descricao": "VÁLVULA MANUAL DE SAÍDA DO TANQUE DE AR", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0033", "descricao": "VÁLVULA MANUAL BYPASS DO SECADOR DE AR", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0034", "descricao": "VÁLVULA MANUAL DE ENTRADA DO SECADOR DE AR", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0035", "descricao": "VÁLVULA MANUAL DE SAÍDA DO SECADOR DE AR", "categoria": "Válvula Manual", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""}
-            // Nota: Todos os 168 itens estão pré-carregados no estado da aplicação.
+            {"tag": "11-5010-AIB-0018", "descricao": "Reservatório de ar", "categoria": "Equipamento", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "ISAAC", "observacoes": ""},
+            {"tag": "11-5010-CPS-0005", "descricao": "Compressor 005", "categoria": "Equipamento", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "ISAAC", "observacoes": ""}
         ];
 
-        // Estado da aplicação
         let items = [];
+        let currentSubsystem = "1.Ar Comprimido";
 
-        // Inicializar dados do LocalStorage ou Carregar Padrão
         function initData() {
-            const stored = localStorage.getItem('checklist_ar_comprimido_data');
+            const stored = localStorage.getItem('multi_checklist_industrial_data');
             if (stored) {
                 try {
                     items = JSON.parse(stored);
@@ -246,50 +277,76 @@
             } else {
                 items = [...defaultItems];
             }
-            populateCategories();
-            updateDashboard();
-            renderChecklist();
+            if(items.length > 0) {
+                currentSubsystem = items[0].subsistema;
+            }
+            updateAll();
         }
 
-        // Salvar no LocalStorage
         function saveData() {
-            localStorage.setItem('checklist_ar_comprimido_data', JSON.stringify(items));
-            updateDashboard();
+            localStorage.setItem('multi_checklist_industrial_data', JSON.stringify(items));
+            updateAll();
         }
 
-        // Resetar dados
         function resetData() {
-            if (confirm("Tem certeza que deseja restaurar os dados iniciais? Todas as modificações locais serão perdedas.")) {
-                localStorage.removeItem('checklist_ar_comprimido_data');
+            if (confirm("Deseja restaurar os dados originais? Suas adições e exclusões locais serão resetadas.")) {
+                localStorage.removeItem('multi_checklist_industrial_data');
                 items = [...defaultItems];
+                currentSubsystem = "1.Ar Comprimido";
                 saveData();
-                renderChecklist();
             }
         }
 
-        // Popular Filtro de Categorias
-        function populateCategories() {
-            const select = document.getElementById('filter-categoria');
-            const categories = [...new Set(items.map(i => i.categoria).filter(Boolean))];
-            select.innerHTML = '<option value="">Todas as Categorias</option>';
-            categories.forEach(cat => {
-                select.innerHTML += `<option value="${cat}">${cat}</option>`;
-            });
+        function updateAll() {
+            renderSubsystemTabs();
+            updateDashboard();
+            renderChecklist();
+            populateCategories();
         }
 
-        // Alternar Abas
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`tab-${tabName}`).classList.add('active');
+        function switchMainTab(tabName) {
+            document.querySelectorAll('.main-tab').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`main-tab-${tabName}`).classList.add('active');
 
             document.getElementById('sec-dashboard').classList.add('hidden');
             document.getElementById('sec-checklist').classList.add('hidden');
             document.getElementById('sec-diretrizes').classList.add('hidden');
 
             document.getElementById(`sec-${tabName}`).classList.remove('hidden');
+            if(tabName === 'dashboard') updateDashboard();
         }
 
-        // Atualizar Dashboard
+        function getSubsystems() {
+            return [...new Set(items.map(i => i.subsistema).filter(Boolean))];
+        }
+
+        function renderSubsystemTabs() {
+            const container = document.getElementById('subsystem-tabs-container');
+            const subsysList = getSubsystems();
+            
+            container.innerHTML = '';
+            subsysList.forEach(sub => {
+                const btn = document.createElement('button');
+                btn.className = `subsys-tab px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition border ${sub === currentSubsystem ? 'active bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'}`;
+                btn.innerHTML = `<i class="fa-solid fa-folder-open mr-1"></i> ${sub}`;
+                btn.onclick = () => {
+                    currentSubsystem = sub;
+                    renderSubsystemTabs();
+                    renderChecklist();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function populateCategories() {
+            const select = document.getElementById('filter-categoria');
+            const categories = [...new Set(items.map(i => i.categoria).filter(Boolean))];
+            select.innerHTML = '<option value="">Todas Categorias</option>';
+            categories.forEach(cat => {
+                select.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+        }
+
         function updateDashboard() {
             const total = items.length;
             const emCampo = items.filter(i => i.em_campo === 'Em Campo').length;
@@ -305,33 +362,50 @@
             document.getElementById('dash-nok').innerText = nok;
             document.getElementById('dash-pct').innerText = `${pct}%`;
 
-            document.getElementById('row-total').innerText = total;
-            document.getElementById('row-campo').innerText = emCampo;
-            document.getElementById('row-instalado').innerText = instalado;
-            document.getElementById('row-nao-instalado').innerText = naoInstalado;
-            document.getElementById('row-nok').innerText = nok;
-            document.getElementById('row-pct').innerText = `${pct}%`;
+            // Tabela por subsistema
+            const tbody = document.getElementById('dashboard-subsystems-tbody');
+            tbody.innerHTML = '';
+            
+            getSubsystems().forEach(sub => {
+                const subItems = items.filter(i => i.subsistema === sub);
+                const subTotal = subItems.length;
+                const subCampo = subItems.filter(i => i.em_campo === 'Em Campo').length;
+                const subInst = subItems.filter(i => i.status === 'Instalado').length;
+                const subNaoInst = subItems.filter(i => i.status === 'Não Instalado').length;
+                const subNok = subItems.filter(i => i.status === 'NOK').length;
+                const subPct = subTotal > 0 ? ((subInst / subTotal) * 100).toFixed(2) : 0;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 font-semibold text-slate-700">${sub}</td>
+                        <td class="p-3 text-center">${subTotal}</td>
+                        <td class="p-3 text-center text-blue-600 font-medium">${subCampo}</td>
+                        <td class="p-3 text-center text-emerald-600 font-medium">${subInst}</td>
+                        <td class="p-3 text-center text-amber-600 font-medium">${subNaoInst}</td>
+                        <td class="p-3 text-center text-red-600 font-medium">${subNok}</td>
+                        <td class="p-3 text-center font-bold text-blue-600">${subPct}%</td>
+                    </tr>
+                `;
+            });
         }
 
-        // Renderizar Tabela do Checklist
         function renderChecklist() {
             const tbody = document.getElementById('checklist-tbody');
             const search = document.getElementById('search-input').value.toLowerCase();
             const catFilter = document.getElementById('filter-categoria').value;
 
             const filtered = items.filter(item => {
+                const matchSubsys = item.subsistema === currentSubsystem;
                 const matchSearch = item.tag.toLowerCase().includes(search) || item.descricao.toLowerCase().includes(search);
                 const matchCat = catFilter === "" || item.categoria === catFilter;
-                return matchSearch && matchCat;
+                return matchSubsys && matchSearch && matchCat;
             });
 
-            document.getElementById('items-count').innerText = `${filtered.length} itens exibidos`;
-
+            document.getElementById('items-count').innerText = `${filtered.length} itens`;
             tbody.innerHTML = '';
 
-            filtered.forEach((item, index) => {
-                const originalIndex = items.findIndex(i => i.tag === item.tag);
-                
+            filtered.forEach((item) => {
+                const originalIndex = items.findIndex(i => i === item);
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-blue-50/50 transition border-b border-gray-100";
 
@@ -359,7 +433,12 @@
                         <input type="text" value="${item.inspetor || ''}" placeholder="Nome..." onchange="updateItem(${originalIndex}, 'inspetor', this.value)" class="border rounded px-2 py-1 text-xs w-28">
                     </td>
                     <td class="p-3">
-                        <input type="text" value="${item.observacoes || ''}" placeholder="Obs/Pendências..." onchange="updateItem(${originalIndex}, 'observacoes', this.value)" class="border rounded px-2 py-1 text-xs w-full">
+                        <input type="text" value="${item.observacoes || ''}" placeholder="Obs..." onchange="updateItem(${originalIndex}, 'observacoes', this.value)" class="border rounded px-2 py-1 text-xs w-full">
+                    </td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteItem(${originalIndex})" class="text-red-500 hover:text-red-700 p-1 rounded transition" title="Excluir Item">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -372,20 +451,95 @@
             return 'bg-amber-100 text-amber-800 border-amber-300';
         }
 
-        // Atualizar atributo do item
         function updateItem(index, field, value) {
             items[index][field] = value;
             saveData();
-            if (field === 'status' || field === 'em_campo') {
-                renderChecklist();
+        }
+
+        function deleteItem(index) {
+            if(confirm(`Tem certeza que deseja excluir o item ${items[index].tag}?`)) {
+                items.splice(index, 1);
+                saveData();
             }
         }
 
-        // Exportar para Arquivo XLSX (Excel) mantendo as abas originais
+        // Modals de Adição
+        function openAddItemModal() {
+            document.getElementById('new-item-subsys').value = currentSubsystem;
+            document.getElementById('new-item-tag').value = '';
+            document.getElementById('new-item-desc').value = '';
+            document.getElementById('modal-add-item').classList.remove('hidden');
+        }
+        function closeAddItemModal() {
+            document.getElementById('modal-add-item').classList.add('hidden');
+        }
+        function saveNewItem() {
+            const tag = document.getElementById('new-item-tag').value.trim();
+            const desc = document.getElementById('new-item-desc').value.trim();
+            const cat = document.getElementById('new-item-cat').value;
+
+            if(!tag || !desc) {
+                alert("Por favor, preencha a TAG e a Descrição do item.");
+                return;
+            }
+
+            items.push({
+                "tag": tag,
+                "descricao": desc,
+                "categoria": cat,
+                "subsistema": currentSubsystem,
+                "em_campo": "",
+                "status": "Não Instalado",
+                "data_inspecao": "",
+                "inspetor": "",
+                "observacoes": ""
+            });
+
+            saveData();
+            closeAddItemModal();
+        }
+
+        function openNewSubsystemModal() {
+            document.getElementById('new-subsys-name').value = '';
+            document.getElementById('modal-add-subsys').classList.remove('hidden');
+        }
+        function closeNewSubsystemModal() {
+            document.getElementById('modal-add-subsys').classList.add('hidden');
+        }
+        function createNewSubsystem() {
+            const name = document.getElementById('new-subsys-name').value.trim();
+            if(!name) {
+                alert("Digite o nome do novo sistema.");
+                return;
+            }
+            if(getSubsystems().includes(name)) {
+                alert("Este sistema já existe.");
+                return;
+            }
+
+            // Adiciona um item inicial para o novo subsistema nascer ativo
+            items.push({
+                "tag": "EXEMPLO-01",
+                "descricao": "Item de Exemplo Inicial",
+                "categoria": "Instrumento",
+                "subsistema": name,
+                "em_campo": "",
+                "status": "Não Instalado",
+                "data_inspecao": "",
+                "inspetor": "",
+                "observacoes": ""
+            });
+
+            currentSubsystem = name;
+            saveData();
+            closeNewSubsystemModal();
+        }
+
+        // Exportar para Excel
         function exportToExcel() {
             const wb = XLSX.utils.book_new();
 
-            // Aba 1: Dashboard
+            // Aba Dashboard
             const total = items.length;
             const emCampo = items.filter(i => i.em_campo === 'Em Campo').length;
             const instalado = items.filter(i => i.status === 'Instalado').length;
@@ -393,23 +547,33 @@
             const nok = items.filter(i => i.status === 'NOK').length;
             const pct = total > 0 ? (instalado / total) : 0;
 
-            const dashData = [
+            let dashRows = [
                 ["DASHBOARD DE COMISSIONAMENTO INDUSTRIAL ETAC"],
                 [],
-                ["TOTAL DE ITENS", "EM CAMPO", "INSTALADO", "NÃO INSTALADO", "", "% PROGRESSO GERAL"],
-                [total, emCampo, instalado, naoInstalado, "", pct],
+                ["TOTAL DE ITENS", "EM CAMPO", "INSTALADO", "NÃO INSTALADO", "NOK", "% PROGRESSO GERAL"],
+                [total, emCampo, instalado, naoInstalado, nok, pct],
                 [],
                 ["1. PROGRESSO POR SUBSISTEMA / ÁREA FUNCIONAL"],
-                ["Subsistema / Área Funcional", "Total Itens", "Equipamento em campo", "Instalado", "Não Instalado", "NOK", "% Concluído"],
-                ["1.AR COMPRIMIDO", total, emCampo, instalado, naoInstalado, nok, pct]
+                ["Subsistema / Área Funcional", "Total Itens", "Equipamento em campo", "Instalado", "Não Instalado", "NOK", "% Concluído"]
             ];
-            const wsDash = XLSX.utils.aoa_to_sheet(dashData);
-            XLSX.utils.book_append_sheet(wb, wsDash, "Dashboard Diretoria");
 
-            // Aba 2: Checklist de Campo
+            getSubsystems().forEach(sub => {
+                const subItems = items.filter(i => i.subsistema === sub);
+                const subTotal = subItems.length;
+                const subCampo = subItems.filter(i => i.em_campo === 'Em Campo').length;
+                const subInst = subItems.filter(i => i.status === 'Instalado').length;
+                const subNaoInst = subItems.filter(i => i.status === 'Não Instalado').length;
+                const subNok = subItems.filter(i => i.status === 'NOK').length;
+                const subPct = subTotal > 0 ? (subInst / subTotal) : 0;
+                dashRows.push([sub, subTotal, subCampo, subInst, subNaoInst, subNok, subPct]);
+            });
+
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dashRows), "Dashboard Diretoria");
+
+            // Aba Checklist de Campo (Geral com todos os subsistemas)
             const checklistHeader = [
-                ["CHECKLIST DE COMISSIONAMENTO DE CAMPO - LISTA OFICIAL DE EQUIPAMENTOS"],
-                ["Atualize a coluna 'Status Comissionamento' para sincronização automática com o Dashboard da Diretoria."],
+                ["CHECKLIST DE COMISSIONAMENTO DE CAMPO - LISTA OFICIAL"],
+                ["Atualize a coluna 'Status Comissionamento' para sincronização automática."],
                 ["TAG do Item", "Descrição do Equipamento / Instrumento", "Categoria do Item", "Subsistema / Área Funcional", "Equipamento em Campo", "Status Comissionamento", "Data Inspeção", "Inspetor Responsável", "Observações de Campo / Pendências Técnicas"]
             ];
             
@@ -417,33 +581,22 @@
                 i.tag, i.descricao, i.categoria, i.subsistema, i.em_campo, i.status, i.data_inspecao, i.inspetor, i.observacoes
             ]);
 
-            const wsChecklist = XLSX.utils.aoa_to_sheet([...checklistHeader, ...checklistRows]);
-            XLSX.utils.book_append_sheet(wb, wsChecklist, "Checklist de Campo");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...checklistHeader, ...checklistRows]), "Checklist de Campo");
 
-            // Aba 3: Diretrizes & Gestão
+            // Aba Diretrizes
             const diretrizesData = [
-                ["GUIA PRÁTICO & DIRETRIZES DE COMISSIONAMENTO DE CAMPO"],
+                ["GUIA PRÁTICO & DIRETRIZES DE COMISSIONAMENTO"],
                 [],
-                ["1. Etapas do Protocolo de Comissionamento em Campo"],
-                ["Fase C1 - Pré-Comissionamento (Cold Commissioning)", "Verificação estática, inspeção visual, alinhamento mecânico, torqueamento de tubulação e testes de isolamento elétrico (Megger)."],
-                ["Fase C2 - Comissionamento a Frio (Dry/Wet Testing)", "Testes de rotação desvinculada (Uncoupled), malhas de instrumentos, calibração I/P, estanqueidade hidráulica e lavagem de tubulação (Flushing)."],
-                ["Fase C3 - Comissionamento a Quente (Hot Testing & Water Run)", "Operação com fluídos de processo (água desmi, vapor, ar), aferição de curvas de desempenho de bombas, sintonia de malhas de controle e testes de intertravamento de segurança (SIS/ESD)."],
-                ["Fase C4 - Operação Assistida e Ramp-Up", "Partida contínua da planta (ex: Osmose Reversa e Leito Misto), validação de garantias de performance (PGT) e transferência para Operação."],
-                [],
-                ["2. Definições dos Status da Planilha"],
-                ["OK (Concluído)", "Item totalmente inspecionado, testado e aprovado com folha de teste (Check List de Campo) assinada sem pendências impeditivas."],
-                ["Em Andamento", "Atividades de campo iniciadas."],
-                ["Pendente / Não Instalado", "Equipamento/instrumento montado no campo, porém sem início dos testes de comissionamento."],
-                ["NOK (Com Falha / Impeditivo)", "Falha identificada durante os testes necessitando intervenção de montagem/fornecedor."]
+                ["Fase C1 - Pré-Comissionamento", "Verificação estática, inspeção visual, alinhamento mecânico."],
+                ["Fase C2 - Comissionamento a Frio", "Testes de malhas, calibração e estanqueidade."],
+                ["Fase C3 - Comissionamento a Quente", "Operação com fluidos de processo e intertravamentos."],
+                ["Fase C4 - Operação Assistida", "Partida contínua e validação de garantias."]
             ];
-            const wsDiretrizes = XLSX.utils.aoa_to_sheet(diretrizesData);
-            XLSX.utils.book_append_sheet(wb, wsDiretrizes, "Diretrizes & Gestão");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(diretrizesData), "Diretrizes & Gestão");
 
-            // Baixar arquivo .xlsx
-            XLSX.writeFile(wb, "CHECKLIST_AR_COMPRIMIDO_ATUALIZADO.xlsx");
+            XLSX.writeFile(wb, "CHECKLIST_INDUSTRIAL_MULTISISTEMAS.xlsx");
         }
 
-        // Executar inicialização
         window.onload = initData;
     </script>
 </body>
