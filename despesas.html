@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Comissionamento Industrial - Multi-Sistemas</title>
+    <title>Sistema de Comissionamento Industrial - Nuvem Sheets</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS CDN para exportar em Excel -->
@@ -11,15 +11,8 @@
     <!-- FontAwesome para Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .main-tab.active {
-            border-bottom: 3px solid #2563eb;
-            color: #2563eb;
-            font-weight: bold;
-        }
-        .subsys-tab.active {
-            background-color: #2563eb;
-            color: white;
-        }
+        .main-tab.active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: bold; }
+        .subsys-tab.active { background-color: #2563eb; color: white; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
@@ -29,9 +22,9 @@
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
-                    <i class="fa-solid fa-industry text-blue-400"></i> CHECKLIST INDUSTRIAL
+                    <i class="fa-solid fa-industry text-blue-400"></i> COMISSIONAMENTO INDUSTRIAL - NUVEM
                 </h1>
-                <p class="text-xs text-slate-400 mt-1">Gestão Multi-Sistemas de Comissionamento</p>
+                <p class="text-xs text-slate-400 mt-1">Sincronizado via Google Sheets</p>
             </div>
             <div class="flex items-center gap-3 flex-wrap">
                 <button onclick="openNewSubsystemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
@@ -40,14 +33,14 @@
                 <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
                     <i class="fa-solid fa-file-excel"></i> Baixar Planilha Excel
                 </button>
-                <button onclick="resetData()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm transition" title="Restaurar dados originais">
-                    <i class="fa-solid fa-rotate-left"></i> Resetar
+                <button onclick="carregarDadosDoPlanilha()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm transition" title="Atualizar dados">
+                    <i class="fa-solid fa-rotate" id="sync-icon"></i> Atualizar
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Navegação Principal (Abas do Sistema) -->
+    <!-- Navegação Principal -->
     <div class="bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 flex gap-6">
             <button onclick="switchMainTab('dashboard')" id="main-tab-dashboard" class="main-tab py-3 px-2 text-gray-600 hover:text-blue-600 transition active">
@@ -65,9 +58,8 @@
     <!-- Conteúdo Principal -->
     <main class="max-w-7xl mx-auto px-4 py-6">
 
-        <!-- ABA 1: DASHBOARD DIRETORIA -->
+        <!-- ABA 1: DASHBOARD -->
         <section id="sec-dashboard" class="space-y-6">
-            <!-- Cards de Resumo Geral -->
             <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow border border-gray-100 text-center">
                     <p class="text-xs font-semibold text-gray-500 uppercase">Total Itens</p>
@@ -95,7 +87,6 @@
                 </div>
             </div>
 
-            <!-- Tabela Resumo por Subsistema -->
             <div class="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
                 <div class="bg-slate-800 text-white px-6 py-3 font-semibold text-sm">
                     1. PROGRESSO POR SUBSISTEMA / ÁREA FUNCIONAL
@@ -112,22 +103,15 @@
                             <th class="p-3 text-center">% Concluído</th>
                         </tr>
                     </thead>
-                    <tbody id="dashboard-subsystems-tbody" class="divide-y divide-gray-100 text-sm">
-                        <!-- Gerado via JS -->
-                    </tbody>
+                    <tbody id="dashboard-subsystems-tbody" class="divide-y divide-gray-100 text-sm"></tbody>
                 </table>
             </div>
         </section>
 
-        <!-- ABA 2: CHECKLIST DE CAMPO -->
+        <!-- ABA 2: CHECKLIST -->
         <section id="sec-checklist" class="hidden space-y-4">
-            
-            <!-- Abas dos Subsistemas (Filtro por Subsistema) -->
-            <div id="subsystem-tabs-container" class="flex gap-2 overflow-x-auto pb-2 border-b border-gray-200">
-                <!-- Preenchido via JS -->
-            </div>
+            <div id="subsystem-tabs-container" class="flex gap-2 overflow-x-auto pb-2 border-b border-gray-200"></div>
 
-            <!-- Barra de Ações, Filtros e Busca -->
             <div class="bg-white p-4 rounded-xl shadow border border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-center">
                 <div class="flex gap-2 w-full md:w-auto flex-1">
                     <div class="relative flex-1 md:max-w-sm">
@@ -146,7 +130,6 @@
                 </div>
             </div>
 
-            <!-- Tabela interativa -->
             <div class="bg-white rounded-xl shadow overflow-x-auto border border-gray-200">
                 <table class="w-full text-left border-collapse text-xs md:text-sm">
                     <thead>
@@ -162,51 +145,31 @@
                             <th class="p-3 text-center">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="checklist-tbody" class="divide-y divide-gray-200">
-                        <!-- Conteúdo injetado via JS -->
-                    </tbody>
+                    <tbody id="checklist-tbody" class="divide-y divide-gray-200"></tbody>
                 </table>
             </div>
         </section>
 
-        <!-- ABA 3: DIRETRIZES & GESTÃO -->
+        <!-- ABA 3: DIRETRIZES -->
         <section id="sec-diretrizes" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-6">
-                <h2 class="text-lg font-bold text-slate-800 border-b pb-2">GUIA PRÁTICO & DIRETRIZES DE COMISSIONAMENTO DE CAMPO</h2>
-                
-                <div>
-                    <h3 class="font-bold text-blue-600 text-md mb-2">1. Etapas do Protocolo de Comissionamento em Campo</h3>
-                    <ul class="space-y-2 text-sm text-gray-700 pl-2">
-                        <li><strong>Fase C1 - Pré-Comissionamento (Cold Commissioning):</strong> Verificação estática, inspeção visual, alinhamento mecânico, torqueamento e isolamento elétrico.</li>
-                        <li><strong>Fase C2 - Comissionamento a Frio (Dry/Wet Testing):</strong> Testes de malhas, calibração, estanqueidade e flushing.</li>
-                        <li><strong>Fase C3 - Comissionamento a Quente (Hot Testing):</strong> Operação com fluidos de processo (água, vapor, ar), sintonia de malhas e intertravamentos SIS/ESD.</li>
-                        <li><strong>Fase C4 - Operação Assistida e Ramp-Up:</strong> Partida contínua da planta e validação de garantias (PGT).</li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="font-bold text-blue-600 text-md mb-2">2. Definições dos Status</h3>
-                    <ul class="space-y-2 text-sm text-gray-700 pl-2">
-                        <li><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Instalado:</span> Inspecionado e aprovado sem pendências.</li>
-                        <li><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">Não Instalado:</span> Equipamento montado, porém testes pendentes.</li>
-                        <li><span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded">NOK:</span> Falha identificada necessitando correção.</li>
-                    </ul>
-                </div>
+                <h2 class="text-lg font-bold text-slate-800 border-b pb-2">GUIA PRÁTICO & DIRETRIZES DE COMISSIONAMENTO</h2>
+                <p class="text-sm text-gray-700">Sistema integrado ao Google Sheets. As alterações feitas por qualquer pessoa aparecem sincronizadas na nuvem.</p>
             </div>
         </section>
 
     </main>
 
-    <!-- Modal Adicionar Novo Item -->
+    <!-- Modal Adicionar Item -->
     <div id="modal-add-item" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-lg text-slate-800">Adicionar Novo Item ao Checklist</h3>
+                <h3 class="font-bold text-lg text-slate-800">Adicionar Novo Item</h3>
                 <button onclick="closeAddItemModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="space-y-3">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Subsistema / Área</label>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Subsistema</label>
                     <input type="text" id="new-item-subsys" readonly class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-700">
                 </div>
                 <div>
@@ -214,11 +177,11 @@
                     <input type="text" id="new-item-tag" placeholder="Ex: PI-5010-9999" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Descrição do Equipamento / Instrumento *</label>
-                    <input type="text" id="new-item-desc" placeholder="Ex: Pressostato da linha principal" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Descrição *</label>
+                    <input type="text" id="new-item-desc" placeholder="Ex: Pressostato principal" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Categoria do Item</label>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Categoria</label>
                     <select id="new-item-cat" class="w-full border rounded-lg px-3 py-2 text-sm outline-none bg-white">
                         <option value="Instrumento">Instrumento</option>
                         <option value="Equipamento">Equipamento</option>
@@ -230,70 +193,78 @@
                 </div>
             </div>
             <div class="flex justify-end gap-3 pt-3 border-t">
-                <button onclick="closeAddItemModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
-                <button onclick="saveNewItem()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Salvar Item</button>
+                <button onclick="closeAddItemModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600">Cancelar</button>
+                <button onclick="saveNewItem()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Salvar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Novo Subsistema / Sistema -->
+    <!-- Modal Novo Subsistema -->
     <div id="modal-add-subsys" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-lg text-slate-800">Criar Novo Sistema de Inspeção</h3>
+                <h3 class="font-bold text-lg text-slate-800">Criar Novo Sistema</h3>
                 <button onclick="closeNewSubsystemModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Nome do Sistema / Subsistema *</label>
-                <input type="text" id="new-subsys-name" placeholder="Ex: 2.ETA/ETE, 3.CALDEIRA, 4.SISTEMA DE VAPOR" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Nome do Sistema *</label>
+                <input type="text" id="new-subsys-name" placeholder="Ex: 2.CALDEIRA, 3.ETA/ETE" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="flex justify-end gap-3 pt-3 border-t">
-                <button onclick="closeNewSubsystemModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
-                <button onclick="createNewSubsystem()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Criar Sistema</button>
+                <button onclick="closeNewSubsystemModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600">Cancelar</button>
+                <button onclick="createNewSubsystem()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Criar</button>
             </div>
         </div>
     </div>
 
-    <!-- Script da Aplicação -->
+    <!-- Script de Integração com Google Sheets -->
     <script>
-        const defaultItems = [
-            {"tag": "5010-0001", "descricao": "VAZÃO DA LINHA WRS PARA SISTEMA GERAL", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "5010-0002", "descricao": "PONTO DE ORVALHO ANTES DO TANQUE PULMAO", "categoria": "Instrumento", "subsistema": "1.Ar Comprimido", "em_campo": "", "status": "Não Instalado", "data_inspecao": "", "inspetor": "", "observacoes": ""},
-            {"tag": "11-5010-AIB-0018", "descricao": "Reservatório de ar", "categoria": "Equipamento", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "ISAAC", "observacoes": ""},
-            {"tag": "11-5010-CPS-0005", "descricao": "Compressor 005", "categoria": "Equipamento", "subsistema": "1.Ar Comprimido", "em_campo": "Em Campo", "status": "Não Instalado", "data_inspecao": "", "inspetor": "ISAAC", "observacoes": ""}
-        ];
+        // COLE AQUI O SEU LINK DO GOOGLE WEB APP
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
 
         let items = [];
         let currentSubsystem = "1.Ar Comprimido";
 
-        function initData() {
-            const stored = localStorage.getItem('multi_checklist_industrial_data');
-            if (stored) {
-                try {
-                    items = JSON.parse(stored);
-                } catch(e) {
-                    items = [...defaultItems];
+        async function initData() {
+            await carregarDadosDoPlanilha();
+        }
+
+        async function carregarDadosDoPlanilha() {
+            if(WEB_APP_URL.includes('COLE_SEU_LINK')) {
+                alert("Por favor, configure a URL do seu Google Web App no código JavaScript!");
+                return;
+            }
+
+            const icon = document.getElementById('sync-icon');
+            icon.classList.add('fa-spin');
+
+            try {
+                const response = await fetch(WEB_APP_URL);
+                const data = await response.json();
+                items = data || [];
+                
+                if(items.length > 0 && !items.some(i => i.subsistema === currentSubsystem)) {
+                    currentSubsystem = items[0].subsistema;
                 }
-            } else {
-                items = [...defaultItems];
+                updateAll();
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                alert('Erro ao carregar dados da planilha.');
+            } finally {
+                icon.classList.remove('fa-spin');
             }
-            if(items.length > 0) {
-                currentSubsystem = items[0].subsistema;
-            }
-            updateAll();
         }
 
-        function saveData() {
-            localStorage.setItem('multi_checklist_industrial_data', JSON.stringify(items));
-            updateAll();
-        }
-
-        function resetData() {
-            if (confirm("Deseja restaurar os dados originais? Suas adições e exclusões locais serão resetadas.")) {
-                localStorage.removeItem('multi_checklist_industrial_data');
-                items = [...defaultItems];
-                currentSubsystem = "1.Ar Comprimido";
-                saveData();
+        async function enviarParaPlanilha(payload) {
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (error) {
+                console.error('Erro ao enviar para planilha:', error);
             }
         }
 
@@ -362,7 +333,6 @@
             document.getElementById('dash-nok').innerText = nok;
             document.getElementById('dash-pct').innerText = `${pct}%`;
 
-            // Tabela por subsistema
             const tbody = document.getElementById('dashboard-subsystems-tbody');
             tbody.innerHTML = '';
             
@@ -405,7 +375,6 @@
             tbody.innerHTML = '';
 
             filtered.forEach((item) => {
-                const originalIndex = items.findIndex(i => i === item);
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-blue-50/50 transition border-b border-gray-100";
 
@@ -414,29 +383,29 @@
                     <td class="p-3 text-gray-700 max-w-xs">${item.descricao}</td>
                     <td class="p-3 text-gray-500">${item.categoria}</td>
                     <td class="p-3">
-                        <select onchange="updateItem(${originalIndex}, 'em_campo', this.value)" class="border rounded px-2 py-1 text-xs outline-none bg-white">
+                        <select onchange="updateItem('${item.id}', 'em_campo', this.value)" class="border rounded px-2 py-1 text-xs outline-none bg-white">
                             <option value="" ${item.em_campo === '' ? 'selected' : ''}>-</option>
                             <option value="Em Campo" ${item.em_campo === 'Em Campo' ? 'selected' : ''}>Em Campo</option>
                         </select>
                     </td>
                     <td class="p-3">
-                        <select onchange="updateItem(${originalIndex}, 'status', this.value)" class="border rounded px-2 py-1 text-xs font-semibold outline-none ${getStatusColor(item.status)}">
+                        <select onchange="updateItem('${item.id}', 'status', this.value)" class="border rounded px-2 py-1 text-xs font-semibold outline-none ${getStatusColor(item.status)}">
                             <option value="Não Instalado" ${item.status === 'Não Instalado' ? 'selected' : ''}>Não Instalado</option>
                             <option value="Instalado" ${item.status === 'Instalado' ? 'selected' : ''}>Instalado</option>
                             <option value="NOK" ${item.status === 'NOK' ? 'selected' : ''}>NOK</option>
                         </select>
                     </td>
                     <td class="p-3">
-                        <input type="date" value="${item.data_inspecao || ''}" onchange="updateItem(${originalIndex}, 'data_inspecao', this.value)" class="border rounded px-2 py-1 text-xs">
+                        <input type="date" value="${item.data_inspecao || ''}" onchange="updateItem('${item.id}', 'data_inspecao', this.value)" class="border rounded px-2 py-1 text-xs">
                     </td>
                     <td class="p-3">
-                        <input type="text" value="${item.inspetor || ''}" placeholder="Nome..." onchange="updateItem(${originalIndex}, 'inspetor', this.value)" class="border rounded px-2 py-1 text-xs w-28">
+                        <input type="text" value="${item.inspetor || ''}" placeholder="Nome..." onchange="updateItem('${item.id}', 'inspetor', this.value)" class="border rounded px-2 py-1 text-xs w-28">
                     </td>
                     <td class="p-3">
-                        <input type="text" value="${item.observacoes || ''}" placeholder="Obs..." onchange="updateItem(${originalIndex}, 'observacoes', this.value)" class="border rounded px-2 py-1 text-xs w-full">
+                        <input type="text" value="${item.observacoes || ''}" placeholder="Obs..." onchange="updateItem('${item.id}', 'observacoes', this.value)" class="border rounded px-2 py-1 text-xs w-full">
                     </td>
                     <td class="p-3 text-center">
-                        <button onclick="deleteItem(${originalIndex})" class="text-red-500 hover:text-red-700 p-1 rounded transition" title="Excluir Item">
+                        <button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700 p-1 rounded transition" title="Excluir Item">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </td>
@@ -451,95 +420,103 @@
             return 'bg-amber-100 text-amber-800 border-amber-300';
         }
 
-        function updateItem(index, field, value) {
-            items[index][field] = value;
-            saveData();
+        async function updateItem(id, field, value) {
+            const item = items.find(i => i.id == id);
+            if(item) item[field] = value;
+            updateDashboard();
+
+            await enviarParaPlanilha({
+                action: 'update',
+                id: id,
+                field: field,
+                value: value
+            });
         }
 
-        function deleteItem(index) {
-            if(confirm(`Tem certeza que deseja excluir o item ${items[index].tag}?`)) {
-                items.splice(index, 1);
-                saveData();
+        async function deleteItem(id) {
+            if(confirm("Tem certeza que deseja excluir este item?")) {
+                items = items.filter(i => i.id != id);
+                updateAll();
+
+                await enviarParaPlanilha({
+                    action: 'delete',
+                    id: id
+                });
             }
         }
 
-        // Modals de Adição
         function openAddItemModal() {
             document.getElementById('new-item-subsys').value = currentSubsystem;
             document.getElementById('new-item-tag').value = '';
             document.getElementById('new-item-desc').value = '';
             document.getElementById('modal-add-item').classList.remove('hidden');
         }
-        function closeAddItemModal() {
-            document.getElementById('modal-add-item').classList.add('hidden');
-        }
-        function saveNewItem() {
+        function closeAddItemModal() { document.getElementById('modal-add-item').classList.add('hidden'); }
+
+        async function saveNewItem() {
             const tag = document.getElementById('new-item-tag').value.trim();
             const desc = document.getElementById('new-item-desc').value.trim();
             const cat = document.getElementById('new-item-cat').value;
 
-            if(!tag || !desc) {
-                alert("Por favor, preencha a TAG e a Descrição do item.");
-                return;
-            }
+            if(!tag || !desc) { alert("Preencha a TAG e a Descrição."); return; }
 
-            items.push({
-                "tag": tag,
-                "descricao": desc,
-                "categoria": cat,
-                "subsistema": currentSubsystem,
-                "em_campo": "",
-                "status": "Não Instalado",
-                "data_inspecao": "",
-                "inspetor": "",
-                "observacoes": ""
-            });
+            const newItem = {
+                id: 'id_' + Date.now(),
+                tag: tag,
+                descricao: desc,
+                categoria: cat,
+                subsistema: currentSubsystem,
+                em_campo: "",
+                status: "Não Instalado",
+                data_inspecao: "",
+                inspetor: "",
+                observacoes: ""
+            };
 
-            saveData();
+            items.push(newItem);
             closeAddItemModal();
-        }
+            updateAll();
 
-        function openNewSubsystemModal() {
-            document.getElementById('new-subsys-name').value = '';
-            document.getElementById('modal-add-subsys').classList.remove('hidden');
-        }
-        function closeNewSubsystemModal() {
-            document.getElementById('modal-add-subsys').classList.add('hidden');
-        }
-        function createNewSubsystem() {
-            const name = document.getElementById('new-subsys-name').value.trim();
-            if(!name) {
-                alert("Digite o nome do novo sistema.");
-                return;
-            }
-            if(getSubsystems().includes(name)) {
-                alert("Este sistema já existe.");
-                return;
-            }
-
-            // Adiciona um item inicial para o novo subsistema nascer ativo
-            items.push({
-                "tag": "EXEMPLO-01",
-                "descricao": "Item de Exemplo Inicial",
-                "categoria": "Instrumento",
-                "subsistema": name,
-                "em_campo": "",
-                "status": "Não Instalado",
-                "data_inspecao": "",
-                "inspetor": "",
-                "observacoes": ""
+            await enviarParaPlanilha({
+                action: 'create',
+                item: newItem
             });
-
-            currentSubsystem = name;
-            saveData();
-            closeNewSubsystemModal();
         }
 
-        // Exportar para Excel
+        function openNewSubsystemModal() { document.getElementById('modal-add-subsys').classList.remove('hidden'); }
+        function closeNewSubsystemModal() { document.getElementById('modal-add-subsys').classList.add('hidden'); }
+
+        async function createNewSubsystem() {
+            const name = document.getElementById('new-subsys-name').value.trim();
+            if(!name) { alert("Digite o nome do sistema."); return; }
+            if(getSubsystems().includes(name)) { alert("Este sistema já existe."); return; }
+
+            const newItem = {
+                id: 'id_' + Date.now(),
+                tag: "EXEMPLO-01",
+                descricao: "Item Inicial do Sistema",
+                categoria: "Instrumento",
+                subsistema: name,
+                em_campo: "",
+                status: "Não Instalado",
+                data_inspecao: "",
+                inspetor: "",
+                observacoes: ""
+            };
+
+            items.push(newItem);
+            currentSubsystem = name;
+            closeNewSubsystemModal();
+            updateAll();
+
+            await enviarParaPlanilha({
+                action: 'create',
+                item: newItem
+            });
+        }
+
         function exportToExcel() {
             const wb = XLSX.utils.book_new();
-
-            // Aba Dashboard
             const total = items.length;
             const emCampo = items.filter(i => i.em_campo === 'Em Campo').length;
             const instalado = items.filter(i => i.status === 'Instalado').length;
@@ -548,13 +525,13 @@
             const pct = total > 0 ? (instalado / total) : 0;
 
             let dashRows = [
-                ["DASHBOARD DE COMISSIONAMENTO INDUSTRIAL ETAC"],
+                ["DASHBOARD DE COMISSIONAMENTO INDUSTRIAL - NUVEM"],
                 [],
                 ["TOTAL DE ITENS", "EM CAMPO", "INSTALADO", "NÃO INSTALADO", "NOK", "% PROGRESSO GERAL"],
                 [total, emCampo, instalado, naoInstalado, nok, pct],
                 [],
                 ["1. PROGRESSO POR SUBSISTEMA / ÁREA FUNCIONAL"],
-                ["Subsistema / Área Funcional", "Total Itens", "Equipamento em campo", "Instalado", "Não Instalado", "NOK", "% Concluído"]
+                ["Subsistema", "Total Itens", "Em Campo", "Instalado", "Não Instalado", "NOK", "% Concluído"]
             ];
 
             getSubsystems().forEach(sub => {
@@ -570,31 +547,16 @@
 
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dashRows), "Dashboard Diretoria");
 
-            // Aba Checklist de Campo (Geral com todos os subsistemas)
             const checklistHeader = [
-                ["CHECKLIST DE COMISSIONAMENTO DE CAMPO - LISTA OFICIAL"],
-                ["Atualize a coluna 'Status Comissionamento' para sincronização automática."],
-                ["TAG do Item", "Descrição do Equipamento / Instrumento", "Categoria do Item", "Subsistema / Área Funcional", "Equipamento em Campo", "Status Comissionamento", "Data Inspeção", "Inspetor Responsável", "Observações de Campo / Pendências Técnicas"]
+                ["CHECKLIST DE COMISSIONAMENTO DE CAMPO - NUVEM"],
+                ["Sincronizado via Google Sheets"],
+                ["ID", "TAG do Item", "Descrição", "Categoria", "Subsistema", "Em Campo", "Status", "Data", "Inspetor", "Observações"]
             ];
             
-            const checklistRows = items.map(i => [
-                i.tag, i.descricao, i.categoria, i.subsistema, i.em_campo, i.status, i.data_inspecao, i.inspetor, i.observacoes
-            ]);
-
+            const checklistRows = items.map(i => [i.id, i.tag, i.descricao, i.categoria, i.subsistema, i.em_campo, i.status, i.data_inspecao, i.inspetor, i.observacoes]);
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...checklistHeader, ...checklistRows]), "Checklist de Campo");
 
-            // Aba Diretrizes
-            const diretrizesData = [
-                ["GUIA PRÁTICO & DIRETRIZES DE COMISSIONAMENTO"],
-                [],
-                ["Fase C1 - Pré-Comissionamento", "Verificação estática, inspeção visual, alinhamento mecânico."],
-                ["Fase C2 - Comissionamento a Frio", "Testes de malhas, calibração e estanqueidade."],
-                ["Fase C3 - Comissionamento a Quente", "Operação com fluidos de processo e intertravamentos."],
-                ["Fase C4 - Operação Assistida", "Partida contínua e validação de garantias."]
-            ];
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(diretrizesData), "Diretrizes & Gestão");
-
-            XLSX.writeFile(wb, "CHECKLIST_INDUSTRIAL_MULTISISTEMAS.xlsx");
+            XLSX.writeFile(wb, "CHECKLIST_INDUSTRIAL_SHEETS.xlsx");
         }
 
         window.onload = initData;
