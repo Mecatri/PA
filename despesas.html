@@ -220,10 +220,10 @@
     <!-- Script de Integração com Google Sheets -->
     <script>
         // COLE AQUI O SEU LINK DO GOOGLE WEB APP
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
+        const WEB_APP_URL = 'COLE_SEU_LINK_DU_WEB_APP_AQUI';
 
         let items = [];
-        let currentSubsystem = "1.Ar Comprimido";
+        let currentSubsystem = "";
 
         async function initData() {
             await carregarDadosDoPlanilha();
@@ -243,9 +243,11 @@
                 const data = await response.json();
                 items = data || [];
                 
-                if(items.length > 0 && !items.some(i => i.subsistema === currentSubsystem)) {
-                    currentSubsystem = items[0].subsistema;
+                const subs = getSubsystems();
+                if(subs.length > 0 && (!currentSubsystem || !subs.includes(currentSubsystem))) {
+                    currentSubsystem = subs[0];
                 }
+
                 updateAll();
             } catch (error) {
                 console.error('Erro ao buscar dados:', error);
@@ -288,7 +290,7 @@
         }
 
         function getSubsystems() {
-            return [...new Set(items.map(i => i.subsistema).filter(Boolean))];
+            return [...new Set(items.map(i => String(i.subsistema || "").trim()).filter(Boolean))];
         }
 
         function renderSubsystemTabs() {
@@ -311,7 +313,7 @@
 
         function populateCategories() {
             const select = document.getElementById('filter-categoria');
-            const categories = [...new Set(items.map(i => i.categoria).filter(Boolean))];
+            const categories = [...new Set(items.map(i => String(i.categoria || "").trim()).filter(Boolean))];
             select.innerHTML = '<option value="">Todas Categorias</option>';
             categories.forEach(cat => {
                 select.innerHTML += `<option value="${cat}">${cat}</option>`;
@@ -320,10 +322,10 @@
 
         function updateDashboard() {
             const total = items.length;
-            const emCampo = items.filter(i => i.em_campo === 'Em Campo').length;
-            const instalado = items.filter(i => i.status === 'Instalado').length;
-            const naoInstalado = items.filter(i => i.status === 'Não Instalado').length;
-            const nok = items.filter(i => i.status === 'NOK').length;
+            const emCampo = items.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
+            const instalado = items.filter(i => String(i.status || "").trim() === 'Instalado').length;
+            const naoInstalado = items.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
+            const nok = items.filter(i => String(i.status || "").trim() === 'NOK').length;
             const pct = total > 0 ? ((instalado / total) * 100).toFixed(2) : 0;
 
             document.getElementById('dash-total').innerText = total;
@@ -337,12 +339,12 @@
             tbody.innerHTML = '';
             
             getSubsystems().forEach(sub => {
-                const subItems = items.filter(i => i.subsistema === sub);
+                const subItems = items.filter(i => String(i.subsistema || "").trim() === sub);
                 const subTotal = subItems.length;
-                const subCampo = subItems.filter(i => i.em_campo === 'Em Campo').length;
-                const subInst = subItems.filter(i => i.status === 'Instalado').length;
-                const subNaoInst = subItems.filter(i => i.status === 'Não Instalado').length;
-                const subNok = subItems.filter(i => i.status === 'NOK').length;
+                const subCampo = subItems.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
+                const subInst = subItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+                const subNaoInst = subItems.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
+                const subNok = subItems.filter(i => String(i.status || "").trim() === 'NOK').length;
                 const subPct = subTotal > 0 ? ((subInst / subTotal) * 100).toFixed(2) : 0;
 
                 tbody.innerHTML += `
@@ -365,9 +367,10 @@
             const catFilter = document.getElementById('filter-categoria').value;
 
             const filtered = items.filter(item => {
-                const matchSubsys = item.subsistema === currentSubsystem;
-                const matchSearch = item.tag.toLowerCase().includes(search) || item.descricao.toLowerCase().includes(search);
-                const matchCat = catFilter === "" || item.categoria === catFilter;
+                const itemSubsys = String(item.subsistema || "").trim();
+                const matchSubsys = itemSubsys === currentSubsystem;
+                const matchSearch = String(item.tag || "").toLowerCase().includes(search) || String(item.descricao || "").toLowerCase().includes(search);
+                const matchCat = catFilter === "" || String(item.categoria || "").trim() === catFilter;
                 return matchSubsys && matchSearch && matchCat;
             });
 
@@ -378,21 +381,24 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-blue-50/50 transition border-b border-gray-100";
 
+                const currentStatus = String(item.status || "Não Instalado").trim();
+                const currentEmCampo = String(item.em_campo || "").trim();
+
                 tr.innerHTML = `
-                    <td class="p-3 font-semibold text-slate-700">${item.tag}</td>
-                    <td class="p-3 text-gray-700 max-w-xs">${item.descricao}</td>
-                    <td class="p-3 text-gray-500">${item.categoria}</td>
+                    <td class="p-3 font-semibold text-slate-700">${item.tag || ''}</td>
+                    <td class="p-3 text-gray-700 max-w-xs">${item.descricao || ''}</td>
+                    <td class="p-3 text-gray-500">${item.categoria || ''}</td>
                     <td class="p-3">
                         <select onchange="updateItem('${item.id}', 'em_campo', this.value)" class="border rounded px-2 py-1 text-xs outline-none bg-white">
-                            <option value="" ${item.em_campo === '' ? 'selected' : ''}>-</option>
-                            <option value="Em Campo" ${item.em_campo === 'Em Campo' ? 'selected' : ''}>Em Campo</option>
+                            <option value="" ${currentEmCampo === '' ? 'selected' : ''}>-</option>
+                            <option value="Em Campo" ${currentEmCampo === 'Em Campo' ? 'selected' : ''}>Em Campo</option>
                         </select>
                     </td>
                     <td class="p-3">
-                        <select onchange="updateItem('${item.id}', 'status', this.value)" class="border rounded px-2 py-1 text-xs font-semibold outline-none ${getStatusColor(item.status)}">
-                            <option value="Não Instalado" ${item.status === 'Não Instalado' ? 'selected' : ''}>Não Instalado</option>
-                            <option value="Instalado" ${item.status === 'Instalado' ? 'selected' : ''}>Instalado</option>
-                            <option value="NOK" ${item.status === 'NOK' ? 'selected' : ''}>NOK</option>
+                        <select onchange="updateItem('${item.id}', 'status', this.value)" class="border rounded px-2 py-1 text-xs font-semibold outline-none ${getStatusColor(currentStatus)}">
+                            <option value="Não Instalado" ${currentStatus === 'Não Instalado' ? 'selected' : ''}>Não Instalado</option>
+                            <option value="Instalado" ${currentStatus === 'Instalado' ? 'selected' : ''}>Instalado</option>
+                            <option value="NOK" ${currentStatus === 'NOK' ? 'selected' : ''}>NOK</option>
                         </select>
                     </td>
                     <td class="p-3">
@@ -421,7 +427,7 @@
         }
 
         async function updateItem(id, field, value) {
-            const item = items.find(i => i.id == id);
+            const item = items.find(i => String(i.id) === String(id));
             if(item) item[field] = value;
             updateDashboard();
 
@@ -435,7 +441,7 @@
 
         async function deleteItem(id) {
             if(confirm("Tem certeza que deseja excluir este item?")) {
-                items = items.filter(i => i.id != id);
+                items = items.filter(i => String(i.id) !== String(id));
                 updateAll();
 
                 await enviarParaPlanilha({
@@ -489,7 +495,7 @@
         async function createNewSubsystem() {
             const name = document.getElementById('new-subsys-name').value.trim();
             if(!name) { alert("Digite o nome do sistema."); return; }
-            if(getSubsystems().includes(name)) { alert("Este sistema já existe."); return; }
+            if(getSubsystems().map(s => s.toLowerCase()).includes(name.toLowerCase())) { alert("Este sistema já existe."); return; }
 
             const newItem = {
                 id: 'id_' + Date.now(),
@@ -518,10 +524,10 @@
         function exportToExcel() {
             const wb = XLSX.utils.book_new();
             const total = items.length;
-            const emCampo = items.filter(i => i.em_campo === 'Em Campo').length;
-            const instalado = items.filter(i => i.status === 'Instalado').length;
-            const naoInstalado = items.filter(i => i.status === 'Não Instalado').length;
-            const nok = items.filter(i => i.status === 'NOK').length;
+            const emCampo = items.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
+            const instalado = items.filter(i => String(i.status || "").trim() === 'Instalado').length;
+            const naoInstalado = items.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
+            const nok = items.filter(i => String(i.status || "").trim() === 'NOK').length;
             const pct = total > 0 ? (instalado / total) : 0;
 
             let dashRows = [
@@ -535,12 +541,12 @@
             ];
 
             getSubsystems().forEach(sub => {
-                const subItems = items.filter(i => i.subsistema === sub);
+                const subItems = items.filter(i => String(i.subsistema || "").trim() === sub);
                 const subTotal = subItems.length;
-                const subCampo = subItems.filter(i => i.em_campo === 'Em Campo').length;
-                const subInst = subItems.filter(i => i.status === 'Instalado').length;
-                const subNaoInst = subItems.filter(i => i.status === 'Não Instalado').length;
-                const subNok = subItems.filter(i => i.status === 'NOK').length;
+                const subCampo = subItems.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
+                const subInst = subItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+                const subNaoInst = subItems.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
+                const subNok = subItems.filter(i => String(i.status || "").trim() === 'NOK').length;
                 const subPct = subTotal > 0 ? (subInst / subTotal) : 0;
                 dashRows.push([sub, subTotal, subCampo, subInst, subNaoInst, subNok, subPct]);
             });
