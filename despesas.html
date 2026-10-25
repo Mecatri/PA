@@ -219,11 +219,85 @@
             </div>
         </section>
 
-        <!-- ABA 3: DIRETRIZES -->
+        <!-- ABA 3: DIRETRIZES & GESTÃO (Atualizada com o conteúdo exato da imagem) -->
         <section id="sec-diretrizes" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-6">
-                <h2 class="text-lg font-bold text-slate-800 border-b pb-2">GUIA PRÁTICO & DIRETRIZES DE COMISSIONAMENTO</h2>
-                <p class="text-sm text-gray-700">Sistema integrado ao Google Sheets com relatório PDF gerencial horizontal para acompanhamento em tempo real.</p>
+            <div class="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-6 text-sm">
+                
+                <h2 class="text-base font-bold bg-blue-900 text-white p-3 rounded-lg text-center uppercase tracking-wide">
+                    GUIA PRÁTICO & DIRETRIZES DE COMISSIONAMENTO DE CAMPO
+                </h2>
+
+                <!-- Bloco 1: Etapas do Protocolo -->
+                <div class="border rounded-lg overflow-hidden">
+                    <div class="bg-slate-800 text-white px-4 py-2 font-semibold text-xs uppercase">
+                        1. Etapas do Protocolo de Comissionamento em Campo
+                    </div>
+                    <div class="divide-y divide-gray-200">
+                        <div class="grid grid-cols-1 md:grid-cols-4 p-3 bg-gray-50 items-center">
+                            <strong class="text-slate-700 font-semibold md:col-span-1">Fase C1 - Pré-Comissionamento (Cold Commission)</strong>
+                            <span class="text-gray-600 md:col-span-3">Verificação estática, inspeção visual, alinhamento mecânico, torqueamento de tubulação e testes de isolamento elétrico (Megger).</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 p-3 items-center">
+                            <strong class="text-slate-700 font-semibold md:col-span-1">Fase C2 - Comissionamento a Frio (Dry/Wet Testing)</strong>
+                            <span class="text-gray-600 md:col-span-3">Testes de rotação desvinculada (Uncoupled), malhas de instrumentos, calibração I/P, estanqueidade hidráulica e lavagem de tubulação (Flushing).</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 p-3 bg-gray-50 items-center">
+                            <strong class="text-slate-700 font-semibold md:col-span-1">Fase C3 - Comissionamento a Quente (Hot Testing)</strong>
+                            <span class="text-gray-600 md:col-span-3">Operação com fluidos de processo (água desmi, vapor, ar), aferição de curvas de desempenho de bombas, sintonia de malhas de controle e testes de intertravamento de segurança (SIS/ESD).</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 p-3 items-center">
+                            <strong class="text-slate-700 font-semibold md:col-span-1">Fase C4 - Operação Assistida e Ramp-Up</strong>
+                            <span class="text-gray-600 md:col-span-3">Partida contínua da planta (ex: Osmose Reversa e Leito Misto), validação de garantias de performance (PGT) e transferência para Operação.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bloco 2: Definições dos Status -->
+                <div class="border rounded-lg overflow-hidden">
+                    <div class="bg-slate-800 text-white px-4 py-2 font-semibold text-xs uppercase">
+                        2. Definições dos Status da Planilha
+                    </div>
+                    <div class="divide-y divide-gray-200">
+                        <div class="grid grid-cols-1 md:grid-cols-4 p-3 bg-emerald-50 items-center">
+                            <strong class="text-emerald-800 font-semibold md:col-span-1">OK (Concluído)</strong>
+                            <span class="text-gray-700 md:col-span-3">Item totalmente inspecionado, testado e aprovado com folha de teste (Check List de Campo) assinada sem pendências impeditivas.</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 p-3 bg-blue-50 items-center border-l-4 border-blue-500">
+                            <strong class="text-blue-800 font-semibold md:col-span-1">Em Andamento</strong>
+                            <span class="text-gray-700 md:col-span-3">Atividades de campo iniciadas (ex: teste mecânico concluído, porém aguardando malha de automação ou energização).</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 p-3 bg-amber-50 items-center">
+                            <strong class="text-amber-800 font-semibold md:col-span-1">Pendente</strong>
+                            <span class="text-gray-700 md:col-span-3">Equipamento/instrumento montado no campo, porém sem início dos testes de comissionamento.</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 p-3 bg-red-50 items-center">
+                            <strong class="text-red-800 font-semibold md:col-span-1">NOK (Com Falha / Impeditivo)</strong>
+                            <span class="text-gray-700 md:col-span-3">Falha identificada durante os testes (vazamento, sobreaquecimento, erro de sinal) necessitando intervenção de montagem/fornecedor.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bloco 3: Recomendações para Apresentação à Diretoria -->
+                <div class="border rounded-lg overflow-hidden">
+                    <div class="bg-slate-800 text-white px-4 py-2 font-semibold text-xs uppercase">
+                        3. Recomendações para Apresentação à Diretoria
+                    </div>
+                    <div class="divide-y divide-gray-200">
+                        <div class="grid grid-cols-1 md:grid-cols-4 p-3 bg-gray-50 items-center">
+                            <strong class="text-slate-700 font-semibold md:col-span-1">Foco nos Gargalos Críticos</strong>
+                            <span class="text-gray-600 md:col-span-3">Utilize a aba 'Dashboard Diretoria' destacando os subsistemas de maior risco (ex: Osmose Reversa e Polimento Leito Misto que impactam o cronograma de vapor/caldeira).</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 p-3 items-center">
+                            <strong class="text-slate-700 font-semibold md:col-span-1">Gestão da Punch List</strong>
+                            <span class="text-gray-600 md:col-span-3">Mantenha rigor no registro da coluna 'Observações' no Checklist para justificativa imediata dos itens em status 'NOK' e 'Pendente'.</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 p-3 bg-gray-50 items-center">
+                            <strong class="text-slate-700 font-semibold md:col-span-1">Ritmo de Atualização</strong>
+                            <span class="text-gray-600 md:col-span-3">Atualize o checklist diariamente no final do turno de campo para garantir que os gráficos e percentuais executivos reflitam a realidade física da obra.</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -563,7 +637,6 @@
             });
         }
 
-        // Tabela limpa que compõe o PDF completo com todos os dados
         function renderPdfChecklistTable() {
             const tbody = document.getElementById('pdf-checklist-tbody');
             tbody.innerHTML = '';
@@ -686,12 +759,11 @@
             });
         }
 
-        // Função para Exportação em PDF na HORIZONTAL (Landscape)
         function exportToPDF() {
-            // Exibe os elementos necessários para compor o PDF completo
             document.getElementById('pdf-header-title').classList.remove('hidden');
             document.getElementById('sec-dashboard').classList.remove('hidden');
             document.getElementById('sec-pdf-table').classList.remove('hidden');
+            document.getElementById('sec-diretrizes').classList.remove('hidden');
 
             const element = document.getElementById('relatorio-pdf-container');
             const opt = {
@@ -703,9 +775,12 @@
             };
 
             html2pdf().from(element).set(opt).save().then(() => {
-                // Oculta os elementos exclusivos do PDF após a geração
                 document.getElementById('pdf-header-title').classList.add('hidden');
                 document.getElementById('sec-pdf-table').classList.add('hidden');
+                // Se a aba ativa não era diretrizes, oculta de volta na tela
+                if(!document.getElementById('main-tab-diretrizes').classList.contains('active')) {
+                    document.getElementById('sec-diretrizes').classList.add('hidden');
+                }
             });
         }
 
