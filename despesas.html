@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Comissionamento Industrial - Nuvem Sheets</title>
+    <title>Sistema de Comissionamento Industrial - Dashboard Gráfico</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS CDN para exportar em Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Chart.js CDN para os Gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- FontAwesome para Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -24,7 +26,7 @@
                 <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
                     <i class="fa-solid fa-industry text-blue-400"></i> COMISSIONAMENTO INDUSTRIAL - NUVEM
                 </h1>
-                <p class="text-xs text-slate-400 mt-1">Sincronizado via Google Sheets</p>
+                <p class="text-xs text-slate-400 mt-1">Sincronizado via Google Sheets com Dashboard Gráfico</p>
             </div>
             <div class="flex items-center gap-3 flex-wrap">
                 <button onclick="openNewSubsystemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
@@ -56,10 +58,11 @@
     </div>
 
     <!-- Conteúdo Principal -->
-    <main class="max-w-7xl mx-auto px-4 py-6">
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
         <!-- ABA 1: DASHBOARD -->
         <section id="sec-dashboard" class="space-y-6">
+            <!-- Cards de Resumo -->
             <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow border border-gray-100 text-center">
                     <p class="text-xs font-semibold text-gray-500 uppercase">Total Itens</p>
@@ -87,9 +90,37 @@
                 </div>
             </div>
 
+            <!-- Gráficos Visuais -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Gráfico Geral de Status -->
+                <div class="bg-white p-5 rounded-xl shadow border border-gray-200 flex flex-col items-center">
+                    <h3 class="font-bold text-slate-700 text-sm mb-4 w-full text-left"><i class="fa-solid fa-chart-pie mr-2 text-blue-500"></i>Status Geral de Comissionamento</h3>
+                    <div class="w-full max-w-xs h-64 flex justify-center items-center">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico por Tipo de Equipamento (Categoria) -->
+                <div class="bg-white p-5 rounded-xl shadow border border-gray-200 flex flex-col items-center">
+                    <h3 class="font-bold text-slate-700 text-sm mb-4 w-full text-left"><i class="fa-solid fa-chart-column mr-2 text-emerald-500"></i>Progresso por Tipo de Equipamento (Categoria)</h3>
+                    <div class="w-full h-64 flex justify-center items-center">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Barras por Subsistema -->
+            <div class="bg-white p-5 rounded-xl shadow border border-gray-200">
+                <h3 class="font-bold text-slate-700 text-sm mb-4"><i class="fa-solid fa-chart-bar mr-2 text-purple-500"></i>Comparativo de Conclusão por Subsistema / Área</h3>
+                <div class="w-full h-72">
+                    <canvas id="subsystemChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Tabela Detalhada por Subsistema -->
             <div class="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
                 <div class="bg-slate-800 text-white px-6 py-3 font-semibold text-sm">
-                    1. PROGRESSO POR SUBSISTEMA / ÁREA FUNCIONAL
+                    DETALHAMENTO DE PROGRESSO POR SUBSISTEMA / ÁREA FUNCIONAL
                 </div>
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -154,7 +185,7 @@
         <section id="sec-diretrizes" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-6">
                 <h2 class="text-lg font-bold text-slate-800 border-b pb-2">GUIA PRÁTICO & DIRETRIZES DE COMISSIONAMENTO</h2>
-                <p class="text-sm text-gray-700">Sistema integrado ao Google Sheets. As alterações feitas por qualquer pessoa aparecem sincronizadas na nuvem.</p>
+                <p class="text-sm text-gray-700">Sistema integrado ao Google Sheets com painel gráfico gerencial para acompanhamento em tempo real da equipe.</p>
             </div>
         </section>
 
@@ -217,13 +248,15 @@
         </div>
     </div>
 
-    <!-- Script de Integração com Google Sheets -->
+    <!-- Script de Integração e Gráficos -->
     <script>
-        // COLE AQUI O SEU LINK DO GOOGLE WEB APP
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
 
         let items = [];
         let currentSubsystem = "";
+        let statusChartInstance = null;
+        let categoryChartInstance = null;
+        let subsystemChartInstance = null;
 
         async function initData() {
             await carregarDadosDoPlanilha();
@@ -286,11 +319,17 @@
             document.getElementById('sec-diretrizes').classList.add('hidden');
 
             document.getElementById(`sec-${tabName}`).classList.remove('hidden');
-            if(tabName === 'dashboard') updateDashboard();
+            if(tabName === 'dashboard') {
+                updateDashboard();
+            }
         }
 
         function getSubsystems() {
             return [...new Set(items.map(i => String(i.subsistema || "").trim()).filter(Boolean))];
+        }
+
+        function getCategories() {
+            return [...new Set(items.map(i => String(i.categoria || "").trim()).filter(Boolean))];
         }
 
         function renderSubsystemTabs() {
@@ -313,7 +352,7 @@
 
         function populateCategories() {
             const select = document.getElementById('filter-categoria');
-            const categories = [...new Set(items.map(i => String(i.categoria || "").trim()).filter(Boolean))];
+            const categories = getCategories();
             select.innerHTML = '<option value="">Todas Categorias</option>';
             categories.forEach(cat => {
                 select.innerHTML += `<option value="${cat}">${cat}</option>`;
@@ -335,6 +374,7 @@
             document.getElementById('dash-nok').innerText = nok;
             document.getElementById('dash-pct').innerText = `${pct}%`;
 
+            // Tabela Detalhada por Subsistema
             const tbody = document.getElementById('dashboard-subsystems-tbody');
             tbody.innerHTML = '';
             
@@ -358,6 +398,69 @@
                         <td class="p-3 text-center font-bold text-blue-600">${subPct}%</td>
                     </tr>
                 `;
+            });
+
+            // Renderizar Gráficos
+            renderCharts(instalado, naoInstalado, nok);
+        }
+
+        function renderCharts(instalado, naoInstalado, nok) {
+            // 1. Gráfico de Rosca - Status Geral
+            const ctxStatus = document.getElementById('statusChart').getContext('2d');
+            if(statusChartInstance) statusChartInstance.destroy();
+            statusChartInstance = new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Instalado', 'Não Instalado', 'NOK'],
+                    datasets: [{
+                        data: [instalado, naoInstalado, nok],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // 2. Gráfico por Categoria (Tipo de Equipamento)
+            const categories = getCategories();
+            const catCounts = categories.map(cat => items.filter(i => String(i.categoria || "").trim() === cat).length);
+            
+            const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+            if(categoryChartInstance) categoryChartInstance.destroy();
+            categoryChartInstance = new Chart(ctxCategory, {
+                type: 'bar',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: 'Qtd de Itens',
+                        data: catCounts,
+                        backgroundColor: '#3b82f6'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            // 3. Gráfico de Barras por Subsistema (% Concluído)
+            const subsys = getSubsystems();
+            const subsysPct = subsys.map(sub => {
+                const subItems = items.filter(i => String(i.subsistema || "").trim() === sub);
+                if(subItems.length === 0) return 0;
+                const subInst = subItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+                return ((subInst / subItems.length) * 100).toFixed(1);
+            });
+
+            const ctxSubsys = document.getElementById('subsystemChart').getContext('2d');
+            if(subsystemChartInstance) subsystemChartInstance.destroy();
+            subsystemChartInstance = new Chart(ctxSubsys, {
+                type: 'bar',
+                data: {
+                    labels: subsys,
+                    datasets: [{
+                        label: '% Concluído',
+                        data: subsysPct,
+                        backgroundColor: '#8b5cf6'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
             });
         }
 
