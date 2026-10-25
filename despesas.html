@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Comissionamento Industrial - Dashboard Gráfico</title>
+    <title>Sistema de Comissionamento Industrial - Relatório PDF</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS CDN para exportar em Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Chart.js CDN para os Gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf.js CDN para exportar em PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- FontAwesome para Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -20,20 +20,20 @@
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
 
     <!-- Header / Navbar -->
-    <header class="bg-slate-900 text-white shadow-md">
+    <header class="bg-slate-900 text-white shadow-md print:hidden">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
                     <i class="fa-solid fa-industry text-blue-400"></i> COMISSIONAMENTO INDUSTRIAL - NUVEM
                 </h1>
-                <p class="text-xs text-slate-400 mt-1">Sincronizado via Google Sheets com Dashboard Analítico</p>
+                <p class="text-xs text-slate-400 mt-1">Sincronizado via Google Sheets com Relatório PDF</p>
             </div>
             <div class="flex items-center gap-3 flex-wrap">
                 <button onclick="openNewSubsystemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
                     <i class="fa-solid fa-plus"></i> Novo Sistema
                 </button>
-                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
-                    <i class="fa-solid fa-file-excel"></i> Baixar Planilha Excel
+                <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
+                    <i class="fa-solid fa-file-pdf"></i> Baixar Relatório PDF
                 </button>
                 <button onclick="carregarDadosDoPlanilha()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm transition" title="Atualizar dados">
                     <i class="fa-solid fa-rotate" id="sync-icon"></i> Atualizar
@@ -43,7 +43,7 @@
     </header>
 
     <!-- Navegação Principal -->
-    <div class="bg-white border-b border-gray-200">
+    <div class="bg-white border-b border-gray-200 print:hidden">
         <div class="max-w-7xl mx-auto px-4 flex gap-6">
             <button onclick="switchMainTab('dashboard')" id="main-tab-dashboard" class="main-tab py-3 px-2 text-gray-600 hover:text-blue-600 transition active">
                 <i class="fa-solid fa-chart-pie mr-1"></i> Dashboard Diretoria
@@ -57,8 +57,14 @@
         </div>
     </div>
 
-    <!-- Conteúdo Principal -->
-    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <!-- Conteúdo Principal (Área capturada para o PDF) -->
+    <main id="relatorio-pdf-container" class="max-w-7xl mx-auto px-4 py-6 space-y-6 bg-gray-100">
+
+        <!-- Título do Relatório (Aparece no PDF) -->
+        <div class="hidden print:block bg-slate-900 text-white p-4 rounded-xl mb-6">
+            <h2 class="text-xl font-bold">RELATÓRIO TÉCNICO DE COMISSIONAMENTO INDUSTRIAL</h2>
+            <p class="text-xs text-slate-300">Gerado automaticamente via Google Sheets</p>
+        </div>
 
         <!-- ABA 1: DASHBOARD -->
         <section id="sec-dashboard" class="space-y-6">
@@ -139,44 +145,27 @@
             </div>
         </section>
 
-        <!-- ABA 2: CHECKLIST -->
-        <section id="sec-checklist" class="hidden space-y-4">
-            <div id="subsystem-tabs-container" class="flex gap-2 overflow-x-auto pb-2 border-b border-gray-200"></div>
-
-            <div class="bg-white p-4 rounded-xl shadow border border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-center">
-                <div class="flex gap-2 w-full md:w-auto flex-1">
-                    <div class="relative flex-1 md:max-w-sm">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
-                        <input type="text" id="search-input" oninput="renderChecklist()" placeholder="Buscar por TAG ou Descrição..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-                    </div>
-                    <select id="filter-categoria" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
-                        <option value="">Todas Categorias</option>
-                    </select>
-                </div>
-                <div class="flex gap-3 w-full md:w-auto justify-between items-center">
-                    <span id="items-count" class="text-sm font-medium bg-gray-100 px-3 py-2 rounded-lg">0 itens</span>
-                    <button onclick="openAddItemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition whitespace-nowrap">
-                        <i class="fa-solid fa-plus"></i> Novo Item
-                    </button>
-                </div>
+        <!-- ABA 2: CHECKLIST (Também incluída no relatório completo) -->
+        <section id="sec-checklist" class="space-y-4 pt-6">
+            <div class="bg-slate-800 text-white px-6 py-3 font-semibold text-sm rounded-t-xl">
+                LISTAGEM COMPLETA DOS ITENS DE COMISSÃO DE CAMPO
             </div>
-
             <div class="bg-white rounded-xl shadow overflow-x-auto border border-gray-200">
-                <table class="w-full text-left border-collapse text-xs md:text-sm">
+                <table class="w-full text-left border-collapse text-xs">
                     <thead>
-                        <tr class="bg-slate-800 text-white uppercase text-xs">
+                        <tr class="bg-gray-200 text-slate-700 uppercase text-xs">
                             <th class="p-3">TAG do Item</th>
                             <th class="p-3">Descrição do Equipamento</th>
                             <th class="p-3">Categoria</th>
+                            <th class="p-3">Subsistema</th>
                             <th class="p-3">Em Campo</th>
-                            <th class="p-3">Status Comissionamento</th>
-                            <th class="p-3">Data Inspeção</th>
+                            <th class="p-3">Status</th>
+                            <th class="p-3">Data</th>
                             <th class="p-3">Inspetor</th>
-                            <th class="p-3">Observações / Pendências</th>
-                            <th class="p-3 text-center">Ações</th>
+                            <th class="p-3">Observações</th>
                         </tr>
                     </thead>
-                    <tbody id="checklist-tbody" class="divide-y divide-gray-200"></tbody>
+                    <tbody id="pdf-checklist-tbody" class="divide-y divide-gray-200"></tbody>
                 </table>
             </div>
         </section>
@@ -185,7 +174,7 @@
         <section id="sec-diretrizes" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-6">
                 <h2 class="text-lg font-bold text-slate-800 border-b pb-2">GUIA PRÁTICO & DIRETRIZES DE COMISSIONAMENTO</h2>
-                <p class="text-sm text-gray-700">Sistema integrado ao Google Sheets com painel gráfico gerencial para acompanhamento em tempo real da equipe.</p>
+                <p class="text-sm text-gray-700">Sistema integrado ao Google Sheets com relatório PDF gerencial para acompanhamento em tempo real.</p>
             </div>
         </section>
 
@@ -248,7 +237,7 @@
         </div>
     </div>
 
-    <!-- Script de Integração e Gráficos -->
+    <!-- Script de Integração e Geração de PDF -->
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
 
@@ -307,6 +296,7 @@
             renderSubsystemTabs();
             updateDashboard();
             renderChecklist();
+            renderPdfChecklistTable();
             populateCategories();
         }
 
@@ -400,7 +390,6 @@
                 `;
             });
 
-            // Renderizar Gráficos
             renderCharts(instalado, naoInstalado, nok);
         }
 
@@ -420,7 +409,7 @@
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
-            // 2. Gráfico por Categoria (Quantidade de Itens vs % Concluído)
+            // 2. Gráfico por Categoria (Quantidade vs % Concluído)
             const categories = getCategories();
             const catCounts = categories.map(cat => items.filter(i => String(i.categoria || "").trim() === cat).length);
             const catPct = categories.map(cat => {
@@ -437,43 +426,21 @@
                 data: {
                     labels: categories,
                     datasets: [
-                        {
-                            label: 'Total de Itens',
-                            data: catCounts,
-                            backgroundColor: '#3b82f6',
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: '% Concluído',
-                            data: catPct,
-                            backgroundColor: '#10b981',
-                            yAxisID: 'y1'
-                        }
+                        { label: 'Qtd Itens', data: catCounts, backgroundColor: '#3b82f6', yAxisID: 'y' },
+                        { label: '% Concluído', data: catPct, backgroundColor: '#10b981', yAxisID: 'y1' }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            type: 'linear',
-                            position: 'left',
-                            beginAtZero: true,
-                            title: { display: true, text: 'Qtd Itens' }
-                        },
-                        y1: {
-                            type: 'linear',
-                            position: 'right',
-                            beginAtZero: true,
-                            max: 100,
-                            grid: { drawOnChartArea: false },
-                            title: { display: true, text: '% Concluído' }
-                        }
+                        y: { type: 'linear', position: 'left', beginAtZero: true },
+                        y1: { type: 'linear', position: 'right', beginAtZero: true, max: 100, grid: { drawOnChartArea: false } }
                     }
                 }
             });
 
-            // 3. Gráfico de Barras por Subsistema (% Concluído)
+            // 3. Gráfico de Barras por Subsistema
             const subsys = getSubsystems();
             const subsysPct = subsys.map(sub => {
                 const subItems = items.filter(i => String(i.subsistema || "").trim() === sub);
@@ -488,11 +455,7 @@
                 type: 'bar',
                 data: {
                     labels: subsys,
-                    datasets: [{
-                        label: '% Concluído',
-                        data: subsysPct,
-                        backgroundColor: '#8b5cf6'
-                    }]
+                    datasets: [{ label: '% Concluído', data: subsysPct, backgroundColor: '#8b5cf6' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
             });
@@ -517,7 +480,6 @@
             filtered.forEach((item) => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-blue-50/50 transition border-b border-gray-100";
-
                 const currentStatus = String(item.status || "Não Instalado").trim();
                 const currentEmCampo = String(item.em_campo || "").trim();
 
@@ -557,6 +519,27 @@
             });
         }
 
+        // Preenche a tabela exclusiva que sai no relatório em PDF
+        function renderPdfChecklistTable() {
+            const tbody = document.getElementById('pdf-checklist-tbody');
+            tbody.innerHTML = '';
+            items.forEach(item => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-100">
+                        <td class="p-2 font-semibold">${item.tag || ''}</td>
+                        <td class="p-2">${item.descricao || ''}</td>
+                        <td class="p-2">${item.categoria || ''}</td>
+                        <td class="p-2">${item.subsistema || ''}</td>
+                        <td class="p-2">${item.em_campo || '-'}</td>
+                        <td class="p-2 font-bold">${item.status || ''}</td>
+                        <td class="p-2">${item.data_inspecao || ''}</td>
+                        <td class="p-2">${item.inspetor || ''}</td>
+                        <td class="p-2">${item.observacoes || ''}</td>
+                    </tr>
+                `;
+            });
+        }
+
         function getStatusColor(status) {
             if (status === 'Instalado') return 'bg-emerald-100 text-emerald-800 border-emerald-300';
             if (status === 'NOK') return 'bg-red-100 text-red-800 border-red-300';
@@ -567,6 +550,7 @@
             const item = items.find(i => String(i.id) === String(id));
             if(item) item[field] = value;
             updateDashboard();
+            renderPdfChecklistTable();
 
             await enviarParaPlanilha({
                 action: 'update',
@@ -647,7 +631,7 @@
                 observacoes: ""
             };
 
-            items.push(newItem);
+            items.png ? items.push(newItem) : items.push(newItem);
             currentSubsystem = name;
             closeNewSubsystemModal();
             updateAll();
@@ -658,48 +642,29 @@
             });
         }
 
-        function exportToExcel() {
-            const wb = XLSX.utils.book_new();
-            const total = items.length;
-            const emCampo = items.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
-            const instalado = items.filter(i => String(i.status || "").trim() === 'Instalado').length;
-            const naoInstalado = items.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
-            const nok = items.filter(i => String(i.status || "").trim() === 'NOK').length;
-            const pct = total > 0 ? (instalado / total) : 0;
+        // Função de Geração e Download do PDF
+        function exportToPDF() {
+            // Exibe temporariamente a aba do dashboard e a tabela de checklist para que saiam no PDF
+            const currentSecChecklistHidden = document.getElementById('sec-checklist').classList.contains('hidden');
+            document.getElementById('sec-dashboard').classList.remove('hidden');
+            document.getElementById('sec-checklist').classList.remove('hidden');
 
-            let dashRows = [
-                ["DASHBOARD DE COMISSIONAMENTO INDUSTRIAL - NUVEM"],
-                [],
-                ["TOTAL DE ITENS", "EM CAMPO", "INSTALADO", "NÃO INSTALADO", "NOK", "% PROGRESSO GERAL"],
-                [total, emCampo, instalado, naoInstalado, nok, pct],
-                [],
-                ["1. PROGRESSO POR SUBSISTEMA / ÁREA FUNCIONAL"],
-                ["Subsistema", "Total Itens", "Em Campo", "Instalado", "Não Instalado", "NOK", "% Concluído"]
-            ];
+            const element = document.getElementById('relatorio-pdf-container');
+            const opt = {
+                margin:       5,
+                filename:     'Relatorio_Comissionamento_Industrial.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
 
-            getSubsystems().forEach(sub => {
-                const subItems = items.filter(i => String(i.subsistema || "").trim() === sub);
-                const subTotal = subItems.length;
-                const subCampo = subItems.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
-                const subInst = subItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
-                const subNaoInst = subItems.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
-                const subNok = subItems.filter(i => String(i.status || "").trim() === 'NOK').length;
-                const subPct = subTotal > 0 ? (subInst / subTotal) : 0;
-                dashRows.push([sub, subTotal, subCampo, subInst, subNaoInst, subNok, subPct]);
+            // Gera o PDF
+            html2pdf().from(element).set(opt).save().then(() => {
+                // Restaura o estado da tela após baixar
+                if(currentSecChecklistHidden) {
+                    document.getElementById('sec-checklist').classList.add('hidden');
+                }
             });
-
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dashRows), "Dashboard Diretoria");
-
-            const checklistHeader = [
-                ["CHECKLIST DE COMISSIONAMENTO DE CAMPO - NUVEM"],
-                ["Sincronizado via Google Sheets"],
-                ["ID", "TAG do Item", "Descrição", "Categoria", "Subsistema", "Em Campo", "Status", "Data", "Inspetor", "Observações"]
-            ];
-            
-            const checklistRows = items.map(i => [i.id, i.tag, i.descricao, i.categoria, i.subsistema, i.em_campo, i.status, i.data_inspecao, i.inspetor, i.observacoes]);
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...checklistHeader, ...checklistRows]), "Checklist de Campo");
-
-            XLSX.writeFile(wb, "CHECKLIST_INDUSTRIAL_SHEETS.xlsx");
         }
 
         window.onload = initData;
