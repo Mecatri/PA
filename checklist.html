@@ -553,7 +553,6 @@
             }
 
             if (navigator.onLine) {
-                // Se já sabemos qual sistema está ativo, busca apenas ele. Caso contrário, busca a lista inicial.
                 await carregarDadosDoPlanilha(currentSystem);
             }
         }
@@ -587,15 +586,16 @@
             if(icon) icon.classList.add('fa-spin');
 
             try {
-                // Primeiro, se não tivermos a lista de sistemas disponíveis na planilha, buscamos os nomes dos sistemas
                 if (knownSystems.length === 0 && !sistemaAlvo) {
                     const resSys = await fetch(`${WEB_APP_URL}?action=getSystems`);
                     const sysData = await resSys.json();
                     if (Array.isArray(sysData) && sysData.length > 0) {
-                        knownSystems = [...new Set([...knownSystems, ...sysData])];
+                        knownSystems = sysData.map(s => typeof s === 'object' ? (s.sistema || '') : String(s)).filter(Boolean);
                         localStorage.setItem('known_systems', JSON.stringify(knownSystems));
-                        currentSystem = knownSystems[0];
-                        sistemaAlvo = currentSystem;
+                        if (knownSystems.length > 0) {
+                            currentSystem = knownSystems[0];
+                            sistemaAlvo = currentSystem;
+                        }
                     }
                 }
 
@@ -612,7 +612,6 @@
                     registrarSistemasConhecidos(normalizedNewItems);
 
                     if (sistemaAlvo) {
-                        // Substitui apenas os itens do sistema que acabou de ser baixado
                         const outrosItens = items.filter(i => String(i.sistema || "").trim() !== sistemaAlvo);
                         items = [...outrosItens, ...normalizedNewItems];
                         await salvarItensSistemaNoDB(normalizedNewItems, sistemaAlvo);
@@ -666,11 +665,10 @@
             if(icon) icon.classList.add('fa-spin');
             try {
                 await sincronizarFilaOffline();
-                // Atualiza a lista de sistemas e baixa os dados do sistema atual
                 const resSys = await fetch(`${WEB_APP_URL}?action=getSystems`);
                 const sysData = await resSys.json();
                 if (Array.isArray(sysData)) {
-                    knownSystems = [...new Set([...knownSystems, ...sysData])];
+                    knownSystems = sysData.map(s => typeof s === 'object' ? (s.sistema || '') : String(s)).filter(Boolean);
                     localStorage.setItem('known_systems', JSON.stringify(knownSystems));
                 }
                 await carregarDadosDoPlanilha(currentSystem);
@@ -729,9 +727,12 @@
         }
 
         function getSystems() {
+            const cleanKnown = knownSystems.map(s => typeof s === 'object' ? (s.sistema || s.name || JSON.stringify(s)) : String(s)).filter(Boolean);
             const fromItems = items.map(i => String(i.sistema || "").trim()).filter(Boolean);
             const fromCustom = Object.keys(customSubsystems);
-            return [...new Set([...knownSystems, ...fromItems, ...fromCustom])];
+            
+            const allSystems = [...new Set([...cleanKnown, ...fromItems, ...fromCustom])];
+            return allSystems.filter(sys => sys && !sys.includes('[object Object]'));
         }
 
         function getSubsystemsForSystem(systemName) {
@@ -777,7 +778,6 @@
             const subSelect = document.getElementById('dash-filter-subsistema');
             const activeSys = sysSelect.value;
             
-            // Se o usuário selecionou um sistema específico no dashboard e ele ainda não foi baixado, baixa sob demanda
             if (activeSys !== "TODOS" && navigator.onLine) {
                 const jaCarregado = items.some(i => String(i.sistema || "").trim() === activeSys);
                 if (!jaCarregado) {
@@ -825,7 +825,6 @@
                     populateFilters();
                     renderChecklist();
 
-                    // Baixa os dados específicos deste sistema ao clicar na aba
                     if (navigator.onLine) {
                         await carregarDadosDoPlanilha(sys);
                     }
@@ -1059,7 +1058,6 @@
             });
         }
 
-        // Otimizado: Renderiza no PDF apenas os itens do sistema/subsistema atual (limite de 500 para segurança do navegador)
         function renderPdfChecklistTable() {
             const tbody = document.getElementById('pdf-checklist-tbody');
             document.getElementById('pdf-system-name').innerText = currentSystem || '-';
