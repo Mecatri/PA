@@ -82,6 +82,31 @@
 
         <!-- ABA 1: DASHBOARD -->
         <section id="sec-dashboard" class="space-y-6">
+            <!-- Filtros do Dashboard Diretoria -->
+            <div class="bg-white p-4 rounded-xl shadow border border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-center">
+                <div class="flex items-center gap-2 text-slate-700 font-bold text-sm">
+                    <i class="fa-solid fa-filter text-blue-600"></i>
+                    <span>Filtro Analítico do Dashboard:</span>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
+                    <div class="w-full sm:w-56">
+                        <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">Sistema</label>
+                        <select id="dash-filter-sistema" onchange="onDashboardSystemChange()" class="w-full border rounded-lg px-3 py-2 text-sm font-medium outline-none bg-white focus:ring-2 focus:ring-blue-500">
+                            <option value="TODOS">Todos os Sistemas</option>
+                        </select>
+                    </div>
+                    <div class="w-full sm:w-56">
+                        <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">Subsistema</label>
+                        <select id="dash-filter-subsistema" onchange="updateDashboard()" class="w-full border rounded-lg px-3 py-2 text-sm font-medium outline-none bg-white focus:ring-2 focus:ring-blue-500">
+                            <option value="TODOS">Todos os Subsistemas</option>
+                        </select>
+                    </div>
+                    <button onclick="resetDashboardFilters()" class="mt-4 sm:mt-5 px-3 py-2 text-xs font-semibold text-gray-600 hover:text-blue-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition whitespace-nowrap print:hidden">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Mostrar Todos
+                    </button>
+                </div>
+            </div>
+
             <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow border border-gray-100 text-center">
                     <p class="text-xs font-semibold text-gray-500 uppercase">Total Itens</p>
@@ -126,7 +151,7 @@
             </div>
 
             <div class="bg-white p-5 rounded-xl shadow border border-gray-200">
-                <h3 class="font-bold text-slate-700 text-sm mb-4"><i class="fa-solid fa-chart-bar mr-2 text-purple-500"></i>Comparativo de Conclusão por Sistema / Área</h3>
+                <h3 id="subsystem-chart-title" class="font-bold text-slate-700 text-sm mb-4"><i class="fa-solid fa-chart-bar mr-2 text-purple-500"></i>Comparativo de Conclusão por Sistema / Área</h3>
                 <div class="w-full h-72">
                     <canvas id="subsystemChart"></canvas>
                 </div>
@@ -434,7 +459,6 @@
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
 
-        // Subsistemas padrão sugeridos caso o sistema "Energia" seja criado/usado sem subsistemas cadastrados ainda
         const DEFAULT_SUBSYSTEMS_MAP = {
             "energia": ["Torre TG", "Torre Utilidades", "Ar Comprimido", "Chiller", "Sistema de Vapor"]
         };
@@ -448,7 +472,6 @@
         let categoryChartInstance = null;
         let subsystemChartInstance = null;
 
-        // Normaliza o campo 'sistema' (suportando tanto 'sistema'/'sistemas' quanto legado 'subsistema' se a planilha retornar chave antiga)
         function normalizeItem(raw) {
             const sys = String(raw.sistema || raw.sistemas || "").trim();
             const sub = String(raw.subsistema || "").trim();
@@ -605,6 +628,7 @@
         function updateAll() {
             renderSystemTabs();
             renderSubsystemTabs();
+            populateDashboardFilters();
             updateDashboard();
             populateFilters();
             renderChecklist();
@@ -621,18 +645,17 @@
 
             document.getElementById(`sec-${tabName}`).classList.remove('hidden');
             if(tabName === 'dashboard') {
+                populateDashboardFilters();
                 updateDashboard();
             }
         }
 
-        // Retorna todos os Sistemas únicos
         function getSystems() {
             const fromItems = items.map(i => String(i.sistema || "").trim()).filter(Boolean);
             const fromCustom = Object.keys(customSubsystems);
             return [...new Set([...fromItems, ...fromCustom])];
         }
 
-        // Retorna os Subsistemas pertencentes a um Sistema específico
         function getSubsystemsForSystem(systemName) {
             const sysKey = String(systemName || "").trim();
             const fromItems = items
@@ -644,15 +667,83 @@
             return [...new Set([...fromDefaults, ...fromCustom, ...fromItems])];
         }
 
-        function getCategories() {
-            return [...new Set(items.map(i => String(i.categoria || "").trim()).filter(Boolean))];
+        function getAllSubsystems() {
+            const all = new Set();
+            getSystems().forEach(sys => {
+                getSubsystemsForSystem(sys).forEach(sub => all.add(sub));
+            });
+            items.forEach(i => {
+                const sub = String(i.subsistema || "").trim();
+                if (sub) all.add(sub);
+            });
+            return [...all];
+        }
+
+        function getCategories(sourceItems = items) {
+            return [...new Set(sourceItems.map(i => String(i.categoria || "").trim()).filter(Boolean))];
         }
 
         function getInspectors() {
             return [...new Set(items.map(i => String(i.inspetor || "").trim()).filter(Boolean))].sort();
         }
 
-        // Renderiza abas de SISTEMAS
+        // --- FILTROS DO DASHBOARD ---
+        function populateDashboardFilters() {
+            const sysSelect = document.getElementById('dash-filter-sistema');
+            const subSelect = document.getElementById('dash-filter-subsistema');
+            if (!sysSelect || !subSelect) return;
+
+            const prevSys = sysSelect.value || "TODOS";
+            const prevSub = subSelect.value || "TODOS";
+
+            const systems = getSystems();
+            sysSelect.innerHTML = '<option value="TODOS">Todos os Sistemas</option>';
+            systems.forEach(sys => {
+                sysSelect.innerHTML += `<option value="${sys}" ${sys === prevSys ? 'selected' : ''}>${sys}</option>`;
+            });
+
+            const activeSys = sysSelect.value;
+            const subs = activeSys === "TODOS" ? getAllSubsystems() : getSubsystemsForSystem(activeSys);
+            subSelect.innerHTML = '<option value="TODOS">Todos os Subsistemas</option>';
+            subs.forEach(sub => {
+                subSelect.innerHTML += `<option value="${sub}" ${sub === prevSub ? 'selected' : ''}>${sub}</option>`;
+            });
+        }
+
+        function onDashboardSystemChange() {
+            const sysSelect = document.getElementById('dash-filter-sistema');
+            const subSelect = document.getElementById('dash-filter-subsistema');
+            const activeSys = sysSelect.value;
+
+            const subs = activeSys === "TODOS" ? getAllSubsystems() : getSubsystemsForSystem(activeSys);
+            subSelect.innerHTML = '<option value="TODOS">Todos os Subsistemas</option>';
+            subs.forEach(sub => {
+                subSelect.innerHTML += `<option value="${sub}">${sub}</option>`;
+            });
+
+            updateDashboard();
+        }
+
+        function resetDashboardFilters() {
+            document.getElementById('dash-filter-sistema').value = "TODOS";
+            populateDashboardFilters();
+            document.getElementById('dash-filter-subsistema').value = "TODOS";
+            updateDashboard();
+        }
+
+        function getDashboardFilteredItems() {
+            const sysFilter = document.getElementById('dash-filter-sistema')?.value || "TODOS";
+            const subFilter = document.getElementById('dash-filter-subsistema')?.value || "TODOS";
+
+            return items.filter(i => {
+                const itemSys = String(i.sistema || "").trim();
+                const itemSub = String(i.subsistema || "").trim();
+                const matchSys = sysFilter === "TODOS" || itemSys === sysFilter;
+                const matchSub = subFilter === "TODOS" || itemSub === subFilter;
+                return matchSys && matchSub;
+            });
+        }
+
         function renderSystemTabs() {
             const container = document.getElementById('system-tabs-container');
             const sysList = getSystems();
@@ -673,7 +764,6 @@
             });
         }
 
-        // Renderiza abas de SUBSISTEMAS dentro do Sistema selecionado
         function renderSubsystemTabs() {
             const container = document.getElementById('subsystem-tabs-container');
             const label = document.getElementById('active-system-label');
@@ -686,7 +776,6 @@
 
             container.innerHTML = '';
 
-            // Aba "Todos os Subsistemas"
             const allBtn = document.createElement('button');
             allBtn.className = `subsys-tab px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition border ${currentSubsystem === 'TODOS' ? 'active bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 hover:bg-slate-100 border-slate-300'}`;
             allBtn.innerHTML = `<i class="fa-solid fa-border-all mr-1"></i> Todos (${subList.length})`;
@@ -711,7 +800,6 @@
         }
 
         function populateFilters() {
-            // Categorias
             const catSelect = document.getElementById('filter-categoria');
             const currentCat = catSelect.value;
             const categories = getCategories();
@@ -720,7 +808,6 @@
                 catSelect.innerHTML += `<option value="${cat}" ${cat === currentCat ? 'selected' : ''}>${cat}</option>`;
             });
 
-            // Inspetores
             const inspSelect = document.getElementById('filter-inspetor');
             const currentInsp = inspSelect.value;
             const inspectors = getInspectors();
@@ -740,11 +827,14 @@
         }
 
         function updateDashboard() {
-            const total = items.length;
-            const emCampo = items.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
-            const instalado = items.filter(i => String(i.status || "").trim() === 'Instalado').length;
-            const naoInstalado = items.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
-            const nok = items.filter(i => String(i.status || "").trim() === 'NOK').length;
+            const dashItems = getDashboardFilteredItems();
+            const sysFilter = document.getElementById('dash-filter-sistema')?.value || "TODOS";
+
+            const total = dashItems.length;
+            const emCampo = dashItems.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
+            const instalado = dashItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+            const naoInstalado = dashItems.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
+            const nok = dashItems.filter(i => String(i.status || "").trim() === 'NOK').length;
             const pct = total > 0 ? ((instalado / total) * 100).toFixed(2) : 0;
 
             document.getElementById('dash-total').innerText = total;
@@ -757,8 +847,10 @@
             const tbody = document.getElementById('dashboard-subsystems-tbody');
             tbody.innerHTML = '';
             
-            getSystems().forEach(sys => {
-                const sysItems = items.filter(i => String(i.sistema || "").trim() === sys);
+            const systemsToRender = sysFilter === "TODOS" ? getSystems() : [sysFilter];
+
+            systemsToRender.forEach(sys => {
+                const sysItems = dashItems.filter(i => String(i.sistema || "").trim() === sys);
                 const subsInSys = [...new Set(sysItems.map(i => String(i.subsistema || "Geral").trim()))];
 
                 subsInSys.forEach(sub => {
@@ -785,10 +877,10 @@
                 });
             });
 
-            renderCharts(instalado, naoInstalado, nok);
+            renderCharts(dashItems, instalado, naoInstalado, nok, sysFilter);
         }
 
-        function renderCharts(instalado, naoInstalado, nok) {
+        function renderCharts(dashItems, instalado, naoInstalado, nok, sysFilter) {
             const ctxStatus = document.getElementById('statusChart').getContext('2d');
             if(statusChartInstance) statusChartInstance.destroy();
             statusChartInstance = new Chart(ctxStatus, {
@@ -803,10 +895,10 @@
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
-            const categories = getCategories();
-            const catCounts = categories.map(cat => items.filter(i => String(i.categoria || "").trim() === cat).length);
+            const categories = getCategories(dashItems);
+            const catCounts = categories.map(cat => dashItems.filter(i => String(i.categoria || "").trim() === cat).length);
             const catPct = categories.map(cat => {
-                const catItems = items.filter(i => String(i.categoria || "").trim() === cat);
+                const catItems = dashItems.filter(i => String(i.categoria || "").trim() === cat);
                 if(catItems.length === 0) return 0;
                 const catInst = catItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
                 return ((catInst / catItems.length) * 100).toFixed(1);
@@ -833,21 +925,42 @@
                 }
             });
 
-            const systems = getSystems();
-            const sysPct = systems.map(sys => {
-                const sysItems = items.filter(i => String(i.sistema || "").trim() === sys);
-                if(sysItems.length === 0) return 0;
-                const sysInst = sysItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
-                return ((sysInst / sysItems.length) * 100).toFixed(1);
-            });
+            // Gráfico 3: Se "TODOS" os sistemas estão selecionados, compara por Sistema.
+            // Se um Sistema específico foi selecionado, compara os Subsistemas dele.
+            const chartTitleEl = document.getElementById('subsystem-chart-title');
+            let labels = [];
+            let pctValues = [];
+
+            if (sysFilter === "TODOS") {
+                chartTitleEl.innerHTML = '<i class="fa-solid fa-chart-bar mr-2 text-purple-500"></i>Comparativo de Conclusão por Sistema / Área';
+                const systems = getSystems();
+                labels = systems;
+                pctValues = systems.map(sys => {
+                    const sysItems = dashItems.filter(i => String(i.sistema || "").trim() === sys);
+                    if(sysItems.length === 0) return 0;
+                    const sysInst = sysItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+                    return ((sysInst / sysItems.length) * 100).toFixed(1);
+                });
+            } else {
+                chartTitleEl.innerHTML = `<i class="fa-solid fa-chart-bar mr-2 text-purple-500"></i>Comparativo de Conclusão por Subsistema (${sysFilter})`;
+                const subFilter = document.getElementById('dash-filter-subsistema')?.value || "TODOS";
+                const subs = subFilter === "TODOS" ? getSubsystemsForSystem(sysFilter) : [subFilter];
+                labels = subs;
+                pctValues = subs.map(sub => {
+                    const subItems = dashItems.filter(i => String(i.subsistema || "").trim() === sub);
+                    if(subItems.length === 0) return 0;
+                    const subInst = subItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+                    return ((subInst / subItems.length) * 100).toFixed(1);
+                });
+            }
 
             const ctxSubsys = document.getElementById('subsystemChart').getContext('2d');
             if(subsystemChartInstance) subsystemChartInstance.destroy();
             subsystemChartInstance = new Chart(ctxSubsys, {
                 type: 'bar',
                 data: {
-                    labels: systems,
-                    datasets: [{ label: '% Concluído', data: sysPct, backgroundColor: '#8b5cf6' }]
+                    labels: labels,
+                    datasets: [{ label: '% Concluído', data: pctValues, backgroundColor: '#8b5cf6' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
             });
@@ -940,7 +1053,8 @@
         function renderPdfChecklistTable() {
             const tbody = document.getElementById('pdf-checklist-tbody');
             tbody.innerHTML = '';
-            items.forEach(item => {
+            const pdfItems = getDashboardFilteredItems();
+            pdfItems.forEach(item => {
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-100">
                         <td class="p-2 font-semibold">${item.tag || ''}</td>
@@ -967,6 +1081,7 @@
         async function updateItem(id, field, value) {
             const item = items.find(i => String(i.id) === String(id));
             if(item) item[field] = value;
+            populateDashboardFilters();
             updateDashboard();
             renderPdfChecklistTable();
             if (field === 'inspetor' || field === 'categoria') populateFilters();
@@ -995,7 +1110,6 @@
             }
         }
 
-        // Modal Novo Item
         function openAddItemModal() {
             document.getElementById('new-item-sys').value = currentSystem;
             const subSelect = document.getElementById('new-item-subsys');
@@ -1043,7 +1157,6 @@
             });
         }
 
-        // Modal Novo Sistema
         function openNewSystemModal() { 
             document.getElementById('new-sys-name').value = '';
             document.getElementById('new-sys-initial-sub').value = '';
@@ -1083,7 +1196,6 @@
             });
         }
 
-        // Modal Novo Subsistema
         function openNewSubsystemModal() {
             const parentSelect = document.getElementById('new-subsys-parent');
             const systems = getSystems();
@@ -1124,6 +1236,7 @@
         }
 
         function exportToPDF() {
+            renderPdfChecklistTable();
             document.getElementById('pdf-header-title').classList.remove('hidden');
             document.getElementById('sec-dashboard').classList.remove('hidden');
             document.getElementById('sec-pdf-table').classList.remove('hidden');
