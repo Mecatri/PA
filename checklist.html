@@ -14,7 +14,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .main-tab.active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: bold; }
-        .subsys-tab.active { background-color: #2563eb; color: white; }
+        .sys-tab.active { background-color: #2563eb; color: white; border-color: #2563eb; }
+        .subsys-tab.active { background-color: #0f172a; color: white; border-color: #0f172a; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
@@ -31,9 +32,12 @@
                     <span id="connection-badge" class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500 text-white">ONLINE</span>
                 </div>
             </div>
-            <div class="flex items-center gap-3 flex-wrap">
-                <button onclick="openNewSubsystemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
+            <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="openNewSystemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
                     <i class="fa-solid fa-plus"></i> Novo Sistema
+                </button>
+                <button onclick="openNewSubsystemModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
+                    <i class="fa-solid fa-folder-plus"></i> Novo Subsistema
                 </button>
                 <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
                     <i class="fa-solid fa-file-pdf"></i> Baixar Relatório PDF
@@ -122,7 +126,7 @@
             </div>
 
             <div class="bg-white p-5 rounded-xl shadow border border-gray-200">
-                <h3 class="font-bold text-slate-700 text-sm mb-4"><i class="fa-solid fa-chart-bar mr-2 text-purple-500"></i>Comparativo de Conclusão por Subsistema / Área</h3>
+                <h3 class="font-bold text-slate-700 text-sm mb-4"><i class="fa-solid fa-chart-bar mr-2 text-purple-500"></i>Comparativo de Conclusão por Sistema / Área</h3>
                 <div class="w-full h-72">
                     <canvas id="subsystemChart"></canvas>
                 </div>
@@ -130,12 +134,13 @@
 
             <div class="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
                 <div class="bg-slate-800 text-white px-6 py-3 font-semibold text-sm">
-                    DETALHAMENTO DE PROGRESSO POR SUBSISTEMA / ÁREA FUNCIONAL
+                    DETALHAMENTO DE PROGRESSO POR SISTEMA / SUBSISTEMA
                 </div>
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-100 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase">
-                            <th class="p-3">Subsistema / Área Funcional</th>
+                            <th class="p-3">Sistema</th>
+                            <th class="p-3">Subsistema</th>
                             <th class="p-3 text-center">Total Itens</th>
                             <th class="p-3 text-center">Equipamento em campo</th>
                             <th class="p-3 text-center">Instalado</th>
@@ -151,20 +156,54 @@
 
         <!-- ABA 2: CHECKLIST -->
         <section id="sec-checklist" class="hidden space-y-4">
-            <div id="subsystem-tabs-container" class="flex gap-2 overflow-x-auto pb-2 border-b border-gray-200"></div>
+            <!-- Nível 1: Abas de SISTEMAS -->
+            <div>
+                <p class="text-[11px] font-bold uppercase text-slate-500 mb-1.5"><i class="fa-solid fa-layer-group mr-1"></i> Sistemas:</p>
+                <div id="system-tabs-container" class="flex gap-2 overflow-x-auto pb-2 border-b border-gray-200"></div>
+            </div>
 
-            <div class="bg-white p-4 rounded-xl shadow border border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-center">
-                <div class="flex gap-2 w-full md:w-auto flex-1">
-                    <div class="relative flex-1 md:max-w-sm">
+            <!-- Nível 2: Abas de SUBSISTEMAS dentro do Sistema selecionado -->
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-[11px] font-bold uppercase text-slate-600"><i class="fa-solid fa-diagram-project mr-1"></i> Subsistemas de <span id="active-system-label" class="text-blue-600">-</span>:</p>
+                    <button onclick="openNewSubsystemModal()" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-plus-circle"></i> Adicionar Subsistema
+                    </button>
+                </div>
+                <div id="subsystem-tabs-container" class="flex gap-2 overflow-x-auto pb-1"></div>
+            </div>
+
+            <!-- Barra de Pesquisa e Filtros -->
+            <div class="bg-white p-4 rounded-xl shadow border border-gray-200 space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    <div class="relative lg:col-span-1">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
-                        <input type="text" id="search-input" oninput="renderChecklist()" placeholder="Buscar por TAG ou Descrição..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        <input type="text" id="search-input" oninput="renderChecklist()" placeholder="Buscar TAG ou Descrição..." class="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                     </div>
+                    <select id="filter-inspetor" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
+                        <option value="">Todos Inspetores</option>
+                    </select>
                     <select id="filter-categoria" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
                         <option value="">Todas Categorias</option>
                     </select>
+                    <select id="filter-em-campo" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
+                        <option value="">Em Campo (Todos)</option>
+                        <option value="Em Campo">Em Campo</option>
+                        <option value="__VAZIO__">Não está em campo (-)</option>
+                    </select>
+                    <select id="filter-status" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
+                        <option value="">Todos Status</option>
+                        <option value="Instalado">Instalado</option>
+                        <option value="Não Instalado">Não Instalado</option>
+                        <option value="NOK">NOK</option>
+                    </select>
                 </div>
-                <div class="flex gap-3 w-full md:w-auto justify-between items-center">
-                    <span id="items-count" class="text-sm font-medium bg-gray-100 px-3 py-2 rounded-lg">0 itens</span>
+
+                <div class="flex flex-wrap gap-3 justify-between items-center pt-2 border-t border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <span id="items-count" class="text-sm font-medium bg-gray-100 px-3 py-1.5 rounded-lg">0 itens</span>
+                        <button onclick="limparFiltros()" class="text-xs text-gray-500 hover:text-blue-600 underline">Limpar filtros</button>
+                    </div>
                     <button onclick="openAddItemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition whitespace-nowrap">
                         <i class="fa-solid fa-plus"></i> Novo Item
                     </button>
@@ -177,6 +216,7 @@
                         <tr class="bg-slate-800 text-white uppercase text-xs">
                             <th class="p-3">TAG do Item</th>
                             <th class="p-3">Descrição do Equipamento</th>
+                            <th class="p-3">Subsistema</th>
                             <th class="p-3">Categoria</th>
                             <th class="p-3">Em Campo</th>
                             <th class="p-3">Status Comissionamento</th>
@@ -194,7 +234,7 @@
         <!-- SEÇÃO OCULTA PARA O PDF -->
         <section id="sec-pdf-table" class="hidden space-y-4 pt-6">
             <div class="bg-slate-800 text-white px-6 py-3 font-semibold text-sm rounded-t-xl">
-                LISTAGEM COMPLETA DOS ITENS DE COMISSIONAMENTO (TODOS OS SUBSISTEMAS)
+                LISTAGEM COMPLETA DOS ITENS DE COMISSIONAMENTO (TODOS OS SISTEMAS E SUBSISTEMAS)
             </div>
             <div class="bg-white rounded-xl shadow overflow-x-auto border border-gray-200">
                 <table class="w-full text-left border-collapse text-xs">
@@ -203,6 +243,7 @@
                             <th class="p-2 border-b">TAG do Item</th>
                             <th class="p-2 border-b">Descrição</th>
                             <th class="p-2 border-b">Categoria</th>
+                            <th class="p-2 border-b">Sistema</th>
                             <th class="p-2 border-b">Subsistema</th>
                             <th class="p-2 border-b">Em Campo</th>
                             <th class="p-2 border-b">Status</th>
@@ -296,7 +337,7 @@
 
     </main>
 
-    <!-- Modais -->
+    <!-- Modal Novo Item -->
     <div id="modal-add-item" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -304,9 +345,15 @@
                 <button onclick="closeAddItemModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Subsistema</label>
-                    <input type="text" id="new-item-subsys" readonly class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-700">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Sistema</label>
+                        <input type="text" id="new-item-sys" readonly class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Subsistema *</label>
+                        <select id="new-item-subsys" class="w-full border rounded-lg px-3 py-2 text-sm outline-none bg-white"></select>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">TAG do Item *</label>
@@ -335,53 +382,100 @@
         </div>
     </div>
 
-    <div id="modal-add-subsys" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+    <!-- Modal Novo Sistema -->
+    <div id="modal-add-sys" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="font-bold text-lg text-slate-800">Criar Novo Sistema</h3>
-                <button onclick="closeNewSubsystemModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button onclick="closeNewSystemModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Nome do Sistema *</label>
-                <input type="text" id="new-subsys-name" placeholder="Ex: 2.CALDEIRA, 3.ETA/ETE" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nome do Sistema *</label>
+                    <input type="text" id="new-sys-name" placeholder="Ex: Energia, Caldeira, ETA/ETE" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Subsistema Inicial *</label>
+                    <input type="text" id="new-sys-initial-sub" placeholder="Ex: Torre TG, Geral" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
             </div>
             <div class="flex justify-end gap-3 pt-3 border-t">
-                <button onclick="closeNewSubsystemModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600">Cancelar</button>
-                <button onclick="createNewSubsystem()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Criar</button>
+                <button onclick="closeNewSystemModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600">Cancelar</button>
+                <button onclick="createNewSystem()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Criar</button>
             </div>
         </div>
     </div>
 
-    <!-- Script Principal com Suporte Offline / LocalStorage -->
+    <!-- Modal Novo Subsistema -->
+    <div id="modal-add-subsys" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-lg text-slate-800">Criar Novo Subsistema</h3>
+                <button onclick="closeNewSubsystemModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Sistema Pai *</label>
+                    <select id="new-subsys-parent" class="w-full border rounded-lg px-3 py-2 text-sm outline-none bg-white"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nome do Subsistema *</label>
+                    <input type="text" id="new-subsys-name" placeholder="Ex: Torre TG, Torre Utilidades, Ar Comprimido, Chiller, Sistema de Vapor" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t">
+                <button onclick="closeNewSubsystemModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600">Cancelar</button>
+                <button onclick="createNewSubsystem()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium">Criar Subsistema</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Principal com Suporte Offline / LocalStorage + Hierarquia Sistema/Subsistema -->
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
 
+        // Subsistemas padrão sugeridos caso o sistema "Energia" seja criado/usado sem subsistemas cadastrados ainda
+        const DEFAULT_SUBSYSTEMS_MAP = {
+            "energia": ["Torre TG", "Torre Utilidades", "Ar Comprimido", "Chiller", "Sistema de Vapor"]
+        };
+
         let items = [];
+        let customSubsystems = JSON.parse(localStorage.getItem('custom_subsystems') || '{}');
         let offlineQueue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
-        let currentSubsystem = "";
+        let currentSystem = "";
+        let currentSubsystem = "TODOS";
         let statusChartInstance = null;
         let categoryChartInstance = null;
         let subsystemChartInstance = null;
+
+        // Normaliza o campo 'sistema' (suportando tanto 'sistema'/'sistemas' quanto legado 'subsistema' se a planilha retornar chave antiga)
+        function normalizeItem(raw) {
+            const sys = String(raw.sistema || raw.sistemas || "").trim();
+            const sub = String(raw.subsistema || "").trim();
+            return {
+                ...raw,
+                sistema: sys || "Geral",
+                subsistema: sub || "Geral"
+            };
+        }
 
         async function initData() {
             window.addEventListener('online', atualizarStatusConexao);
             window.addEventListener('offline', atualizarStatusConexao);
             atualizarStatusConexao();
 
-            // Tenta carregar do cache local primeiro para exibição instantânea
             const cachedItems = localStorage.getItem('local_items');
             if (cachedItems) {
                 try {
-                    items = JSON.parse(cachedItems);
-                    const subs = getSubsystems();
-                    if(subs.length > 0 && (!currentSubsystem || !subs.includes(currentSubsystem))) {
-                        currentSubsystem = subs[0];
+                    items = JSON.parse(cachedItems).map(normalizeItem);
+                    const systems = getSystems();
+                    if (systems.length > 0 && (!currentSystem || !systems.includes(currentSystem))) {
+                        currentSystem = systems[0];
                     }
                     updateAll();
                 } catch(e) { console.error('Erro ao ler cache local:', e); }
             }
 
-            // Depois busca da planilha se houver rede
             if (navigator.onLine) {
                 await carregarDadosDoPlanilha();
             }
@@ -392,7 +486,6 @@
             if (navigator.onLine) {
                 badge.innerText = "ONLINE";
                 badge.className = "px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500 text-white";
-                // Se reconectou, tenta sincronizar filas pendentes automaticamente
                 if (offlineQueue.length > 0) {
                     sincronizarFilaOffline();
                 }
@@ -423,13 +516,13 @@
                 const response = await fetch(WEB_APP_URL);
                 const data = await response.json();
                 if (data && data.length > 0) {
-                    items = data;
+                    items = data.map(normalizeItem);
                     localStorage.setItem('local_items', JSON.stringify(items));
                 }
                 
-                const subs = getSubsystems();
-                if(subs.length > 0 && (!currentSubsystem || !subs.includes(currentSubsystem))) {
-                    currentSubsystem = subs[0];
+                const systems = getSystems();
+                if(systems.length > 0 && (!currentSystem || !systems.includes(currentSystem))) {
+                    currentSystem = systems[0];
                 }
 
                 updateAll();
@@ -441,15 +534,12 @@
         }
 
         async function enviarParaPlanilha(payload) {
-            // Salva a alteração localmente primeiro para garantir consistência offline
             localStorage.setItem('local_items', JSON.stringify(items));
 
             if (!navigator.onLine) {
-                // Adiciona na fila offline se não houver internet
                 offlineQueue.push(payload);
                 localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
                 atualizarContadorFila();
-                console.log('Salvo offline na fila:', payload);
                 return;
             }
 
@@ -491,7 +581,6 @@
         async function sincronizarFilaOffline() {
             if (offlineQueue.length === 0) return;
 
-            console.log(`Sincronizando ${offlineQueue.length} itens pendentes...`);
             let remainingQueue = [...offlineQueue];
 
             for (let payload of offlineQueue) {
@@ -502,24 +591,24 @@
                         headers: { 'Content-Type': 'text/plain' },
                         body: JSON.stringify(payload)
                     });
-                    // Remove da fila se enviado com sucesso
                     remainingQueue.shift();
                     offlineQueue = remainingQueue;
                     localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
                 } catch (e) {
                     console.error("Falha ao enviar item da fila offline:", e);
-                    break; // Para se perder a conexão no meio
+                    break;
                 }
             }
             atualizarContadorFila();
         }
 
         function updateAll() {
+            renderSystemTabs();
             renderSubsystemTabs();
             updateDashboard();
+            populateFilters();
             renderChecklist();
             renderPdfChecklistTable();
-            populateCategories();
         }
 
         function switchMainTab(tabName) {
@@ -536,22 +625,81 @@
             }
         }
 
-        function getSubsystems() {
-            return [...new Set(items.map(i => String(i.subsistema || "").trim()).filter(Boolean))];
+        // Retorna todos os Sistemas únicos
+        function getSystems() {
+            const fromItems = items.map(i => String(i.sistema || "").trim()).filter(Boolean);
+            const fromCustom = Object.keys(customSubsystems);
+            return [...new Set([...fromItems, ...fromCustom])];
+        }
+
+        // Retorna os Subsistemas pertencentes a um Sistema específico
+        function getSubsystemsForSystem(systemName) {
+            const sysKey = String(systemName || "").trim();
+            const fromItems = items
+                .filter(i => String(i.sistema || "").trim() === sysKey)
+                .map(i => String(i.subsistema || "").trim())
+                .filter(Boolean);
+            const fromCustom = customSubsystems[sysKey] || [];
+            const fromDefaults = DEFAULT_SUBSYSTEMS_MAP[sysKey.toLowerCase()] || [];
+            return [...new Set([...fromDefaults, ...fromCustom, ...fromItems])];
         }
 
         function getCategories() {
             return [...new Set(items.map(i => String(i.categoria || "").trim()).filter(Boolean))];
         }
 
-        function renderSubsystemTabs() {
-            const container = document.getElementById('subsystem-tabs-container');
-            const subsysList = getSubsystems();
+        function getInspectors() {
+            return [...new Set(items.map(i => String(i.inspetor || "").trim()).filter(Boolean))].sort();
+        }
+
+        // Renderiza abas de SISTEMAS
+        function renderSystemTabs() {
+            const container = document.getElementById('system-tabs-container');
+            const sysList = getSystems();
             
             container.innerHTML = '';
-            subsysList.forEach(sub => {
+            sysList.forEach(sys => {
                 const btn = document.createElement('button');
-                btn.className = `subsys-tab px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition border ${sub === currentSubsystem ? 'active bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'}`;
+                btn.className = `sys-tab px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition border ${sys === currentSystem ? 'active bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'}`;
+                btn.innerHTML = `<i class="fa-solid fa-industry mr-1.5"></i> ${sys}`;
+                btn.onclick = () => {
+                    currentSystem = sys;
+                    currentSubsystem = "TODOS";
+                    renderSystemTabs();
+                    renderSubsystemTabs();
+                    renderChecklist();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // Renderiza abas de SUBSISTEMAS dentro do Sistema selecionado
+        function renderSubsystemTabs() {
+            const container = document.getElementById('subsystem-tabs-container');
+            const label = document.getElementById('active-system-label');
+            label.innerText = currentSystem || '-';
+
+            const subList = getSubsystemsForSystem(currentSystem);
+            if (currentSubsystem !== "TODOS" && !subList.includes(currentSubsystem)) {
+                currentSubsystem = "TODOS";
+            }
+
+            container.innerHTML = '';
+
+            // Aba "Todos os Subsistemas"
+            const allBtn = document.createElement('button');
+            allBtn.className = `subsys-tab px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition border ${currentSubsystem === 'TODOS' ? 'active bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 hover:bg-slate-100 border-slate-300'}`;
+            allBtn.innerHTML = `<i class="fa-solid fa-border-all mr-1"></i> Todos (${subList.length})`;
+            allBtn.onclick = () => {
+                currentSubsystem = "TODOS";
+                renderSubsystemTabs();
+                renderChecklist();
+            };
+            container.appendChild(allBtn);
+
+            subList.forEach(sub => {
+                const btn = document.createElement('button');
+                btn.className = `subsys-tab px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition border ${sub === currentSubsystem ? 'active bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 hover:bg-slate-100 border-slate-300'}`;
                 btn.innerHTML = `<i class="fa-solid fa-folder-open mr-1"></i> ${sub}`;
                 btn.onclick = () => {
                     currentSubsystem = sub;
@@ -562,13 +710,33 @@
             });
         }
 
-        function populateCategories() {
-            const select = document.getElementById('filter-categoria');
+        function populateFilters() {
+            // Categorias
+            const catSelect = document.getElementById('filter-categoria');
+            const currentCat = catSelect.value;
             const categories = getCategories();
-            select.innerHTML = '<option value="">Todas Categorias</option>';
+            catSelect.innerHTML = '<option value="">Todas Categorias</option>';
             categories.forEach(cat => {
-                select.innerHTML += `<option value="${cat}">${cat}</option>`;
+                catSelect.innerHTML += `<option value="${cat}" ${cat === currentCat ? 'selected' : ''}>${cat}</option>`;
             });
+
+            // Inspetores
+            const inspSelect = document.getElementById('filter-inspetor');
+            const currentInsp = inspSelect.value;
+            const inspectors = getInspectors();
+            inspSelect.innerHTML = '<option value="">Todos Inspetores</option>';
+            inspectors.forEach(insp => {
+                inspSelect.innerHTML += `<option value="${insp}" ${insp === currentInsp ? 'selected' : ''}>${insp}</option>`;
+            });
+        }
+
+        function limparFiltros() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('filter-inspetor').value = '';
+            document.getElementById('filter-categoria').value = '';
+            document.getElementById('filter-em-campo').value = '';
+            document.getElementById('filter-status').value = '';
+            renderChecklist();
         }
 
         function updateDashboard() {
@@ -589,26 +757,32 @@
             const tbody = document.getElementById('dashboard-subsystems-tbody');
             tbody.innerHTML = '';
             
-            getSubsystems().forEach(sub => {
-                const subItems = items.filter(i => String(i.subsistema || "").trim() === sub);
-                const subTotal = subItems.length;
-                const subCampo = subItems.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
-                const subInst = subItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
-                const subNaoInst = subItems.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
-                const subNok = subItems.filter(i => String(i.status || "").trim() === 'NOK').length;
-                const subPct = subTotal > 0 ? ((subInst / subTotal) * 100).toFixed(2) : 0;
+            getSystems().forEach(sys => {
+                const sysItems = items.filter(i => String(i.sistema || "").trim() === sys);
+                const subsInSys = [...new Set(sysItems.map(i => String(i.subsistema || "Geral").trim()))];
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="p-3 font-semibold text-slate-700">${sub}</td>
-                        <td class="p-3 text-center">${subTotal}</td>
-                        <td class="p-3 text-center text-blue-600 font-medium">${subCampo}</td>
-                        <td class="p-3 text-center text-emerald-600 font-medium">${subInst}</td>
-                        <td class="p-3 text-center text-amber-600 font-medium">${subNaoInst}</td>
-                        <td class="p-3 text-center text-red-600 font-medium">${subNok}</td>
-                        <td class="p-3 text-center font-bold text-blue-600">${subPct}%</td>
-                    </tr>
-                `;
+                subsInSys.forEach(sub => {
+                    const subItems = sysItems.filter(i => String(i.subsistema || "Geral").trim() === sub);
+                    const subTotal = subItems.length;
+                    const subCampo = subItems.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
+                    const subInst = subItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+                    const subNaoInst = subItems.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
+                    const subNok = subItems.filter(i => String(i.status || "").trim() === 'NOK').length;
+                    const subPct = subTotal > 0 ? ((subInst / subTotal) * 100).toFixed(2) : 0;
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 font-semibold text-slate-700">${sys}</td>
+                            <td class="p-3 text-slate-600">${sub}</td>
+                            <td class="p-3 text-center">${subTotal}</td>
+                            <td class="p-3 text-center text-blue-600 font-medium">${subCampo}</td>
+                            <td class="p-3 text-center text-emerald-600 font-medium">${subInst}</td>
+                            <td class="p-3 text-center text-amber-600 font-medium">${subNaoInst}</td>
+                            <td class="p-3 text-center text-red-600 font-medium">${subNok}</td>
+                            <td class="p-3 text-center font-bold text-blue-600">${subPct}%</td>
+                        </tr>
+                    `;
+                });
             });
 
             renderCharts(instalado, naoInstalado, nok);
@@ -659,12 +833,12 @@
                 }
             });
 
-            const subsys = getSubsystems();
-            const subsysPct = subsys.map(sub => {
-                const subItems = items.filter(i => String(i.subsistema || "").trim() === sub);
-                if(subItems.length === 0) return 0;
-                const subInst = subItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
-                return ((subInst / subItems.length) * 100).toFixed(1);
+            const systems = getSystems();
+            const sysPct = systems.map(sys => {
+                const sysItems = items.filter(i => String(i.sistema || "").trim() === sys);
+                if(sysItems.length === 0) return 0;
+                const sysInst = sysItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+                return ((sysInst / sysItems.length) * 100).toFixed(1);
             });
 
             const ctxSubsys = document.getElementById('subsystemChart').getContext('2d');
@@ -672,8 +846,8 @@
             subsystemChartInstance = new Chart(ctxSubsys, {
                 type: 'bar',
                 data: {
-                    labels: subsys,
-                    datasets: [{ label: '% Concluído', data: subsysPct, backgroundColor: '#8b5cf6' }]
+                    labels: systems,
+                    datasets: [{ label: '% Concluído', data: sysPct, backgroundColor: '#8b5cf6' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
             });
@@ -682,28 +856,54 @@
         function renderChecklist() {
             const tbody = document.getElementById('checklist-tbody');
             const search = document.getElementById('search-input').value.toLowerCase();
+            const inspFilter = document.getElementById('filter-inspetor').value;
             const catFilter = document.getElementById('filter-categoria').value;
+            const campoFilter = document.getElementById('filter-em-campo').value;
+            const statusFilter = document.getElementById('filter-status').value;
 
             const filtered = items.filter(item => {
+                const itemSys = String(item.sistema || "").trim();
                 const itemSubsys = String(item.subsistema || "").trim();
-                const matchSubsys = itemSubsys === currentSubsystem;
+                const itemInsp = String(item.inspetor || "").trim();
+                const itemCat = String(item.categoria || "").trim();
+                const itemCampo = String(item.em_campo || "").trim();
+                const itemStatus = String(item.status || "Não Instalado").trim();
+
+                const matchSys = itemSys === currentSystem;
+                const matchSubsys = currentSubsystem === "TODOS" || itemSubsys === currentSubsystem;
                 const matchSearch = String(item.tag || "").toLowerCase().includes(search) || String(item.descricao || "").toLowerCase().includes(search);
-                const matchCat = catFilter === "" || String(item.categoria || "").trim() === catFilter;
-                return matchSubsys && matchSearch && matchCat;
+                const matchInsp = inspFilter === "" || itemInsp === inspFilter;
+                const matchCat = catFilter === "" || itemCat === catFilter;
+                const matchCampo = campoFilter === "" || (campoFilter === "__VAZIO__" ? itemCampo === "" : itemCampo === campoFilter);
+                const matchStatus = statusFilter === "" || itemStatus === statusFilter;
+
+                return matchSys && matchSubsys && matchSearch && matchInsp && matchCat && matchCampo && matchStatus;
             });
 
             document.getElementById('items-count').innerText = `${filtered.length} itens`;
             tbody.innerHTML = '';
+
+            const subList = getSubsystemsForSystem(currentSystem);
 
             filtered.forEach((item) => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-blue-50/50 transition border-b border-gray-100";
                 const currentStatus = String(item.status || "Não Instalado").trim();
                 const currentEmCampo = String(item.em_campo || "").trim();
+                const currentSub = String(item.subsistema || "Geral").trim();
+
+                const subOptions = [...new Set([...subList, currentSub])].map(s => 
+                    `<option value="${s}" ${s === currentSub ? 'selected' : ''}>${s}</option>`
+                ).join('');
 
                 tr.innerHTML = `
                     <td class="p-3 font-semibold text-slate-700">${item.tag || ''}</td>
                     <td class="p-3 text-gray-700 max-w-xs">${item.descricao || ''}</td>
+                    <td class="p-3">
+                        <select onchange="updateItem('${item.id}', 'subsistema', this.value)" class="border rounded px-2 py-1 text-xs outline-none bg-slate-50 text-slate-700 font-medium">
+                            ${subOptions}
+                        </select>
+                    </td>
                     <td class="p-3 text-gray-500">${item.categoria || ''}</td>
                     <td class="p-3">
                         <select onchange="updateItem('${item.id}', 'em_campo', this.value)" class="border rounded px-2 py-1 text-xs outline-none bg-white">
@@ -746,6 +946,7 @@
                         <td class="p-2 font-semibold">${item.tag || ''}</td>
                         <td class="p-2">${item.descricao || ''}</td>
                         <td class="p-2">${item.categoria || ''}</td>
+                        <td class="p-2">${item.sistema || ''}</td>
                         <td class="p-2">${item.subsistema || ''}</td>
                         <td class="p-2">${item.em_campo || '-'}</td>
                         <td class="p-2 font-bold">${item.status || ''}</td>
@@ -768,6 +969,11 @@
             if(item) item[field] = value;
             updateDashboard();
             renderPdfChecklistTable();
+            if (field === 'inspetor' || field === 'categoria') populateFilters();
+            if (field === 'subsistema') {
+                renderSubsystemTabs();
+                renderChecklist();
+            }
 
             await enviarParaPlanilha({
                 action: 'update',
@@ -789,8 +995,16 @@
             }
         }
 
+        // Modal Novo Item
         function openAddItemModal() {
-            document.getElementById('new-item-subsys').value = currentSubsystem;
+            document.getElementById('new-item-sys').value = currentSystem;
+            const subSelect = document.getElementById('new-item-subsys');
+            const subList = getSubsystemsForSystem(currentSystem);
+            const options = subList.length > 0 ? subList : ["Geral"];
+            subSelect.innerHTML = options.map(s => 
+                `<option value="${s}" ${s === currentSubsystem ? 'selected' : ''}>${s}</option>`
+            ).join('');
+
             document.getElementById('new-item-tag').value = '';
             document.getElementById('new-item-desc').value = '';
             document.getElementById('modal-add-item').classList.remove('hidden');
@@ -801,6 +1015,7 @@
             const tag = document.getElementById('new-item-tag').value.trim();
             const desc = document.getElementById('new-item-desc').value.trim();
             const cat = document.getElementById('new-item-cat').value;
+            const subsys = document.getElementById('new-item-subsys').value;
 
             if(!tag || !desc) { alert("Preencha a TAG e a Descrição."); return; }
 
@@ -809,7 +1024,8 @@
                 tag: tag,
                 descricao: desc,
                 categoria: cat,
-                subsistema: currentSubsystem,
+                sistema: currentSystem,
+                subsistema: subsys,
                 em_campo: "",
                 status: "Não Instalado",
                 data_inspecao: "",
@@ -827,20 +1043,27 @@
             });
         }
 
-        function openNewSubsystemModal() { document.getElementById('modal-add-subsys').classList.remove('hidden'); }
-        function closeNewSubsystemModal() { document.getElementById('modal-add-subsys').classList.add('hidden'); }
+        // Modal Novo Sistema
+        function openNewSystemModal() { 
+            document.getElementById('new-sys-name').value = '';
+            document.getElementById('new-sys-initial-sub').value = '';
+            document.getElementById('modal-add-sys').classList.remove('hidden'); 
+        }
+        function closeNewSystemModal() { document.getElementById('modal-add-sys').classList.add('hidden'); }
 
-        async function createNewSubsystem() {
-            const name = document.getElementById('new-subsys-name').value.trim();
+        async function createNewSystem() {
+            const name = document.getElementById('new-sys-name').value.trim();
+            const initialSub = document.getElementById('new-sys-initial-sub').value.trim() || "Geral";
             if(!name) { alert("Digite o nome do sistema."); return; }
-            if(getSubsystems().map(s => s.toLowerCase()).includes(name.toLowerCase())) { alert("Este sistema já existe."); return; }
+            if(getSystems().map(s => s.toLowerCase()).includes(name.toLowerCase())) { alert("Este sistema já existe."); return; }
 
             const newItem = {
                 id: 'id_' + Date.now(),
                 tag: "EXEMPLO-01",
                 descricao: "Item Inicial do Sistema",
                 categoria: "Instrumento",
-                subsistema: name,
+                sistema: name,
+                subsistema: initialSub,
                 em_campo: "",
                 status: "Não Instalado",
                 data_inspecao: "",
@@ -849,14 +1072,55 @@
             };
 
             items.push(newItem);
-            currentSubsystem = name;
-            closeNewSubsystemModal();
+            currentSystem = name;
+            currentSubsystem = initialSub;
+            closeNewSystemModal();
             updateAll();
 
             await enviarParaPlanilha({
                 action: 'create',
                 item: newItem
             });
+        }
+
+        // Modal Novo Subsistema
+        function openNewSubsystemModal() {
+            const parentSelect = document.getElementById('new-subsys-parent');
+            const systems = getSystems();
+            parentSelect.innerHTML = systems.map(s => 
+                `<option value="${s}" ${s === currentSystem ? 'selected' : ''}>${s}</option>`
+            ).join('');
+            document.getElementById('new-subsys-name').value = '';
+            document.getElementById('modal-add-subsys').classList.remove('hidden');
+        }
+        function closeNewSubsystemModal() { document.getElementById('modal-add-subsys').classList.add('hidden'); }
+
+        function createNewSubsystem() {
+            const parentSys = document.getElementById('new-subsys-parent').value;
+            const subName = document.getElementById('new-subsys-name').value.trim();
+
+            if (!parentSys || !subName) {
+                alert("Selecione o Sistema Pai e informe o nome do Subsistema.");
+                return;
+            }
+
+            if (!customSubsystems[parentSys]) {
+                customSubsystems[parentSys] = [];
+            }
+
+            const existing = getSubsystemsForSystem(parentSys).map(s => s.toLowerCase());
+            if (existing.includes(subName.toLowerCase())) {
+                alert("Este subsistema já existe dentro de " + parentSys + ".");
+                return;
+            }
+
+            customSubsystems[parentSys].push(subName);
+            localStorage.setItem('custom_subsystems', JSON.stringify(customSubsystems));
+
+            currentSystem = parentSys;
+            currentSubsystem = subName;
+            closeNewSubsystemModal();
+            updateAll();
         }
 
         function exportToPDF() {
