@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Comissionamento Industrial - Offline/Online</title>
+    <title>Sistema de Comissionamento Industrial - Otimizado</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN para os Gráficos -->
@@ -55,11 +55,11 @@
     <!-- Navegação Principal -->
     <div class="bg-white border-b border-gray-200 print:hidden">
         <div class="max-w-7xl mx-auto px-4 flex gap-6">
-            <button onclick="switchMainTab('dashboard')" id="main-tab-dashboard" class="main-tab py-3 px-2 text-gray-600 hover:text-blue-600 transition active">
-                <i class="fa-solid fa-chart-pie mr-1"></i> Dashboard Diretoria
-            </button>
-            <button onclick="switchMainTab('checklist')" id="main-tab-checklist" class="main-tab py-3 px-2 text-gray-600 hover:text-blue-600 transition">
+            <button onclick="switchMainTab('checklist')" id="main-tab-checklist" class="main-tab py-3 px-2 text-gray-600 hover:text-blue-600 transition active">
                 <i class="fa-solid fa-list-check mr-1"></i> Checklist de Campo
+            </button>
+            <button onclick="switchMainTab('dashboard')" id="main-tab-dashboard" class="main-tab py-3 px-2 text-gray-600 hover:text-blue-600 transition">
+                <i class="fa-solid fa-chart-pie mr-1"></i> Dashboard Diretoria
             </button>
             <button onclick="switchMainTab('diretrizes')" id="main-tab-diretrizes" class="main-tab py-3 px-2 text-gray-600 hover:text-blue-600 transition">
                 <i class="fa-solid fa-book mr-1"></i> Diretrizes & Gestão
@@ -83,8 +83,85 @@
             </div>
         </div>
 
-        <!-- ABA 1: DASHBOARD -->
-        <section id="sec-dashboard" class="space-y-6">
+        <!-- ABA 1: CHECKLIST (Padronizada como inicial para alta performance) -->
+        <section id="sec-checklist" class="space-y-4">
+            <!-- Nível 1: Abas de SISTEMAS -->
+            <div>
+                <p class="text-[11px] font-bold uppercase text-slate-500 mb-1.5"><i class="fa-solid fa-layer-group mr-1"></i> Sistemas:</p>
+                <div id="system-tabs-container" class="flex gap-2 overflow-x-auto pb-2 border-b border-gray-200"></div>
+            </div>
+
+            <!-- Nível 2: Abas de SUBSISTEMAS dentro do Sistema selecionado -->
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-[11px] font-bold uppercase text-slate-600"><i class="fa-solid fa-diagram-project mr-1"></i> Subsistemas de <span id="active-system-label" class="text-blue-600">-</span>:</p>
+                    <button onclick="openNewSubsystemModal()" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-plus-circle"></i> Adicionar Subsistema
+                    </button>
+                </div>
+                <div id="subsystem-tabs-container" class="flex gap-2 overflow-x-auto pb-1"></div>
+            </div>
+
+            <!-- Barra de Pesquisa e Filtros -->
+            <div class="bg-white p-4 rounded-xl shadow border border-gray-200 space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    <div class="relative lg:col-span-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
+                        <input type="text" id="search-input" oninput="renderChecklist()" placeholder="Buscar TAG ou Descrição..." class="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    </div>
+                    <select id="filter-inspetor" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
+                        <option value="">Todos Inspetores</option>
+                    </select>
+                    <select id="filter-categoria" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
+                        <option value="">Todas Categorias</option>
+                    </select>
+                    <select id="filter-em-campo" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
+                        <option value="">Em Campo (Todos)</option>
+                        <option value="Em Campo">Em Campo</option>
+                        <option value="__VAZIO__">Não está em campo (-)</option>
+                    </select>
+                    <select id="filter-status" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
+                        <option value="">Todos Status</option>
+                        <option value="Instalado">Instalado</option>
+                        <option value="Não Instalado">Não Instalado</option>
+                        <option value="NOK">NOK</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-wrap gap-3 justify-between items-center pt-2 border-t border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <span id="items-count" class="text-sm font-medium bg-gray-100 px-3 py-1.5 rounded-lg">0 itens</span>
+                        <button onclick="limparFiltros()" class="text-xs text-gray-500 hover:text-blue-600 underline">Limpar filtros</button>
+                    </div>
+                    <button onclick="openAddItemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition whitespace-nowrap">
+                        <i class="fa-solid fa-plus"></i> Novo Item
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow overflow-x-auto border border-gray-200">
+                <table class="w-full text-left border-collapse text-xs md:text-sm">
+                    <thead>
+                        <tr class="bg-slate-800 text-white uppercase text-xs">
+                            <th class="p-3">TAG do Item</th>
+                            <th class="p-3">Descrição do Equipamento</th>
+                            <th class="p-3">Subsistema</th>
+                            <th class="p-3">Categoria</th>
+                            <th class="p-3">Em Campo</th>
+                            <th class="p-3">Status Comissionamento</th>
+                            <th class="p-3">Data Inspeção</th>
+                            <th class="p-3">Inspetor</th>
+                            <th class="p-3">Observações / Pendências</th>
+                            <th class="p-3 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="checklist-tbody" class="divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ABA 2: DASHBOARD -->
+        <section id="sec-dashboard" class="hidden space-y-6">
             <!-- Filtros do Dashboard Diretoria -->
             <div class="bg-white p-4 rounded-xl shadow border border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-center">
                 <div class="flex items-center gap-2 text-slate-700 font-bold text-sm">
@@ -178,83 +255,6 @@
                         </tr>
                     </thead>
                     <tbody id="dashboard-subsystems-tbody" class="divide-y divide-gray-100 text-sm"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- ABA 2: CHECKLIST -->
-        <section id="sec-checklist" class="hidden space-y-4">
-            <!-- Nível 1: Abas de SISTEMAS -->
-            <div>
-                <p class="text-[11px] font-bold uppercase text-slate-500 mb-1.5"><i class="fa-solid fa-layer-group mr-1"></i> Sistemas:</p>
-                <div id="system-tabs-container" class="flex gap-2 overflow-x-auto pb-2 border-b border-gray-200"></div>
-            </div>
-
-            <!-- Nível 2: Abas de SUBSISTEMAS dentro do Sistema selecionado -->
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                <div class="flex justify-between items-center mb-2">
-                    <p class="text-[11px] font-bold uppercase text-slate-600"><i class="fa-solid fa-diagram-project mr-1"></i> Subsistemas de <span id="active-system-label" class="text-blue-600">-</span>:</p>
-                    <button onclick="openNewSubsystemModal()" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
-                        <i class="fa-solid fa-plus-circle"></i> Adicionar Subsistema
-                    </button>
-                </div>
-                <div id="subsystem-tabs-container" class="flex gap-2 overflow-x-auto pb-1"></div>
-            </div>
-
-            <!-- Barra de Pesquisa e Filtros -->
-            <div class="bg-white p-4 rounded-xl shadow border border-gray-200 space-y-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                    <div class="relative lg:col-span-1">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
-                        <input type="text" id="search-input" oninput="renderChecklist()" placeholder="Buscar TAG ou Descrição..." class="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-                    </div>
-                    <select id="filter-inspetor" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
-                        <option value="">Todos Inspetores</option>
-                    </select>
-                    <select id="filter-categoria" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
-                        <option value="">Todas Categorias</option>
-                    </select>
-                    <select id="filter-em-campo" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
-                        <option value="">Em Campo (Todos)</option>
-                        <option value="Em Campo">Em Campo</option>
-                        <option value="__VAZIO__">Não está em campo (-)</option>
-                    </select>
-                    <select id="filter-status" onchange="renderChecklist()" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
-                        <option value="">Todos Status</option>
-                        <option value="Instalado">Instalado</option>
-                        <option value="Não Instalado">Não Instalado</option>
-                        <option value="NOK">NOK</option>
-                    </select>
-                </div>
-
-                <div class="flex flex-wrap gap-3 justify-between items-center pt-2 border-t border-gray-100">
-                    <div class="flex items-center gap-2">
-                        <span id="items-count" class="text-sm font-medium bg-gray-100 px-3 py-1.5 rounded-lg">0 itens</span>
-                        <button onclick="limparFiltros()" class="text-xs text-gray-500 hover:text-blue-600 underline">Limpar filtros</button>
-                    </div>
-                    <button onclick="openAddItemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition whitespace-nowrap">
-                        <i class="fa-solid fa-plus"></i> Novo Item
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow overflow-x-auto border border-gray-200">
-                <table class="w-full text-left border-collapse text-xs md:text-sm">
-                    <thead>
-                        <tr class="bg-slate-800 text-white uppercase text-xs">
-                            <th class="p-3">TAG do Item</th>
-                            <th class="p-3">Descrição do Equipamento</th>
-                            <th class="p-3">Subsistema</th>
-                            <th class="p-3">Categoria</th>
-                            <th class="p-3">Em Campo</th>
-                            <th class="p-3">Status Comissionamento</th>
-                            <th class="p-3">Data Inspeção</th>
-                            <th class="p-3">Inspetor</th>
-                            <th class="p-3">Observações / Pendências</th>
-                            <th class="p-3 text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="checklist-tbody" class="divide-y divide-gray-200"></tbody>
                 </table>
             </div>
         </section>
@@ -484,7 +484,7 @@
         </div>
     </div>
 
-    <!-- Script Principal com Suporte Offline / LocalStorage + Exclusão com Advertência -->
+    <!-- Script Principal Altamente Otimizado -->
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
 
@@ -500,6 +500,7 @@
         let statusChartInstance = null;
         let categoryChartInstance = null;
         let subsystemChartInstance = null;
+        let dashboardInitialized = false;
 
         function normalizeItem(raw) {
             const sys = String(raw.sistema || raw.sistemas || "").trim();
@@ -657,11 +658,13 @@
         function updateAll() {
             renderSystemTabs();
             renderSubsystemTabs();
-            populateDashboardFilters();
-            updateDashboard();
             populateFilters();
             renderChecklist();
             renderPdfChecklistTable();
+            if (dashboardInitialized) {
+                populateDashboardFilters();
+                updateDashboard();
+            }
         }
 
         function switchMainTab(tabName) {
@@ -674,6 +677,7 @@
 
             document.getElementById(`sec-${tabName}`).classList.remove('hidden');
             if(tabName === 'dashboard') {
+                dashboardInitialized = true;
                 populateDashboardFilters();
                 updateDashboard();
             }
@@ -855,6 +859,7 @@
         }
 
         function updateDashboard() {
+            if (!dashboardInitialized) return;
             const dashItems = getDashboardFilteredItems();
             const sysFilter = document.getElementById('dash-filter-sistema')?.value || "TODOS";
 
@@ -1270,7 +1275,6 @@
             updateAll();
         }
 
-        // Funções para Excluir Sistema com Advertência
         function openDeleteSystemModal() {
             const select = document.getElementById('delete-sys-select');
             const systems = getSystems();
@@ -1296,19 +1300,14 @@
                 return;
             }
 
-            // Identifica todos os IDs dos itens pertencentes a esse sistema para excluir na planilha também
             const itemsToDelete = items.filter(i => String(i.sistema || "").trim() === sysToDelete);
-
-            // Remove os itens do array local
             items = items.filter(i => String(i.sistema || "").trim() !== sysToDelete);
 
-            // Remove subsistemas customizados salvos desse sistema
             if (customSubsystems[sysToDelete]) {
                 delete customSubsystems[sysToDelete];
                 localStorage.setItem('custom_subsystems', JSON.stringify(customSubsystems));
             }
 
-            // Atualiza sistema ativo se necessário
             const remainingSystems = getSystems();
             currentSystem = remainingSystems.length > 0 ? remainingSystems[0] : "";
             currentSubsystem = "TODOS";
@@ -1316,7 +1315,6 @@
             closeDeleteSystemModal();
             updateAll();
 
-            // Envia requisições de exclusão para cada item na planilha
             for (let item of itemsToDelete) {
                 await enviarParaPlanilha({
                     action: 'delete',
