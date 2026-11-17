@@ -455,7 +455,7 @@
         </div>
     </div>
 
-    <!-- Script Principal com Suporte Offline / LocalStorage + Hierarquia Sistema/Subsistema -->
+    <!-- Script Principal Otimizado -->
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
 
@@ -687,7 +687,6 @@
             return [...new Set(items.map(i => String(i.inspetor || "").trim()).filter(Boolean))].sort();
         }
 
-        // --- FILTROS DO DASHBOARD ---
         function populateDashboardFilters() {
             const sysSelect = document.getElementById('dash-filter-sistema');
             const subSelect = document.getElementById('dash-filter-subsistema');
@@ -925,8 +924,6 @@
                 }
             });
 
-            // Gráfico 3: Se "TODOS" os sistemas estão selecionados, compara por Sistema.
-            // Se um Sistema específico foi selecionado, compara os Subsistemas dele.
             const chartTitleEl = document.getElementById('subsystem-chart-title');
             let labels = [];
             let pctValues = [];
@@ -1078,19 +1075,32 @@
             return 'bg-amber-100 text-amber-800 border-amber-300';
         }
 
+        // --- FUNÇÃO UPDATEITEM OTIMIZADA PARA MÁXIMA VELOCIDADE ---
         async function updateItem(id, field, value) {
             const item = items.find(i => String(i.id) === String(id));
             if(item) item[field] = value;
-            populateDashboardFilters();
-            updateDashboard();
-            renderPdfChecklistTable();
+
+            // Salva no cache local instantaneamente sem travamentos na tela
+            localStorage.setItem('local_items', JSON.stringify(items));
+
+            // Atualiza dinamicamente a cor do select de status sem recriar toda a tabela
+            if (field === 'status') {
+                const row = document.querySelector(`select[onchange*="${id}"]`)?.closest('tr');
+                if (row) {
+                    const statusSelect = row.querySelector(`select[onchange*="status"]`);
+                    if (statusSelect) {
+                        statusSelect.className = `border rounded px-2 py-1 text-xs font-semibold outline-none ${getStatusColor(value)}`;
+                    }
+                }
+            }
+
             if (field === 'inspetor' || field === 'categoria') populateFilters();
             if (field === 'subsistema') {
                 renderSubsystemTabs();
-                renderChecklist();
             }
 
-            await enviarParaPlanilha({
+            // Envia para a planilha em segundo plano de forma assíncrona
+            enviarParaPlanilha({
                 action: 'update',
                 id: id,
                 field: field,
