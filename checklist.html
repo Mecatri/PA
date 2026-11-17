@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Comissionamento Industrial - Otimizado</title>
+    <title>Sistema de Comissionamento Industrial - Alta Performance</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN para os Gráficos -->
@@ -28,7 +28,7 @@
                     <i class="fa-solid fa-industry text-blue-400"></i> Checklist Operacional
                 </h1>
                 <div class="flex items-center gap-2 mt-1">
-                    <p class="text-xs text-slate-400">Sincronizado via Google Sheets / Modo Performance Ativo</p>
+                    <p class="text-xs text-slate-400">Sincronizado via Google Sheets / IndexedDB Ativo</p>
                     <span id="connection-badge" class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500 text-white">ONLINE</span>
                 </div>
             </div>
@@ -124,8 +124,8 @@
                         <option value="NOK">NOK</option>
                     </select>
                     <select id="itens-por-pagina" onchange="mudarPagina(1)" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white font-medium text-slate-700">
-                        <option value="50">50 por página</option>
-                        <option value="100" selected>100 por página</option>
+                        <option value="50" selected>50 por página</option>
+                        <option value="100">100 por página</option>
                         <option value="250">250 por página</option>
                     </select>
                 </div>
@@ -435,7 +435,7 @@
         </div>
     </div>
 
-    <!-- Script Principal com Limpeza Automática de Cache -->
+    <!-- Script Principal com IndexedDB (Alta Performance para 10k+ itens) -->
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
 
@@ -454,6 +454,48 @@
         let subsystemChartInstance = null;
         let dashboardInitialized = false;
 
+        // Configuração do IndexedDB para suportar milhares de itens sem travar
+        let db = null;
+        function abrirIndexedDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('ComissionamentoDB', 1);
+                request.onerror = event => reject(event.target.error);
+                request.onsuccess = event => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+                request.onupgradeneeded = event => {
+                    const database = event.target.result;
+                    if (!database.objectStoreNames.contains('items')) {
+                        database.createObjectStore('items', { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        function salvarItensNoDB(arrayItens) {
+            return new Promise((resolve, reject) => {
+                if (!db) return resolve();
+                const transaction = db.transaction(['items'], 'readwrite');
+                const store = transaction.objectStore('items');
+                store.clear();
+                arrayItens.forEach(item => store.put(item));
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = event => reject(event.target.error);
+            });
+        }
+
+        function carregarItensDoDB() {
+            return new Promise((resolve, reject) => {
+                if (!db) return resolve([]);
+                const transaction = db.transaction(['items'], 'readonly');
+                const store = transaction.objectStore('items');
+                const request = store.getAll();
+                request.onsuccess = event => resolve(event.target.result || []);
+                request.onerror = event => reject(event.target.error);
+            });
+        }
+
         function normalizeItem(raw) {
             const sys = String(raw.sistema || raw.sistemas || "").trim();
             const sub = String(raw.subsistema || "").trim();
@@ -465,25 +507,26 @@
         }
 
         async function initData() {
+            // Limpa lixo antigo do localStorage para evitar crash
+            localStorage.removeItem('local_items');
+
             window.addEventListener('online', atualizarStatusConexao);
             window.addEventListener('offline', atualizarStatusConexao);
             atualizarStatusConexao();
 
-            // LIMPEZA DE SEGURANÇA: Se houver dados corrompidos no cache local ao carregar, reseta para evitar crash
-            const cachedItems = localStorage.getItem('local_items');
-            if (cachedItems) {
-                try {
-                    items = JSON.parse(cachedItems).map(normalizeItem);
+            try {
+                await abrirIndexedDB();
+                const cachedItems = await carregarItensDoDB();
+                if (cachedItems && cachedItems.length > 0) {
+                    items = cachedItems.map(normalizeItem);
                     const systems = getSystems();
                     if (systems.length > 0 && (!currentSystem || !systems.includes(currentSystem))) {
                         currentSystem = systems[0];
                     }
                     updateAll();
-                } catch(e) {
-                    console.warn('Cache local corrompido detectado. Limpando...');
-                    localStorage.removeItem('local_items');
-                    items = [];
                 }
+            } catch(e) {
+                console.error('Erro ao carregar IndexedDB:', e);
             }
 
             if (navigator.onLine) {
@@ -524,7 +567,7 @@
                 const data = await response.json();
                 if (data && data.length > 0) {
                     items = data.map(normalizeItem);
-                    localStorage.setItem('local_items', JSON.stringify(items));
+                    await salvarItensNoDB(items);
                 }
                 const systems = getSystems();
                 if(systems.length > 0 && (!currentSystem || !systems.includes(currentSystem))) {
@@ -532,14 +575,15 @@
                 }
                 updateAll();
             } catch (error) {
-                console.error('Modo Offline: Usando dados locais salvos.', error);
+                console.error('Modo Offline: Usando dados locais do IndexedDB.', error);
             } finally {
                 icon.classList.remove('fa-spin');
             }
         }
 
         async function enviarParaPlanilha(payload) {
-            localStorage.setItem('local_items', JSON.stringify(items));
+            await salvarItensNoDB(items);
+
             if (!navigator.onLine) {
                 offlineQueue.push(payload);
                 localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
@@ -776,7 +820,7 @@
             const catFilter = document.getElementById('filter-categoria').value;
             const campoFilter = document.getElementById('filter-em-campo').value;
             const statusFilter = document.getElementById('filter-status').value;
-            const itensPorPagina = parseInt(document.getElementById('itens-por-pagina').value) || 100;
+            const itensPorPagina = parseInt(document.getElementById('itens-por-pagina').value) || 50;
 
             const filtered = items.filter(item => {
                 const itemSys = String(item.sistema || "").trim();
@@ -970,7 +1014,7 @@
         async function updateItem(id, field, value) {
             const item = items.find(i => String(i.id) === String(id));
             if(item) item[field] = value;
-            localStorage.setItem('local_items', JSON.stringify(items));
+            await salvarItensNoDB(items);
             if (field === 'status') {
                 const row = document.querySelector(`select[onchange*="${id}"]`)?.closest('tr');
                 if (row) {
@@ -1083,7 +1127,7 @@
         function openDeleteSystemModal() {
             const select = document.getElementById('delete-sys-select');
             const systems = getSystems();
-            if (systems.length === 0) { alert("Não há sistemas cadastrados."); return; }
+            if (systems.length === 0) { alert("Nenhum sistema cadastrado."); return; }
             select.innerHTML = systems.map(s => `<option value="${s}" ${s === currentSystem ? 'selected' : ''}>${s}</option>`).join('');
             document.getElementById('modal-delete-sys').classList.remove('hidden');
         }
