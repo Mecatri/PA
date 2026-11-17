@@ -101,7 +101,7 @@
             </div>
 
             <div class="bg-white p-4 rounded-xl shadow border border-gray-200 space-y-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
                     <div class="relative lg:col-span-1">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
                         <input type="text" id="search-input" oninput="mudarPagina(1)" placeholder="Buscar TAG ou Descrição..." class="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
@@ -111,6 +111,10 @@
                     </select>
                     <select id="filter-categoria" onchange="mudarPagina(1)" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
                         <option value="">Todas Categorias</option>
+                    </select>
+                    <!-- NOVO FILTRO DE SUBDIVISÃO -->
+                    <select id="filter-subdivisao" onchange="mudarPagina(1)" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
+                        <option value="">Todas Subdivisões</option>
                     </select>
                     <select id="filter-em-campo" onchange="mudarPagina(1)" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white">
                         <option value="">Em Campo (Todos)</option>
@@ -148,6 +152,7 @@
                             <th class="p-3">TAG do Item</th>
                             <th class="p-3">Descrição do Equipamento</th>
                             <th class="p-3">Subsistema</th>
+                            <th class="p-3">Subdivisão</th>
                             <th class="p-3">Categoria</th>
                             <th class="p-3">Em Campo</th>
                             <th class="p-3">Status Comissionamento</th>
@@ -227,7 +232,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Gráfico de Pizza 1: Status Geral -->
                 <div class="bg-white p-5 rounded-xl shadow border border-gray-200 flex flex-col items-center">
                     <h3 class="font-bold text-slate-700 text-sm mb-4 w-full text-left"><i class="fa-solid fa-chart-pie mr-2 text-blue-500"></i>Status Geral de Comissionamento</h3>
                     <div class="w-full max-w-xs h-64 flex justify-center items-center">
@@ -235,7 +239,6 @@
                     </div>
                 </div>
 
-                <!-- NOVO: Gráfico de Pizza 2: Total vs Em Campo vs Instalados -->
                 <div class="bg-white p-5 rounded-xl shadow border border-gray-200 flex flex-col items-center">
                     <h3 class="font-bold text-slate-700 text-sm mb-4 w-full text-left"><i class="fa-solid fa-chart-pie mr-2 text-indigo-500"></i>Total vs Em Campo vs Instalados</h3>
                     <div class="w-full max-w-xs h-64 flex justify-center items-center">
@@ -243,7 +246,6 @@
                     </div>
                 </div>
 
-                <!-- Gráfico de Barras: Categoria -->
                 <div class="bg-white p-5 rounded-xl shadow border border-gray-200 flex flex-col items-center">
                     <h3 class="font-bold text-slate-700 text-sm mb-4 w-full text-left"><i class="fa-solid fa-chart-column mr-2 text-emerald-500"></i>Volume vs % Concluído por Categoria</h3>
                     <div class="w-full h-64 flex justify-center items-center">
@@ -281,7 +283,7 @@
             </div>
         </section>
 
-        <!-- SEÇÃO OCULTA PARA O PDF (OTIMIZADA PARA O SISTEMA ATIVO) -->
+        <!-- SEÇÃO OCULTA PARA O PDF -->
         <section id="sec-pdf-table" class="hidden space-y-4 pt-6">
             <div class="bg-slate-800 text-white px-6 py-3 font-semibold text-sm rounded-t-xl">
                 LISTAGEM DOS ITENS DE COMISSIONAMENTO — SISTEMA: <span id="pdf-system-name">-</span>
@@ -292,9 +294,10 @@
                         <tr class="bg-gray-200 text-slate-700 uppercase text-xs">
                             <th class="p-2 border-b">TAG</th>
                             <th class="p-2 border-b">Descrição</th>
+                            <th class="p-2 border-b">Subsistema</th>
+                            <th class="p-2 border-b">Subdivisão</th>
                             <th class="p-2 border-b">Categoria</th>
                             <th class="p-2 border-b">Sistema</th>
-                            <th class="p-2 border-b">Subsistema</th>
                             <th class="p-2 border-b">Em Campo</th>
                             <th class="p-2 border-b">Status</th>
                             <th class="p-2 border-b">Data</th>
@@ -349,9 +352,15 @@
                         <select id="new-item-subsys" class="w-full border rounded-lg px-3 py-2 text-sm outline-none bg-white"></select>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">TAG do Item *</label>
-                    <input type="text" id="new-item-tag" placeholder="Ex: PI-5010-9999" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">TAG do Item *</label>
+                        <input type="text" id="new-item-tag" placeholder="Ex: PI-5010-9999" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Subdivisão</label>
+                        <input type="text" id="new-item-subdivisao" placeholder="Ex: Bloco A" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Descrição *</label>
@@ -445,7 +454,7 @@
         </div>
     </div>
 
-    <!-- Script Principal com IndexedDB e Carregamento em Blocos (Alta Performance para 10k+ itens) -->
+    <!-- Script Principal com IndexedDB e Carregamento em Blocos -->
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
 
@@ -466,7 +475,6 @@
         let subsystemChartInstance = null;
         let dashboardInitialized = false;
 
-        // Configuração do IndexedDB para suportar milhares de itens sem travar
         let db = null;
         function abrirIndexedDB() {
             return new Promise((resolve, reject) => {
@@ -485,7 +493,6 @@
             });
         }
 
-        // Salva ou atualiza apenas os itens do sistema específico no IndexedDB
         function salvarItensSistemaNoDB(arrayItens, sistemaAlvo) {
             return new Promise((resolve, reject) => {
                 if (!db) return resolve();
@@ -527,10 +534,12 @@
         function normalizeItem(raw) {
             const sys = String(raw.sistema || raw.sistemas || "").trim();
             const sub = String(raw.subsistema || "").trim();
+            const subdiv = String(raw.subdivisão || raw.subdivisao || "").trim();
             return {
                 ...raw,
                 sistema: sys || "Geral",
-                subsistema: sub || "Geral"
+                subsistema: sub || "Geral",
+                subdivisão: subdiv || ""
             };
         }
 
@@ -765,6 +774,10 @@
             return [...new Set(sourceItems.map(i => String(i.categoria || "").trim()).filter(Boolean))];
         }
 
+        function getSubdivisoes(sourceItems = items) {
+            return [...new Set(sourceItems.map(i => String(i.subdivisão || "").trim()).filter(Boolean))].sort();
+        }
+
         function getInspectors() {
             return [...new Set(items.filter(i => String(i.sistema || "").trim() === currentSystem).map(i => String(i.inspetor || "").trim()).filter(Boolean))].sort();
         }
@@ -867,13 +880,23 @@
         }
 
         function populateFilters() {
+            const sysItems = items.filter(i => String(i.sistema || "").trim() === currentSystem);
+
+            // Categoria
             const catSelect = document.getElementById('filter-categoria');
             const currentCat = catSelect.value;
-            const sysItems = items.filter(i => String(i.sistema || "").trim() === currentSystem);
             const categories = getCategories(sysItems);
             catSelect.innerHTML = '<option value="">Todas Categorias</option>';
             categories.forEach(cat => { catSelect.innerHTML += `<option value="${cat}" ${cat === currentCat ? 'selected' : ''}>${cat}</option>`; });
 
+            // Subdivisão
+            const subdivSelect = document.getElementById('filter-subdivisao');
+            const currentSubdiv = subdivSelect.value;
+            const subdivisoes = getSubdivisoes(sysItems);
+            subdivSelect.innerHTML = '<option value="">Todas Subdivisões</option>';
+            subdivisoes.forEach(subdiv => { subdivSelect.innerHTML += `<option value="${subdiv}" ${subdiv === currentSubdiv ? 'selected' : ''}>${subdiv}</option>`; });
+
+            // Inspetor
             const inspSelect = document.getElementById('filter-inspetor');
             const currentInsp = inspSelect.value;
             const inspectors = getInspectors();
@@ -885,6 +908,7 @@
             document.getElementById('search-input').value = '';
             document.getElementById('filter-inspetor').value = '';
             document.getElementById('filter-categoria').value = '';
+            document.getElementById('filter-subdivisao').value = '';
             document.getElementById('filter-em-campo').value = '';
             document.getElementById('filter-status').value = '';
             paginaAtual = 1;
@@ -903,6 +927,7 @@
             const search = document.getElementById('search-input').value.toLowerCase();
             const inspFilter = document.getElementById('filter-inspetor').value;
             const catFilter = document.getElementById('filter-categoria').value;
+            const subdivFilter = document.getElementById('filter-subdivisao').value;
             const campoFilter = document.getElementById('filter-em-campo').value;
             const statusFilter = document.getElementById('filter-status').value;
             const itensPorPagina = parseInt(document.getElementById('itens-por-pagina').value) || 50;
@@ -915,9 +940,10 @@
                 const matchSearch = String(item.tag || "").toLowerCase().includes(search) || String(item.descricao || "").toLowerCase().includes(search);
                 const matchInsp = inspFilter === "" || String(item.inspetor || "").trim() === inspFilter;
                 const matchCat = catFilter === "" || String(item.categoria || "").trim() === catFilter;
+                const matchSubdiv = subdivFilter === "" || String(item.subdivisão || "").trim() === subdivFilter;
                 const matchCampo = campoFilter === "" || (campoFilter === "__VAZIO__" ? !item.em_campo : item.em_campo === campoFilter);
                 const matchStatus = statusFilter === "" || String(item.status || "Não Instalado").trim() === statusFilter;
-                return matchSys && matchSubsys && matchSearch && matchInsp && matchCat && matchCampo && matchStatus;
+                return matchSys && matchSubsys && matchSearch && matchInsp && matchCat && matchSubdiv && matchCampo && matchStatus;
             });
 
             const totalItens = filtered.length;
@@ -949,6 +975,7 @@
                     <td class="p-3 font-semibold text-slate-700">${item.tag || ''}</td>
                     <td class="p-3 text-gray-700 max-w-xs">${item.descricao || ''}</td>
                     <td class="p-3"><select onchange="updateItem('${item.id}', 'subsistema', this.value)" class="border rounded px-2 py-1 text-xs outline-none bg-slate-50 text-slate-700 font-medium">${subOptions}</select></td>
+                    <td class="p-3"><input type="text" value="${item.subdivisão || ''}" placeholder="Subdivisão..." onchange="updateItem('${item.id}', 'subdivisão', this.value)" class="border rounded px-2 py-1 text-xs w-28"></td>
                     <td class="p-3 text-gray-500">${item.categoria || ''}</td>
                     <td class="p-3"><select onchange="updateItem('${item.id}', 'em_campo', this.value)" class="border rounded px-2 py-1 text-xs outline-none bg-white"><option value="" ${currentEmCampo === '' ? 'selected' : ''}>-</option><option value="Em Campo" ${currentEmCampo === 'Em Campo' ? 'selected' : ''}>Em Campo</option></select></td>
                     <td class="p-3"><select onchange="updateItem('${item.id}', 'status', this.value)" class="border rounded px-2 py-1 text-xs font-semibold outline-none ${getStatusColor(currentStatus)}"><option value="Não Instalado" ${currentStatus === 'Não Instalado' ? 'selected' : ''}>Não Instalado</option><option value="Instalado" ${currentStatus === 'Instalado' ? 'selected' : ''}>Instalado</option><option value="NOK" ${currentStatus === 'NOK' ? 'selected' : ''}>NOK</option></select></td>
@@ -1012,7 +1039,6 @@
         }
 
         function renderCharts(dashItems, total, emCampo, instalado, naoInstalado, nok, sysFilter) {
-            // Gráfico 1: Status Geral (Pizza)
             const ctxStatus = document.getElementById('statusChart').getContext('2d');
             if(statusChartInstance) statusChartInstance.destroy();
             statusChartInstance = new Chart(ctxStatus, {
@@ -1021,7 +1047,6 @@
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
-            // NOVO Gráfico 2: Total vs Em Campo vs Instalados (Pizza / Doughnut)
             const ctxProgressPie = document.getElementById('progressPieChart').getContext('2d');
             if(progressPieChartInstance) progressPieChartInstance.destroy();
             progressPieChartInstance = new Chart(ctxProgressPie, {
@@ -1105,9 +1130,10 @@
                     <tr class="border-b border-gray-100">
                         <td class="p-2 font-semibold">${item.tag || ''}</td>
                         <td class="p-2">${item.descricao || ''}</td>
+                        <td class="p-2">${item.subsistema || ''}</td>
+                        <td class="p-2">${item.subdivisão || ''}</td>
                         <td class="p-2">${item.categoria || ''}</td>
                         <td class="p-2">${item.sistema || ''}</td>
-                        <td class="p-2">${item.subsistema || ''}</td>
                         <td class="p-2">${item.em_campo || '-'}</td>
                         <td class="p-2 font-bold">${item.status || ''}</td>
                         <td class="p-2">${item.data_inspecao || ''}</td>
@@ -1135,7 +1161,7 @@
                     if (statusSelect) statusSelect.className = `border rounded px-2 py-1 text-xs font-semibold outline-none ${getStatusColor(value)}`;
                 }
             }
-            if (field === 'inspetor' || field === 'categoria') populateFilters();
+            if (field === 'inspetor' || field === 'categoria' || field === 'subdivisão') populateFilters();
             if (field === 'subsistema') renderSubsystemTabs();
             enviarParaPlanilha({ action: 'update', id: id, field: field, value: value });
         }
@@ -1155,6 +1181,7 @@
             subSelect.innerHTML = (subList.length > 0 ? subList : ["Geral"]).map(s => `<option value="${s}" ${s === currentSubsystem ? 'selected' : ''}>${s}</option>`).join('');
             document.getElementById('new-item-tag').value = '';
             document.getElementById('new-item-desc').value = '';
+            document.getElementById('new-item-subdivisao').value = '';
             document.getElementById('modal-add-item').classList.remove('hidden');
         }
         function closeAddItemModal() { document.getElementById('modal-add-item').classList.add('hidden'); }
@@ -1167,9 +1194,10 @@
                 id: 'id_' + Date.now(),
                 tag: tag,
                 descricao: desc,
+                subsistema: document.getElementById('new-item-subsys').value,
+                subdivisão: document.getElementById('new-item-subdivisao').value.trim(),
                 categoria: document.getElementById('new-item-cat').value,
                 sistema: currentSystem,
-                subsistema: document.getElementById('new-item-subsys').value,
                 em_campo: "",
                 status: "Não Instalado",
                 data_inspecao: "",
@@ -1198,9 +1226,10 @@
                 id: 'id_' + Date.now(),
                 tag: "EXEMPLO-01",
                 descricao: "Item Inicial",
+                subsistema: initialSub,
+                subdivisão: "Geral",
                 categoria: "Instrumento",
                 sistema: name,
-                subsistema: initialSub,
                 em_campo: "",
                 status: "Não Instalado",
                 data_inspecao: "",
