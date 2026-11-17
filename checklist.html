@@ -226,7 +226,8 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Gráfico de Pizza 1: Status Geral -->
                 <div class="bg-white p-5 rounded-xl shadow border border-gray-200 flex flex-col items-center">
                     <h3 class="font-bold text-slate-700 text-sm mb-4 w-full text-left"><i class="fa-solid fa-chart-pie mr-2 text-blue-500"></i>Status Geral de Comissionamento</h3>
                     <div class="w-full max-w-xs h-64 flex justify-center items-center">
@@ -234,6 +235,15 @@
                     </div>
                 </div>
 
+                <!-- NOVO: Gráfico de Pizza 2: Total vs Em Campo vs Instalados -->
+                <div class="bg-white p-5 rounded-xl shadow border border-gray-200 flex flex-col items-center">
+                    <h3 class="font-bold text-slate-700 text-sm mb-4 w-full text-left"><i class="fa-solid fa-chart-pie mr-2 text-indigo-500"></i>Total vs Em Campo vs Instalados</h3>
+                    <div class="w-full max-w-xs h-64 flex justify-center items-center">
+                        <canvas id="progressPieChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Barras: Categoria -->
                 <div class="bg-white p-5 rounded-xl shadow border border-gray-200 flex flex-col items-center">
                     <h3 class="font-bold text-slate-700 text-sm mb-4 w-full text-left"><i class="fa-solid fa-chart-column mr-2 text-emerald-500"></i>Volume vs % Concluído por Categoria</h3>
                     <div class="w-full h-64 flex justify-center items-center">
@@ -451,6 +461,7 @@
         let currentSubsystem = "TODOS";
         let paginaAtual = 1;
         let statusChartInstance = null;
+        let progressPieChartInstance = null;
         let categoryChartInstance = null;
         let subsystemChartInstance = null;
         let dashboardInitialized = false;
@@ -997,15 +1008,31 @@
                     `;
                 });
             });
-            renderCharts(dashItems, instalado, naoInstalado, nok, sysFilter);
+            renderCharts(dashItems, total, emCampo, instalado, naoInstalado, nok, sysFilter);
         }
 
-        function renderCharts(dashItems, instalado, naoInstalado, nok, sysFilter) {
+        function renderCharts(dashItems, total, emCampo, instalado, naoInstalado, nok, sysFilter) {
+            // Gráfico 1: Status Geral (Pizza)
             const ctxStatus = document.getElementById('statusChart').getContext('2d');
             if(statusChartInstance) statusChartInstance.destroy();
             statusChartInstance = new Chart(ctxStatus, {
                 type: 'doughnut',
                 data: { labels: ['Instalado', 'Não Instalado', 'NOK'], datasets: [{ data: [instalado, naoInstalado, nok], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // NOVO Gráfico 2: Total vs Em Campo vs Instalados (Pizza / Doughnut)
+            const ctxProgressPie = document.getElementById('progressPieChart').getContext('2d');
+            if(progressPieChartInstance) progressPieChartInstance.destroy();
+            progressPieChartInstance = new Chart(ctxProgressPie, {
+                type: 'pie',
+                data: {
+                    labels: ['Total de Itens', 'Em Campo', 'Instalados'],
+                    datasets: [{
+                        data: [total, emCampo, instalado],
+                        backgroundColor: ['#64748b', '#3b82f6', '#10b981']
+                    }]
+                },
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
