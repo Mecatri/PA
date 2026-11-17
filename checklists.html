@@ -124,8 +124,8 @@
                         <option value="NOK">NOK</option>
                     </select>
                     <select id="itens-por-pagina" onchange="mudarPagina(1)" class="border rounded-lg px-3 py-2 text-sm outline-none bg-white font-medium text-slate-700">
-                        <option value="50" selected>50 por página</option>
-                        <option value="100">100 por página</option>
+                        <option value="50">50 por página</option>
+                        <option value="100" selected>100 por página</option>
                         <option value="250">250 por página</option>
                     </select>
                 </div>
@@ -469,6 +469,7 @@
             window.addEventListener('offline', atualizarStatusConexao);
             atualizarStatusConexao();
 
+            // LIMPEZA DE SEGURANÇA: Se houver dados corrompidos no cache local ao carregar, reseta para evitar crash
             const cachedItems = localStorage.getItem('local_items');
             if (cachedItems) {
                 try {
@@ -741,4 +742,394 @@
             const catSelect = document.getElementById('filter-categoria');
             const currentCat = catSelect.value;
             const categories = getCategories();
-            catSelect.
+            catSelect.innerHTML = '<option value="">Todas Categorias</option>';
+            categories.forEach(cat => { catSelect.innerHTML += `<option value="${cat}" ${cat === currentCat ? 'selected' : ''}>${cat}</option>`; });
+
+            const inspSelect = document.getElementById('filter-inspetor');
+            const currentInsp = inspSelect.value;
+            const inspectors = getInspectors();
+            inspSelect.innerHTML = '<option value="">Todos Inspetores</option>';
+            inspectors.forEach(insp => { inspSelect.innerHTML += `<option value="${insp}" ${insp === currentInsp ? 'selected' : ''}>${insp}</option>`; });
+        }
+
+        function limparFiltros() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('filter-inspetor').value = '';
+            document.getElementById('filter-categoria').value = '';
+            document.getElementById('filter-em-campo').value = '';
+            document.getElementById('filter-status').value = '';
+            paginaAtual = 1;
+            renderChecklist();
+        }
+
+        function mudarPagina(novaPagina) {
+            paginaAtual = novaPagina;
+            renderChecklist();
+        }
+        function paginaAnterior() { if (paginaAtual > 1) mudarPagina(paginaAtual - 1); }
+        function proximaPagina() { mudarPagina(paginaAtual + 1); }
+
+        function renderChecklist() {
+            const tbody = document.getElementById('checklist-tbody');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const inspFilter = document.getElementById('filter-inspetor').value;
+            const catFilter = document.getElementById('filter-categoria').value;
+            const campoFilter = document.getElementById('filter-em-campo').value;
+            const statusFilter = document.getElementById('filter-status').value;
+            const itensPorPagina = parseInt(document.getElementById('itens-por-pagina').value) || 100;
+
+            const filtered = items.filter(item => {
+                const itemSys = String(item.sistema || "").trim();
+                const itemSubsys = String(item.subsistema || "").trim();
+                const matchSys = itemSys === currentSystem;
+                const matchSubsys = currentSubsystem === "TODOS" || itemSubsys === currentSubsystem;
+                const matchSearch = String(item.tag || "").toLowerCase().includes(search) || String(item.descricao || "").toLowerCase().includes(search);
+                const matchInsp = inspFilter === "" || String(item.inspetor || "").trim() === inspFilter;
+                const matchCat = catFilter === "" || String(item.categoria || "").trim() === catFilter;
+                const matchCampo = campoFilter === "" || (campoFilter === "__VAZIO__" ? !item.em_campo : item.em_campo === campoFilter);
+                const matchStatus = statusFilter === "" || String(item.status || "Não Instalado").trim() === statusFilter;
+                return matchSys && matchSubsys && matchSearch && matchInsp && matchCat && matchCampo && matchStatus;
+            });
+
+            const totalItens = filtered.length;
+            const totalPaginas = Math.ceil(totalItens / itensPorPagina) || 1;
+            if (paginaAtual > totalPaginas) paginaAtual = totalPaginas;
+            if (paginaAtual < 1) paginaAtual = 1;
+
+            const inicio = (paginaAtual - 1) * itensPorPagina;
+            const fim = inicio + itensPorPagina;
+            const itensPagina = filtered.slice(inicio, fim);
+
+            document.getElementById('items-count').innerText = `${totalItens} itens encontrados`;
+            document.getElementById('paginacao-info').innerText = `Página ${paginaAtual} de ${totalPaginas}`;
+            document.getElementById('btn-anterior').disabled = paginaAtual === 1;
+            document.getElementById('btn-proxima').disabled = paginaAtual >= totalPaginas;
+
+            tbody.innerHTML = '';
+            const subList = getSubsystemsForSystem(currentSystem);
+
+            itensPagina.forEach((item) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50/50 transition border-b border-gray-100";
+                const currentStatus = String(item.status || "Não Instalado").trim();
+                const currentEmCampo = String(item.em_campo || "").trim();
+                const currentSub = String(item.subsistema || "Geral").trim();
+                const subOptions = [...new Set([...subList, currentSub])].map(s => `<option value="${s}" ${s === currentSub ? 'selected' : ''}>${s}</option>`).join('');
+
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-700">${item.tag || ''}</td>
+                    <td class="p-3 text-gray-700 max-w-xs">${item.descricao || ''}</td>
+                    <td class="p-3"><select onchange="updateItem('${item.id}', 'subsistema', this.value)" class="border rounded px-2 py-1 text-xs outline-none bg-slate-50 text-slate-700 font-medium">${subOptions}</select></td>
+                    <td class="p-3 text-gray-500">${item.categoria || ''}</td>
+                    <td class="p-3"><select onchange="updateItem('${item.id}', 'em_campo', this.value)" class="border rounded px-2 py-1 text-xs outline-none bg-white"><option value="" ${currentEmCampo === '' ? 'selected' : ''}>-</option><option value="Em Campo" ${currentEmCampo === 'Em Campo' ? 'selected' : ''}>Em Campo</option></select></td>
+                    <td class="p-3"><select onchange="updateItem('${item.id}', 'status', this.value)" class="border rounded px-2 py-1 text-xs font-semibold outline-none ${getStatusColor(currentStatus)}"><option value="Não Instalado" ${currentStatus === 'Não Instalado' ? 'selected' : ''}>Não Instalado</option><option value="Instalado" ${currentStatus === 'Instalado' ? 'selected' : ''}>Instalado</option><option value="NOK" ${currentStatus === 'NOK' ? 'selected' : ''}>NOK</option></select></td>
+                    <td class="p-3"><input type="date" value="${item.data_inspecao || ''}" onchange="updateItem('${item.id}', 'data_inspecao', this.value)" class="border rounded px-2 py-1 text-xs"></td>
+                    <td class="p-3"><input type="text" value="${item.inspetor || ''}" placeholder="Nome..." onchange="updateItem('${item.id}', 'inspetor', this.value)" class="border rounded px-2 py-1 text-xs w-28"></td>
+                    <td class="p-3"><input type="text" value="${item.observacoes || ''}" placeholder="Obs..." onchange="updateItem('${item.id}', 'observacoes', this.value)" class="border rounded px-2 py-1 text-xs w-full"></td>
+                    <td class="p-3 text-center"><button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700 p-1 rounded transition" title="Excluir Item"><i class="fa-solid fa-trash-can"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateDashboard() {
+            if (!dashboardInitialized) return;
+            const dashItems = getDashboardFilteredItems();
+            const sysFilter = document.getElementById('dash-filter-sistema')?.value || "TODOS";
+            const total = dashItems.length;
+            const emCampo = dashItems.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
+            const instalado = dashItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+            const naoInstalado = dashItems.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
+            const nok = dashItems.filter(i => String(i.status || "").trim() === 'NOK').length;
+            const pct = total > 0 ? ((instalado / total) * 100).toFixed(2) : 0;
+
+            document.getElementById('dash-total').innerText = total;
+            document.getElementById('dash-campo').innerText = emCampo;
+            document.getElementById('dash-instalado').innerText = instalado;
+            document.getElementById('dash-nao-instalado').innerText = naoInstalado;
+            document.getElementById('dash-nok').innerText = nok;
+            document.getElementById('dash-pct').innerText = `${pct}%`;
+
+            const tbody = document.getElementById('dashboard-subsystems-tbody');
+            tbody.innerHTML = '';
+            const systemsToRender = sysFilter === "TODOS" ? getSystems() : [sysFilter];
+
+            systemsToRender.forEach(sys => {
+                const sysItems = dashItems.filter(i => String(i.sistema || "").trim() === sys);
+                const subsInSys = [...new Set(sysItems.map(i => String(i.subsistema || "Geral").trim()))];
+                subsInSys.forEach(sub => {
+                    const subItems = sysItems.filter(i => String(i.subsistema || "Geral").trim() === sub);
+                    const subTotal = subItems.length;
+                    const subCampo = subItems.filter(i => String(i.em_campo || "").trim() === 'Em Campo').length;
+                    const subInst = subItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+                    const subNaoInst = subItems.filter(i => String(i.status || "").trim() === 'Não Instalado').length;
+                    const subNok = subItems.filter(i => String(i.status || "").trim() === 'NOK').length;
+                    const subPct = subTotal > 0 ? ((subInst / subTotal) * 100).toFixed(2) : 0;
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 font-semibold text-slate-700">${sys}</td>
+                            <td class="p-3 text-slate-600">${sub}</td>
+                            <td class="p-3 text-center">${subTotal}</td>
+                            <td class="p-3 text-center text-blue-600 font-medium">${subCampo}</td>
+                            <td class="p-3 text-center text-emerald-600 font-medium">${subInst}</td>
+                            <td class="p-3 text-center text-amber-600 font-medium">${subNaoInst}</td>
+                            <td class="p-3 text-center text-red-600 font-medium">${subNok}</td>
+                            <td class="p-3 text-center font-bold text-blue-600">${subPct}%</td>
+                        </tr>
+                    `;
+                });
+            });
+            renderCharts(dashItems, instalado, naoInstalado, nok, sysFilter);
+        }
+
+        function renderCharts(dashItems, instalado, naoInstalado, nok, sysFilter) {
+            const ctxStatus = document.getElementById('statusChart').getContext('2d');
+            if(statusChartInstance) statusChartInstance.destroy();
+            statusChartInstance = new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: { labels: ['Instalado', 'Não Instalado', 'NOK'], datasets: [{ data: [instalado, naoInstalado, nok], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const categories = getCategories(dashItems);
+            const catCounts = categories.map(cat => dashItems.filter(i => String(i.categoria || "").trim() === cat).length);
+            const catPct = categories.map(cat => {
+                const catItems = dashItems.filter(i => String(i.categoria || "").trim() === cat);
+                if(catItems.length === 0) return 0;
+                const catInst = catItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+                return ((catInst / catItems.length) * 100).toFixed(1);
+            });
+            const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+            if(categoryChartInstance) categoryChartInstance.destroy();
+            categoryChartInstance = new Chart(ctxCategory, {
+                type: 'bar',
+                data: { labels: categories, datasets: [{ label: 'Qtd Itens', data: catCounts, backgroundColor: '#3b82f6', yAxisID: 'y' }, { label: '% Concluído', data: catPct, backgroundColor: '#10b981', yAxisID: 'y1' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { type: 'linear', position: 'left', beginAtZero: true }, y1: { type: 'linear', position: 'right', beginAtZero: true, max: 100, grid: { drawOnChartArea: false } } } }
+            });
+
+            const chartTitleEl = document.getElementById('subsystem-chart-title');
+            let labels = []; let pctValues = [];
+            if (sysFilter === "TODOS") {
+                chartTitleEl.innerHTML = '<i class="fa-solid fa-chart-bar mr-2 text-purple-500"></i>Comparativo de Conclusão por Sistema / Área';
+                const systems = getSystems();
+                labels = systems;
+                pctValues = systems.map(sys => {
+                    const sysItems = dashItems.filter(i => String(i.sistema || "").trim() === sys);
+                    if(sysItems.length === 0) return 0;
+                    const sysInst = sysItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+                    return ((sysInst / sysItems.length) * 100).toFixed(1);
+                });
+            } else {
+                chartTitleEl.innerHTML = `<i class="fa-solid fa-chart-bar mr-2 text-purple-500"></i>Comparativo de Conclusão por Subsistema (${sysFilter})`;
+                const subFilter = document.getElementById('dash-filter-subsistema')?.value || "TODOS";
+                const subs = subFilter === "TODOS" ? getSubsystemsForSystem(sysFilter) : [subFilter];
+                labels = subs;
+                pctValues = subs.map(sub => {
+                    const subItems = dashItems.filter(i => String(i.subsistema || "").trim() === sub);
+                    if(subItems.length === 0) return 0;
+                    const subInst = subItems.filter(i => String(i.status || "").trim() === 'Instalado').length;
+                    return ((subInst / subItems.length) * 100).toFixed(1);
+                });
+            }
+            const ctxSubsys = document.getElementById('subsystemChart').getContext('2d');
+            if(subsystemChartInstance) subsystemChartInstance.destroy();
+            subsystemChartInstance = new Chart(ctxSubsys, {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ label: '% Concluído', data: pctValues, backgroundColor: '#8b5cf6' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+            });
+        }
+
+        function renderPdfChecklistTable() {
+            const tbody = document.getElementById('pdf-checklist-tbody');
+            tbody.innerHTML = '';
+            getDashboardFilteredItems().forEach(item => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-100">
+                        <td class="p-2 font-semibold">${item.tag || ''}</td>
+                        <td class="p-2">${item.descricao || ''}</td>
+                        <td class="p-2">${item.categoria || ''}</td>
+                        <td class="p-2">${item.sistema || ''}</td>
+                        <td class="p-2">${item.subsistema || ''}</td>
+                        <td class="p-2">${item.em_campo || '-'}</td>
+                        <td class="p-2 font-bold">${item.status || ''}</td>
+                        <td class="p-2">${item.data_inspecao || ''}</td>
+                        <td class="p-2">${item.inspetor || ''}</td>
+                        <td class="p-2">${item.observacoes || ''}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function getStatusColor(status) {
+            if (status === 'Instalado') return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+            if (status === 'NOK') return 'bg-red-100 text-red-800 border-red-300';
+            return 'bg-amber-100 text-amber-800 border-amber-300';
+        }
+
+        async function updateItem(id, field, value) {
+            const item = items.find(i => String(i.id) === String(id));
+            if(item) item[field] = value;
+            localStorage.setItem('local_items', JSON.stringify(items));
+            if (field === 'status') {
+                const row = document.querySelector(`select[onchange*="${id}"]`)?.closest('tr');
+                if (row) {
+                    const statusSelect = row.querySelector(`select[onchange*="status"]`);
+                    if (statusSelect) statusSelect.className = `border rounded px-2 py-1 text-xs font-semibold outline-none ${getStatusColor(value)}`;
+                }
+            }
+            if (field === 'inspetor' || field === 'categoria') populateFilters();
+            if (field === 'subsistema') renderSubsystemTabs();
+            enviarParaPlanilha({ action: 'update', id: id, field: field, value: value });
+        }
+
+        async function deleteItem(id) {
+            if(confirm("Tem certeza que deseja excluir este item?")) {
+                items = items.filter(i => String(i.id) !== String(id));
+                updateAll();
+                await enviarParaPlanilha({ action: 'delete', id: id });
+            }
+        }
+
+        function openAddItemModal() {
+            document.getElementById('new-item-sys').value = currentSystem;
+            const subSelect = document.getElementById('new-item-subsys');
+            const subList = getSubsystemsForSystem(currentSystem);
+            subSelect.innerHTML = (subList.length > 0 ? subList : ["Geral"]).map(s => `<option value="${s}" ${s === currentSubsystem ? 'selected' : ''}>${s}</option>`).join('');
+            document.getElementById('new-item-tag').value = '';
+            document.getElementById('new-item-desc').value = '';
+            document.getElementById('modal-add-item').classList.remove('hidden');
+        }
+        function closeAddItemModal() { document.getElementById('modal-add-item').classList.add('hidden'); }
+
+        async function saveNewItem() {
+            const tag = document.getElementById('new-item-tag').value.trim();
+            const desc = document.getElementById('new-item-desc').value.trim();
+            if(!tag || !desc) { alert("Preencha a TAG e a Descrição."); return; }
+            const newItem = {
+                id: 'id_' + Date.now(),
+                tag: tag,
+                descricao: desc,
+                categoria: document.getElementById('new-item-cat').value,
+                sistema: currentSystem,
+                subsistema: document.getElementById('new-item-subsys').value,
+                em_campo: "",
+                status: "Não Instalado",
+                data_inspecao: "",
+                inspetor: "",
+                observacoes: ""
+            };
+            items.push(newItem);
+            closeAddItemModal();
+            updateAll();
+            await enviarParaPlanilha({ action: 'create', item: newItem });
+        }
+
+        function openNewSystemModal() {
+            document.getElementById('new-sys-name').value = '';
+            document.getElementById('new-sys-initial-sub').value = '';
+            document.getElementById('modal-add-sys').classList.remove('hidden');
+        }
+        function closeNewSystemModal() { document.getElementById('modal-add-sys').classList.add('hidden'); }
+
+        async function createNewSystem() {
+            const name = document.getElementById('new-sys-name').value.trim();
+            const initialSub = document.getElementById('new-sys-initial-sub').value.trim() || "Geral";
+            if(!name) { alert("Digite o nome do sistema."); return; }
+            if(getSystems().map(s => s.toLowerCase()).includes(name.toLowerCase())) { alert("Este sistema já existe."); return; }
+            const newItem = {
+                id: 'id_' + Date.now(),
+                tag: "EXEMPLO-01",
+                descricao: "Item Inicial",
+                categoria: "Instrumento",
+                sistema: name,
+                subsistema: initialSub,
+                em_campo: "",
+                status: "Não Instalado",
+                data_inspecao: "",
+                inspetor: "",
+                observacoes: ""
+            };
+            items.push(newItem);
+            currentSystem = name;
+            currentSubsystem = initialSub;
+            closeNewSystemModal();
+            updateAll();
+            await enviarParaPlanilha({ action: 'create', item: newItem });
+        }
+
+        function openNewSubsystemModal() {
+            const parentSelect = document.getElementById('new-subsys-parent');
+            parentSelect.innerHTML = getSystems().map(s => `<option value="${s}" ${s === currentSystem ? 'selected' : ''}>${s}</option>`).join('');
+            document.getElementById('new-subsys-name').value = '';
+            document.getElementById('modal-add-subsys').classList.remove('hidden');
+        }
+        function closeNewSubsystemModal() { document.getElementById('modal-add-subsys').classList.add('hidden'); }
+
+        function createNewSubsystem() {
+            const parentSys = document.getElementById('new-subsys-parent').value;
+            const subName = document.getElementById('new-subsys-name').value.trim();
+            if (!parentSys || !subName) { alert("Selecione o Sistema Pai e informe o nome."); return; }
+            if (!customSubsystems[parentSys]) customSubsystems[parentSys] = [];
+            if (getSubsystemsForSystem(parentSys).map(s => s.toLowerCase()).includes(subName.toLowerCase())) { alert("Este subsistema já existe."); return; }
+            customSubsystems[parentSys].push(subName);
+            localStorage.setItem('custom_subsystems', JSON.stringify(customSubsystems));
+            currentSystem = parentSys;
+            currentSubsystem = subName;
+            closeNewSubsystemModal();
+            updateAll();
+        }
+
+        function openDeleteSystemModal() {
+            const select = document.getElementById('delete-sys-select');
+            const systems = getSystems();
+            if (systems.length === 0) { alert("Não há sistemas cadastrados."); return; }
+            select.innerHTML = systems.map(s => `<option value="${s}" ${s === currentSystem ? 'selected' : ''}>${s}</option>`).join('');
+            document.getElementById('modal-delete-sys').classList.remove('hidden');
+        }
+        function closeDeleteSystemModal() { document.getElementById('modal-delete-sys').classList.add('hidden'); }
+
+        async function confirmDeleteSystem() {
+            const sysToDelete = document.getElementById('delete-sys-select').value;
+            if (!sysToDelete) return;
+            const confirmText = prompt(`⚠️ ATENÇÃO: Deseja excluir o sistema "${sysToDelete}"?\n\nDigite o nome exato para confirmar:`);
+            if (confirmText !== sysToDelete) { alert("Nome incorreto. Cancelado."); return; }
+            const itemsToDelete = items.filter(i => String(i.sistema || "").trim() === sysToDelete);
+            items = items.filter(i => String(i.sistema || "").trim() !== sysToDelete);
+            if (customSubsystems[sysToDelete]) { delete customSubsystems[sysToDelete]; localStorage.setItem('custom_subsystems', JSON.stringify(customSubsystems)); }
+            const remainingSystems = getSystems();
+            currentSystem = remainingSystems.length > 0 ? remainingSystems[0] : "";
+            currentSubsystem = "TODOS";
+            closeDeleteSystemModal();
+            updateAll();
+            for (let item of itemsToDelete) { await enviarParaPlanilha({ action: 'delete', id: item.id }); }
+            alert(`Sistema "${sysToDelete}" excluído com sucesso.`);
+        }
+
+        function exportToPDF() {
+            renderPdfChecklistTable();
+            document.getElementById('pdf-header-title').classList.remove('hidden');
+            document.getElementById('sec-dashboard').classList.remove('hidden');
+            document.getElementById('sec-pdf-table').classList.remove('hidden');
+            document.getElementById('sec-diretrizes').classList.remove('hidden');
+
+            const element = document.getElementById('relatorio-pdf-container');
+            const opt = {
+                margin: [5, 5, 5, 5],
+                filename: 'Relatorio_Comissionamento_Industrial_Landscape.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            html2pdf().from(element).set(opt).save().then(() => {
+                document.getElementById('pdf-header-title').classList.add('hidden');
+                document.getElementById('sec-pdf-table').classList.add('hidden');
+                if(!document.getElementById('main-tab-diretrizes').classList.contains('active')) document.getElementById('sec-diretrizes').classList.add('hidden');
+            });
+        }
+
+        window.onload = initData;
+    </script>
+</body>
+</html>
