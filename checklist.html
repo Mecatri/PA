@@ -28,7 +28,7 @@
                     <i class="fa-solid fa-industry text-blue-400"></i> Checklist Operacional
                 </h1>
                 <div class="flex items-center gap-2 mt-1">
-                    <p class="text-xs text-slate-400">Sincronizado via Google Sheets / IndexedDB Ativo</p>
+                    <p class="text-xs text-slate-400">Sincronizado via Google Sheets / IndexedDB Ativo (Modo Blocos)</p>
                     <span id="connection-badge" class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500 text-white">ONLINE</span>
                 </div>
             </div>
@@ -184,7 +184,7 @@
                     <div class="w-full sm:w-56">
                         <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">Sistema</label>
                         <select id="dash-filter-sistema" onchange="onDashboardSystemChange()" class="w-full border rounded-lg px-3 py-2 text-sm font-medium outline-none bg-white">
-                            <option value="TODOS">Todos os Sistemas</option>
+                            <option value="TODOS">Todos os Sistemas Carregados</option>
                         </select>
                     </div>
                     <div class="w-full sm:w-56">
@@ -271,10 +271,10 @@
             </div>
         </section>
 
-        <!-- SEÇÃO OCULTA PARA O PDF -->
+        <!-- SEÇÃO OCULTA PARA O PDF (OTIMIZADA PARA O SISTEMA ATIVO) -->
         <section id="sec-pdf-table" class="hidden space-y-4 pt-6">
             <div class="bg-slate-800 text-white px-6 py-3 font-semibold text-sm rounded-t-xl">
-                LISTAGEM COMPLETA DOS ITENS DE COMISSIONAMENTO
+                LISTAGEM DOS ITENS DE COMISSIONAMENTO — SISTEMA: <span id="pdf-system-name">-</span>
             </div>
             <div class="bg-white rounded-xl shadow overflow-x-auto border border-gray-200">
                 <table class="w-full text-left border-collapse text-xs">
@@ -435,7 +435,7 @@
         </div>
     </div>
 
-    <!-- Script Principal com IndexedDB (Alta Performance para 10k+ itens) -->
+    <!-- Script Principal com IndexedDB e Carregamento em Blocos (Alta Performance para 10k+ itens) -->
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
 
@@ -444,6 +444,7 @@
         };
 
         let items = [];
+        let knownSystems = JSON.parse(localStorage.getItem('known_systems') || '[]');
         let customSubsystems = JSON.parse(localStorage.getItem('custom_subsystems') || '{}');
         let offlineQueue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
         let currentSystem = "";
@@ -473,13 +474,29 @@
             });
         }
 
-        function salvarItensNoDB(arrayItens) {
+        // Salva ou atualiza apenas os itens do sistema específico no IndexedDB
+        function salvarItensSistemaNoDB(arrayItens, sistemaAlvo) {
             return new Promise((resolve, reject) => {
                 if (!db) return resolve();
                 const transaction = db.transaction(['items'], 'readwrite');
                 const store = transaction.objectStore('items');
-                store.clear();
-                arrayItens.forEach(item => store.put(item));
+                
+                if (sistemaAlvo) {
+                    const requestAll = store.getAll();
+                    requestAll.onsuccess = event => {
+                        const allStored = event.target.result || [];
+                        allStored.forEach(i => {
+                            if (String(i.sistema || "").trim() === sistemaAlvo) {
+                                store.delete(i.id);
+                            }
+                        });
+                        arrayItens.forEach(item => store.put(item));
+                    };
+                } else {
+                    store.clear();
+                    arrayItens.forEach(item => store.put(item));
+                }
+
                 transaction.oncomplete = () => resolve();
                 transaction.onerror = event => reject(event.target.error);
             });
@@ -506,8 +523,13 @@
             };
         }
 
+        function registrarSistemasConhecidos(listaItens) {
+            const novosSistemas = listaItens.map(i => String(i.sistema || "").trim()).filter(Boolean);
+            knownSystems = [...new Set([...knownSystems, ...novosSistemas])];
+            localStorage.setItem('known_systems', JSON.stringify(knownSystems));
+        }
+
         async function initData() {
-            // Limpa lixo antigo do localStorage para evitar crash
             localStorage.removeItem('local_items');
 
             window.addEventListener('online', atualizarStatusConexao);
@@ -519,6 +541,7 @@
                 const cachedItems = await carregarItensDoDB();
                 if (cachedItems && cachedItems.length > 0) {
                     items = cachedItems.map(normalizeItem);
+                    registrarSistemasConhecidos(items);
                     const systems = getSystems();
                     if (systems.length > 0 && (!currentSystem || !systems.includes(currentSystem))) {
                         currentSystem = systems[0];
@@ -530,7 +553,8 @@
             }
 
             if (navigator.onLine) {
-                await carregarDadosDoPlanilha();
+                // Se já sabemos qual sistema está ativo, busca apenas ele. Caso contrário, busca a lista inicial.
+                await carregarDadosDoPlanilha(currentSystem);
             }
         }
 
@@ -557,18 +581,47 @@
             }
         }
 
-        async function carregarDadosDoPlanilha() {
+        async function carregarDadosDoPlanilha(sistemaAlvo = "") {
             if(WEB_APP_URL.includes('COLE_SEU_LINK')) return;
             const icon = document.getElementById('sync-icon');
-            icon.classList.add('fa-spin');
+            if(icon) icon.classList.add('fa-spin');
 
             try {
-                const response = await fetch(WEB_APP_URL);
-                const data = await response.json();
-                if (data && data.length > 0) {
-                    items = data.map(normalizeItem);
-                    await salvarItensNoDB(items);
+                // Primeiro, se não tivermos a lista de sistemas disponíveis na planilha, buscamos os nomes dos sistemas
+                if (knownSystems.length === 0 && !sistemaAlvo) {
+                    const resSys = await fetch(`${WEB_APP_URL}?action=getSystems`);
+                    const sysData = await resSys.json();
+                    if (Array.isArray(sysData) && sysData.length > 0) {
+                        knownSystems = [...new Set([...knownSystems, ...sysData])];
+                        localStorage.setItem('known_systems', JSON.stringify(knownSystems));
+                        currentSystem = knownSystems[0];
+                        sistemaAlvo = currentSystem;
+                    }
                 }
+
+                let url = WEB_APP_URL;
+                if (sistemaAlvo) {
+                    url += `?sistema=${encodeURIComponent(sistemaAlvo)}`;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data && Array.isArray(data) && data.length > 0) {
+                    const normalizedNewItems = data.map(normalizeItem);
+                    registrarSistemasConhecidos(normalizedNewItems);
+
+                    if (sistemaAlvo) {
+                        // Substitui apenas os itens do sistema que acabou de ser baixado
+                        const outrosItens = items.filter(i => String(i.sistema || "").trim() !== sistemaAlvo);
+                        items = [...outrosItens, ...normalizedNewItems];
+                        await salvarItensSistemaNoDB(normalizedNewItems, sistemaAlvo);
+                    } else {
+                        items = normalizedNewItems;
+                        await salvarItensSistemaNoDB(items, "");
+                    }
+                }
+
                 const systems = getSystems();
                 if(systems.length > 0 && (!currentSystem || !systems.includes(currentSystem))) {
                     currentSystem = systems[0];
@@ -577,12 +630,12 @@
             } catch (error) {
                 console.error('Modo Offline: Usando dados locais do IndexedDB.', error);
             } finally {
-                icon.classList.remove('fa-spin');
+                if(icon) icon.classList.remove('fa-spin');
             }
         }
 
         async function enviarParaPlanilha(payload) {
-            await salvarItensNoDB(items);
+            await salvarItensSistemaNoDB(items, "");
 
             if (!navigator.onLine) {
                 offlineQueue.push(payload);
@@ -610,15 +663,22 @@
                 return;
             }
             const icon = document.getElementById('sync-icon');
-            icon.classList.add('fa-spin');
+            if(icon) icon.classList.add('fa-spin');
             try {
                 await sincronizarFilaOffline();
-                await carregarDadosDoPlanilha();
-                alert("Sincronização concluída com sucesso!");
+                // Atualiza a lista de sistemas e baixa os dados do sistema atual
+                const resSys = await fetch(`${WEB_APP_URL}?action=getSystems`);
+                const sysData = await resSys.json();
+                if (Array.isArray(sysData)) {
+                    knownSystems = [...new Set([...knownSystems, ...sysData])];
+                    localStorage.setItem('known_systems', JSON.stringify(knownSystems));
+                }
+                await carregarDadosDoPlanilha(currentSystem);
+                alert(`Sincronização do sistema "${currentSystem}" concluída com sucesso!`);
             } catch(e) {
                 alert("Erro ao sincronizar dados.");
             } finally {
-                icon.classList.remove('fa-spin');
+                if(icon) icon.classList.remove('fa-spin');
             }
         }
 
@@ -646,7 +706,6 @@
             renderSubsystemTabs();
             populateFilters();
             renderChecklist();
-            renderPdfChecklistTable();
             if (dashboardInitialized) {
                 populateDashboardFilters();
                 updateDashboard();
@@ -672,7 +731,7 @@
         function getSystems() {
             const fromItems = items.map(i => String(i.sistema || "").trim()).filter(Boolean);
             const fromCustom = Object.keys(customSubsystems);
-            return [...new Set([...fromItems, ...fromCustom])];
+            return [...new Set([...knownSystems, ...fromItems, ...fromCustom])];
         }
 
         function getSubsystemsForSystem(systemName) {
@@ -695,7 +754,7 @@
         }
 
         function getInspectors() {
-            return [...new Set(items.map(i => String(i.inspetor || "").trim()).filter(Boolean))].sort();
+            return [...new Set(items.filter(i => String(i.sistema || "").trim() === currentSystem).map(i => String(i.inspetor || "").trim()).filter(Boolean))].sort();
         }
 
         function populateDashboardFilters() {
@@ -705,7 +764,7 @@
             const prevSys = sysSelect.value || "TODOS";
             const prevSub = subSelect.value || "TODOS";
             const systems = getSystems();
-            sysSelect.innerHTML = '<option value="TODOS">Todos os Sistemas</option>';
+            sysSelect.innerHTML = '<option value="TODOS">Todos os Sistemas Carregados</option>';
             systems.forEach(sys => { sysSelect.innerHTML += `<option value="${sys}" ${sys === prevSys ? 'selected' : ''}>${sys}</option>`; });
             const activeSys = sysSelect.value;
             const subs = activeSys === "TODOS" ? getAllSubsystems() : getSubsystemsForSystem(activeSys);
@@ -713,10 +772,19 @@
             subs.forEach(sub => { subSelect.innerHTML += `<option value="${sub}" ${sub === prevSub ? 'selected' : ''}>${sub}</option>`; });
         }
 
-        function onDashboardSystemChange() {
+        async function onDashboardSystemChange() {
             const sysSelect = document.getElementById('dash-filter-sistema');
             const subSelect = document.getElementById('dash-filter-subsistema');
             const activeSys = sysSelect.value;
+            
+            // Se o usuário selecionou um sistema específico no dashboard e ele ainda não foi baixado, baixa sob demanda
+            if (activeSys !== "TODOS" && navigator.onLine) {
+                const jaCarregado = items.some(i => String(i.sistema || "").trim() === activeSys);
+                if (!jaCarregado) {
+                    await carregarDadosDoPlanilha(activeSys);
+                }
+            }
+
             const subs = activeSys === "TODOS" ? getAllSubsystems() : getSubsystemsForSystem(activeSys);
             subSelect.innerHTML = '<option value="TODOS">Todos os Subsistemas</option>';
             subs.forEach(sub => { subSelect.innerHTML += `<option value="${sub}">${sub}</option>`; });
@@ -748,13 +816,19 @@
                 const btn = document.createElement('button');
                 btn.className = `sys-tab px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition border ${sys === currentSystem ? 'active bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'}`;
                 btn.innerHTML = `<i class="fa-solid fa-industry mr-1.5"></i> ${sys}`;
-                btn.onclick = () => {
+                btn.onclick = async () => {
                     currentSystem = sys;
                     currentSubsystem = "TODOS";
                     paginaAtual = 1;
                     renderSystemTabs();
                     renderSubsystemTabs();
+                    populateFilters();
                     renderChecklist();
+
+                    // Baixa os dados específicos deste sistema ao clicar na aba
+                    if (navigator.onLine) {
+                        await carregarDadosDoPlanilha(sys);
+                    }
                 };
                 container.appendChild(btn);
             });
@@ -785,7 +859,8 @@
         function populateFilters() {
             const catSelect = document.getElementById('filter-categoria');
             const currentCat = catSelect.value;
-            const categories = getCategories();
+            const sysItems = items.filter(i => String(i.sistema || "").trim() === currentSystem);
+            const categories = getCategories(sysItems);
             catSelect.innerHTML = '<option value="">Todas Categorias</option>';
             categories.forEach(cat => { catSelect.innerHTML += `<option value="${cat}" ${cat === currentCat ? 'selected' : ''}>${cat}</option>`; });
 
@@ -984,10 +1059,23 @@
             });
         }
 
+        // Otimizado: Renderiza no PDF apenas os itens do sistema/subsistema atual (limite de 500 para segurança do navegador)
         function renderPdfChecklistTable() {
             const tbody = document.getElementById('pdf-checklist-tbody');
+            document.getElementById('pdf-system-name').innerText = currentSystem || '-';
             tbody.innerHTML = '';
-            getDashboardFilteredItems().forEach(item => {
+
+            const itensParaPdf = items.filter(i => {
+                const itemSys = String(i.sistema || "").trim();
+                const itemSub = String(i.subsistema || "").trim();
+                const matchSys = itemSys === currentSystem;
+                const matchSub = currentSubsystem === "TODOS" || itemSub === currentSubsystem;
+                return matchSys && matchSub;
+            });
+
+            const limitePdf = itensParaPdf.slice(0, 500);
+
+            limitePdf.forEach(item => {
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-100">
                         <td class="p-2 font-semibold">${item.tag || ''}</td>
@@ -1014,7 +1102,7 @@
         async function updateItem(id, field, value) {
             const item = items.find(i => String(i.id) === String(id));
             if(item) item[field] = value;
-            await salvarItensNoDB(items);
+            await salvarItensSistemaNoDB(items, "");
             if (field === 'status') {
                 const row = document.querySelector(`select[onchange*="${id}"]`)?.closest('tr');
                 if (row) {
@@ -1095,6 +1183,7 @@
                 observacoes: ""
             };
             items.push(newItem);
+            registrarSistemasConhecidos([newItem]);
             currentSystem = name;
             currentSubsystem = initialSub;
             closeNewSystemModal();
@@ -1140,6 +1229,8 @@
             if (confirmText !== sysToDelete) { alert("Nome incorreto. Cancelado."); return; }
             const itemsToDelete = items.filter(i => String(i.sistema || "").trim() === sysToDelete);
             items = items.filter(i => String(i.sistema || "").trim() !== sysToDelete);
+            knownSystems = knownSystems.filter(s => s !== sysToDelete);
+            localStorage.setItem('known_systems', JSON.stringify(knownSystems));
             if (customSubsystems[sysToDelete]) { delete customSubsystems[sysToDelete]; localStorage.setItem('custom_subsystems', JSON.stringify(customSubsystems)); }
             const remainingSystems = getSystems();
             currentSystem = remainingSystems.length > 0 ? remainingSystems[0] : "";
@@ -1160,7 +1251,7 @@
             const element = document.getElementById('relatorio-pdf-container');
             const opt = {
                 margin: [5, 5, 5, 5],
-                filename: 'Relatorio_Comissionamento_Industrial_Landscape.pdf',
+                filename: `Relatorio_Comissionamento_${currentSystem || 'Geral'}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
