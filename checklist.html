@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Comissionamento Industrial - Relatório PDF Landscape</title>
+    <title>Sistema de Comissionamento Industrial - Offline/Online</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN para os Gráficos -->
@@ -26,7 +26,10 @@
                 <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
                     <i class="fa-solid fa-industry text-blue-400"></i> Checklist Operacional
                 </h1>
-                <p class="text-xs text-slate-400 mt-1">Sincronizado via Google Sheets com Relatório PDF Horizontal</p>
+                <div class="flex items-center gap-2 mt-1">
+                    <p class="text-xs text-slate-400">Sincronizado via Google Sheets / Modo Offline Ativo</p>
+                    <span id="connection-badge" class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500 text-white">ONLINE</span>
+                </div>
             </div>
             <div class="flex items-center gap-3 flex-wrap">
                 <button onclick="openNewSubsystemModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
@@ -35,8 +38,8 @@
                 <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow flex items-center gap-2 transition">
                     <i class="fa-solid fa-file-pdf"></i> Baixar Relatório PDF
                 </button>
-                <button onclick="carregarDadosDoPlanilha()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm transition" title="Atualizar dados">
-                    <i class="fa-solid fa-rotate" id="sync-icon"></i> Atualizar
+                <button onclick="sincronizarManualmente()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm transition flex items-center gap-2" title="Atualizar / Sincronizar dados">
+                    <i class="fa-solid fa-rotate" id="sync-icon"></i> Sincronizar <span id="sync-count" class="bg-blue-500 text-white px-1.5 py-0.2 rounded-full text-xs hidden">0</span>
                 </button>
             </div>
         </div>
@@ -349,25 +352,69 @@
         </div>
     </div>
 
-    <!-- Script Principal -->
+    <!-- Script Principal com Suporte Offline / LocalStorage -->
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNmnFQVE5TCcqDvkI42HtvsU-8Ajn-42RiPsK7sErjsPBVfQ58NujqjT8SVjOQIkGeIQ/exec';
 
         let items = [];
+        let offlineQueue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
         let currentSubsystem = "";
         let statusChartInstance = null;
         let categoryChartInstance = null;
         let subsystemChartInstance = null;
 
         async function initData() {
-            await carregarDadosDoPlanilha();
+            window.addEventListener('online', atualizarStatusConexao);
+            window.addEventListener('offline', atualizarStatusConexao);
+            atualizarStatusConexao();
+
+            // Tenta carregar do cache local primeiro para exibição instantânea
+            const cachedItems = localStorage.getItem('local_items');
+            if (cachedItems) {
+                try {
+                    items = JSON.parse(cachedItems);
+                    const subs = getSubsystems();
+                    if(subs.length > 0 && (!currentSubsystem || !subs.includes(currentSubsystem))) {
+                        currentSubsystem = subs[0];
+                    }
+                    updateAll();
+                } catch(e) { console.error('Erro ao ler cache local:', e); }
+            }
+
+            // Depois busca da planilha se houver rede
+            if (navigator.onLine) {
+                await carregarDadosDoPlanilha();
+            }
+        }
+
+        function atualizarStatusConexao() {
+            const badge = document.getElementById('connection-badge');
+            if (navigator.onLine) {
+                badge.innerText = "ONLINE";
+                badge.className = "px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500 text-white";
+                // Se reconectou, tenta sincronizar filas pendentes automaticamente
+                if (offlineQueue.length > 0) {
+                    sincronizarFilaOffline();
+                }
+            } else {
+                badge.innerText = "OFFLINE";
+                badge.className = "px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500 text-white";
+            }
+            atualizarContadorFila();
+        }
+
+        function atualizarContadorFila() {
+            const counter = document.getElementById('sync-count');
+            if (offlineQueue.length > 0) {
+                counter.innerText = offlineQueue.length;
+                counter.classList.remove('hidden');
+            } else {
+                counter.classList.add('hidden');
+            }
         }
 
         async function carregarDadosDoPlanilha() {
-            if(WEB_APP_URL.includes('COLE_SEU_LINK')) {
-                alert("Por favor, configure a URL do seu Google Web App no código JavaScript!");
-                return;
-            }
+            if(WEB_APP_URL.includes('COLE_SEU_LINK')) return;
 
             const icon = document.getElementById('sync-icon');
             icon.classList.add('fa-spin');
@@ -375,7 +422,10 @@
             try {
                 const response = await fetch(WEB_APP_URL);
                 const data = await response.json();
-                items = data || [];
+                if (data && data.length > 0) {
+                    items = data;
+                    localStorage.setItem('local_items', JSON.stringify(items));
+                }
                 
                 const subs = getSubsystems();
                 if(subs.length > 0 && (!currentSubsystem || !subs.includes(currentSubsystem))) {
@@ -384,14 +434,25 @@
 
                 updateAll();
             } catch (error) {
-                console.error('Erro ao buscar dados:', error);
-                alert('Erro ao carregar dados da planilha.');
+                console.error('Modo Offline: Usando dados locais salvos.', error);
             } finally {
                 icon.classList.remove('fa-spin');
             }
         }
 
         async function enviarParaPlanilha(payload) {
+            // Salva a alteração localmente primeiro para garantir consistência offline
+            localStorage.setItem('local_items', JSON.stringify(items));
+
+            if (!navigator.onLine) {
+                // Adiciona na fila offline se não houver internet
+                offlineQueue.push(payload);
+                localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
+                atualizarContadorFila();
+                console.log('Salvo offline na fila:', payload);
+                return;
+            }
+
             try {
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
@@ -400,8 +461,57 @@
                     body: JSON.stringify(payload)
                 });
             } catch (error) {
-                console.error('Erro ao enviar para planilha:', error);
+                console.error('Erro de rede ao enviar, salvando em fila offline:', error);
+                offlineQueue.push(payload);
+                localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
+                atualizarContadorFila();
             }
+        }
+
+        async function sincronizarManualmente() {
+            if (!navigator.onLine) {
+                alert("Você está offline no momento. As alterações já estão salvas no dispositivo e serão enviadas quando a conexão voltar.");
+                return;
+            }
+
+            const icon = document.getElementById('sync-icon');
+            icon.classList.add('fa-spin');
+
+            try {
+                await sincronizarFilaOffline();
+                await carregarDadosDoPlanilha();
+                alert("Sincronização concluída com sucesso!");
+            } catch(e) {
+                alert("Erro ao sincronizar dados.");
+            } finally {
+                icon.classList.remove('fa-spin');
+            }
+        }
+
+        async function sincronizarFilaOffline() {
+            if (offlineQueue.length === 0) return;
+
+            console.log(`Sincronizando ${offlineQueue.length} itens pendentes...`);
+            let remainingQueue = [...offlineQueue];
+
+            for (let payload of offlineQueue) {
+                try {
+                    await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify(payload)
+                    });
+                    // Remove da fila se enviado com sucesso
+                    remainingQueue.shift();
+                    offlineQueue = remainingQueue;
+                    localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
+                } catch (e) {
+                    console.error("Falha ao enviar item da fila offline:", e);
+                    break; // Para se perder a conexão no meio
+                }
+            }
+            atualizarContadorFila();
         }
 
         function updateAll() {
